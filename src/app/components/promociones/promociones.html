@@ -1,0 +1,57 @@
+<div class="space-y-6">
+  <div class="flex flex-col gap-1.5">
+    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Promociones Especiales</h2>
+    <p class="text-sm text-slate-400 font-medium">Las mejores combinaciones y descuentos para ti hoy.</p>
+  </div>
+  
+  <!-- Promos Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
+    @for (promo of promos; track promo.id) {
+      <div class="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden flex flex-col justify-between p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 group relative">
+        
+        <!-- Promo Badge -->
+        <span class="absolute top-8 left-8 bg-pizza-orange text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full z-10 shadow-md">
+          {{ promo.badge }}
+        </span>
+
+        <!-- Image Container -->
+        <div class="w-full h-56 rounded-2xl overflow-hidden mb-5 relative bg-slate-100">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent z-10"></div>
+          <img 
+            [src]="promo.imagen" 
+            [alt]="promo.nombre" 
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <!-- Price overlay -->
+          <div class="absolute bottom-4 right-4 z-20 bg-pizza-dark/85 backdrop-blur-sm text-white px-4 py-2 rounded-2xl border border-white/15">
+            <span class="text-xs text-slate-300 font-bold block uppercase tracking-wider leading-none">Desde</span>
+            <span class="text-2xl font-black text-pizza-yellow leading-none">${{ promo.precio }}</span>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="flex-1 flex flex-col justify-between mb-5">
+          <div>
+            <h3 class="text-2xl font-black text-slate-800 group-hover:text-pizza-red transition-colors mb-2">
+              {{ promo.nombre }}
+            </h3>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              {{ promo.descripcion }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Order Button -->
+        <button 
+          (click)="ordenarPromo(promo)"
+          class="w-full bg-pizza-dark hover:bg-slate-900 active:scale-95 text-white font-black py-4 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-lg shadow-slate-100"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Ordenar Combo
+        </button>
+      </div>
+    }
+  </div>
+</div>

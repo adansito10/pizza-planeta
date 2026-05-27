@@ -1,0 +1,118 @@
+@if (cartService.activeModal() === 'success') {
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto transition-all duration-300">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-8">
+      
+      <!-- Close Button -->
+      <button 
+        (click)="nuevaOrden()"
+        class="absolute top-5 right-5 w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-100 no-print"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Printable Ticket Area -->
+      <div id="printable-ticket" class="flex flex-col items-center">
+        <!-- Giant Pizza Slice -->
+        <div class="w-20 h-20 text-amber-500 mb-4 animate-bounce no-print">
+          <!-- Beautiful Vector Pizza Slice SVG -->
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <path d="M56 12C48 6 36 4 32 4C28 4 16 6 8 12C7 13 8 15 9 15.5C14 18 20 20 32 20C44 20 50 18 55 15.5C56 15 57 13 56 12Z" fill="#E85D04"/>
+            <path d="M53.5 16.5C48 20.5 38 23 32 23C26 23 16 20.5 10.5 16.5C10 16 9.5 17 10 18L30.5 58.5C31 59.5 33 59.5 33.5 58.5L54 18C54.5 17 54 16 53.5 16.5Z" fill="#FFB703"/>
+            <circle cx="24" cy="24" r="3.5" fill="#D00000"/>
+            <circle cx="40" cy="24" r="3.5" fill="#D00000"/>
+            <circle cx="32" cy="36" r="3.5" fill="#D00000"/>
+            <circle cx="28" cy="46" r="2.5" fill="#D00000"/>
+          </svg>
+        </div>
+
+        <!-- Ticket Header (Show in print too) -->
+        <h2 class="text-2xl font-black text-slate-800 mb-1 text-center">¡Orden Confirmada!</h2>
+        
+        <div class="flex flex-col items-center my-3">
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-0.5">Número de Orden</span>
+          <span class="text-5xl font-black text-slate-800 tracking-tight my-1">
+            {{ cartService.lastConfirmedOrderNumber() }}
+          </span>
+          <span class="text-[11px] text-slate-400 font-semibold mt-1">
+            {{ cartService.lastConfirmedOrderTime() }}
+          </span>
+        </div>
+
+        <!-- Dashed Divider -->
+        <div class="w-full border-t-2 border-dashed border-slate-200 my-5"></div>
+
+        <!-- Order details -->
+        <div class="w-full text-left">
+          <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">Detalle de la Orden</h3>
+          <div class="space-y-4">
+            @for (item of cartService.lastConfirmedOrder(); track item.id; let idx = $index) {
+              <div>
+                <div class="flex justify-between items-start text-sm font-bold text-slate-800">
+                  <span>{{ idx + 1 }}. {{ item.pizza.nombre }} ({{ item.size.nombre }})</span>
+                  <span>${{ item.totalItem }}</span>
+                </div>
+                <!-- Customization details -->
+                <ul class="mt-1 ml-4 list-disc text-slate-400 text-xs space-y-0.5">
+                  <li>Masa: <span class="font-medium text-slate-600">{{ item.masa.nombre }}</span></li>
+                  <li>Salsa: <span class="font-medium text-slate-600">{{ item.salsa.nombre }}</span></li>
+                  <li>Queso: <span class="font-medium text-slate-600">{{ item.queso.nombre }}</span></li>
+                  @if (item.extras.length > 0) {
+                    <li>
+                      Extras: 
+                      <span class="font-medium text-slate-600">
+                        {{ item.extras.map(e => e.nombre).join(', ') }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+
+          <!-- Total price -->
+          <div class="flex justify-between items-center text-lg font-black text-slate-800 pt-4 border-t border-slate-100 mt-6">
+            <span>Total:</span>
+            <span class="text-2xl text-pizza-orange font-black">
+              ${{ cartService.lastConfirmedOrderTotal() }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Ticket Footer note (Show in print too) -->
+        <div class="w-full border-t border-slate-100 pt-4 mt-6 flex flex-col items-center">
+          <div class="text-xs text-slate-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-pizza-orange shrink-0">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Tiempo estimado: 15-20 min
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons (Hidden during printing) -->
+      <div class="flex gap-4 w-full mt-8 no-print">
+        <!-- Print Button -->
+        <button 
+          (click)="imprimirTicket()"
+          class="flex-1 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-lg shadow-slate-200"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096a42.415 42.415 0 01-10.56 0m10.56 0L17.66 18m0 0a.736.736 0 01-.037.018l-.065.03a1.826 1.826 0 01-2.433-.872l-.109-.254M17.66 18a1.826 1.826 0 001.806-1.546l.651-6.216a1.826 1.826 0 00-1.806-2.018h-2.24m-1.2 11.454a1.826 1.826 0 01-2.433-.872l-.11-.254m-2.433.872a1.826 1.826 0 001.806-1.546l.651-6.216a1.826 1.826 0 00-1.806-2.018h-2.24m-1.2 11.454L3.6 14.172m0 0a1.826 1.826 0 00-1.806-1.546L1.143 6.41a1.826 1.826 0 001.806-2.018h18.102a1.826 1.826 0 001.806 2.018l-.651 6.216a1.826 1.826 0 00-1.806 1.546M3.6 14.172L3.606 14.2m12.854-1.2H7.5" />
+          </svg>
+          Imprimir Ticket
+        </button>
+        
+        <!-- New Order Button -->
+        <button 
+          (click)="nuevaOrden()"
+          class="flex-1 bg-pizza-red hover:bg-red-700 active:scale-95 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-lg shadow-red-100 hover:shadow-red-200"
+        >
+          Nueva Orden
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

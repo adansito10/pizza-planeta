@@ -1,0 +1,10 @@
+<div class="space-y-6">
+  <h2 class="text-3xl font-black text-slate-800 tracking-tight">Nuestras Pizzas</h2>
+  
+  <!-- Pizza Grid layout -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 pb-12">
+    @for (pizzaItem of pizzas; track pizzaItem.id) {
+      <app-pizza-card [pizza]="pizzaItem"></app-pizza-card>
+    }
+  </div>
+</div>
