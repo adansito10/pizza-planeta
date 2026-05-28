@@ -1,0 +1,137 @@
+<!-- Administrative Panel Outer Wrapper -->
+<div 
+  class="h-screen w-screen flex overflow-hidden transition-all duration-300 font-sans"
+  [class]="themeService.activeTheme.class"
+  style="background: linear-gradient(135deg, var(--admin-bg-gradient-start) 0%, var(--admin-bg-gradient-end) 100%); color: var(--admin-text-main);"
+>
+
+  <!-- Sidebar Component -->
+  <aside 
+    class="w-64 flex-shrink-0 flex flex-col justify-between shadow-2xl z-20 transition-all duration-300 border-r border-white/5"
+    style="background-color: var(--admin-sidebar-bg); color: var(--admin-sidebar-text);"
+  >
+    <!-- Top Brand & User profile block -->
+    <div>
+      <!-- Logo Header -->
+      <div class="h-20 flex items-center gap-3 px-6 border-b border-white/5 bg-black/10">
+        <div class="h-10 w-10 rounded-xl overflow-hidden bg-white flex items-center justify-center p-0.5 border border-white/10 shadow-inner flex-shrink-0">
+          <img 
+            src="assets/images/logo_pizza.JPG" 
+            alt="Planet Pizza Logo" 
+            class="h-full w-full object-cover rounded-xl"
+          />
+        </div>
+        <div>
+          <h2 class="text-lg font-black tracking-wider leading-none text-white uppercase">Planet Admin</h2>
+          <span class="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-1 block">Panel de Control</span>
+        </div>
+      </div>
+
+      <!-- User Profile Card (Less Minimalist Detail) -->
+      <div class="px-6 py-4 border-b border-white/5 flex items-center gap-3.5 bg-black/5">
+        <div class="h-9 w-9 rounded-full bg-pizza-red text-white flex items-center justify-center font-black text-sm shadow border border-white/10 shrink-0">
+          AP
+        </div>
+        <div class="truncate">
+          <div class="text-xs font-black text-white leading-none">Admin Peralta</div>
+          <span class="text-[8px] text-emerald-400 font-bold uppercase tracking-wider block mt-1.5 flex items-center gap-1">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Súper Admin
+          </span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="p-4 space-y-1">
+        @for (item of menuItems; track item.route) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active-link"
+            class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 hover:bg-white/5 hover:translate-x-1 group"
+          >
+            <span [innerHTML]="item.icon" class="text-white/50 group-hover:text-white transition-colors duration-200"></span>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+    </div>
+
+    <!-- Live Indicators & Logout (Density Details) -->
+    <div>
+      <!-- Live Metrics Widget (Less Minimalist Detail) -->
+      <div class="px-4 py-3 mx-4 mb-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[8px] font-black uppercase tracking-widest text-white/40 block">KPIs del Turno</span>
+          <span class="h-1.5 w-1.5 rounded-full bg-pizza-yellow animate-ping"></span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-white/5">
+          <div class="space-y-0.5">
+            <span class="text-[7px] text-white/50 uppercase font-black tracking-wider block leading-none">Ventas</span>
+            <span class="text-xs font-black text-emerald-400 block leading-none">${{ orderService.totalSales() | number:'1.0-0' }}</span>
+          </div>
+          <div class="space-y-0.5">
+            <span class="text-[7px] text-white/50 uppercase font-black tracking-wider block leading-none">Pedidos</span>
+            <span class="text-xs font-black text-pizza-yellow block leading-none">{{ orderService.activeOrders().length }} Act.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exit Button Section (ONLY ONE LOGOUT BUTTON) -->
+      <div class="p-4 border-t border-white/5 bg-black/10">
+        <button
+          (click)="onLogout()"
+          class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-red-600/15 hover:bg-red-600/25 text-red-400 hover:text-red-300 font-bold text-xs uppercase tracking-wider transition-all duration-150 active:scale-95 text-center cursor-pointer border border-red-500/10 shadow-inner"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-red-500">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+          </svg>
+          Cerrar Sesión (Salir)
+        </button>
+        <div class="text-center mt-3.5 text-[8px] text-white/30 font-semibold uppercase tracking-wider">
+          Planet Pizza &copy; {{ currentYear }}
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Main View Container -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    
+    <!-- Topbar Header -->
+    <header 
+      class="h-20 flex items-center justify-between px-8 border-b transition-all duration-300 shadow-sm"
+      style="background-color: var(--admin-header-bg); border-color: var(--admin-header-border); color: var(--admin-header-text);"
+    >
+      <!-- Title & Context -->
+      <div>
+        <h1 class="text-xl font-black tracking-tight uppercase leading-none">Administración</h1>
+        <span class="text-[9px] uppercase font-bold tracking-widest block transition-colors duration-300 mt-1.5" style="color: var(--admin-header-subtitle);">Gestión General del Kiosco</span>
+      </div>
+
+      <!-- Quick Metrics/Badges (Less Minimalist Details) -->
+      <div class="flex items-center gap-4">
+        <!-- Terminal & DB Connection Indicators (Less Minimalist) -->
+        <div class="hidden md:flex flex-col text-right text-[9px] font-bold uppercase tracking-wider opacity-85 space-y-0.5">
+          <span>Terminal: #01-CAJA</span>
+          <span class="text-[8px] text-emerald-400 font-black">Base de Datos: Activa</span>
+        </div>
+
+        <!-- System Clock & Status -->
+        <div 
+          class="flex items-center gap-2.5 px-4 py-2 rounded-2xl border bg-white/10 backdrop-blur-sm shadow-sm transition-all duration-300"
+          style="border-color: var(--admin-header-border);"
+        >
+          <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-black tracking-wide uppercase text-white">Sistema En Línea</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dynamic Route Outlet Content (Dashboard, Orders, Catalog, etc.) -->
+    <main class="flex-1 overflow-y-auto p-8">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+</div>

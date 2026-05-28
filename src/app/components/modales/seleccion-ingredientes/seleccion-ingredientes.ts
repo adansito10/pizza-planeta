@@ -17,19 +17,35 @@ export class SeleccionIngredientes {
   public readonly selectedQueso = signal<IngredientOption>(this.cartService.QUESOS[0]);
   public readonly selectedExtras = signal<IngredientOption[]>([]);
 
-  // Reactively reset choices when customizing a new pizza
+  // Reactively reset choices and load recipe defaults when customizing a new pizza
   constructor() {
     effect(() => {
       const pizza = this.cartService.customizingPizza();
       const size = this.cartService.selectedSize();
       if (pizza && size) {
-        this.selectedMasa.set(this.cartService.MASAS[0]);
-        this.selectedSalsa.set(this.cartService.SALSAS[0]);
-        this.selectedQueso.set(this.cartService.QUESOS[0]);
-        this.selectedExtras.set([]);
+        // Pre-select related default crust (masa)
+        const defaultMasa = this.cartService.MASAS.find(m => m.nombre === pizza.defaultMasa) || this.cartService.MASAS[0];
+        this.selectedMasa.set(defaultMasa);
+
+        // Pre-select related default sauce (salsa)
+        const defaultSalsa = this.cartService.SALSAS.find(s => s.nombre === pizza.defaultSalsa) || this.cartService.SALSAS[0];
+        this.selectedSalsa.set(defaultSalsa);
+
+        // Pre-select related default cheese (queso)
+        const defaultQueso = this.cartService.QUESOS.find(q => q.nombre === pizza.defaultQueso) || this.cartService.QUESOS[0];
+        this.selectedQueso.set(defaultQueso);
+
+        // Pre-select related default extra ingredients
+        if (pizza.defaultExtras && pizza.defaultExtras.length > 0) {
+          const preselected = this.cartService.EXTRAS.filter(e => pizza.defaultExtras?.includes(e.nombre));
+          this.selectedExtras.set(preselected);
+        } else {
+          this.selectedExtras.set([]);
+        }
       }
     });
   }
+
 
   // Real-time calculated price
   public readonly currentUnitPrice = computed(() => {

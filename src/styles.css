@@ -175,3 +175,85 @@ body {
     font-weight: bold !important;
   }
 }
+
+/* Theme variables for the Admin Panel */
+.admin-theme-red {
+  --admin-primary: #d00000;
+  --admin-primary-hover: #b00000;
+  --admin-bg-gradient-start: #fef2f2;
+  --admin-bg-gradient-end: #fee2e2;
+  --admin-card-bg: #ffffff;
+  --admin-card-border: #fee2e2;
+  --admin-text-main: #1e293b;
+  --admin-text-muted: #64748b;
+  --admin-sidebar-bg: #0f172a;
+  --admin-sidebar-text: #f8fafc;
+  --admin-sidebar-active: #d00000;
+  --admin-badge-pending: #fee2e2;
+  --admin-badge-pending-text: #ef4444;
+  --admin-header-bg: #d00000;
+  --admin-header-text: #ffffff;
+  --admin-header-border: #b00000;
+  --admin-header-subtitle: rgba(255, 255, 255, 0.7);
+}
+
+.admin-theme-blue {
+  --admin-primary: #1d4ed8;
+  --admin-primary-hover: #1e40af;
+  --admin-bg-gradient-start: #eff6ff;
+  --admin-bg-gradient-end: #dbeafe;
+  --admin-card-bg: #ffffff;
+  --admin-card-border: #dbeafe;
+  --admin-text-main: #1e293b;
+  --admin-text-muted: #64748b;
+  --admin-sidebar-bg: #0f172a;
+  --admin-sidebar-text: #f8fafc;
+  --admin-sidebar-active: #1d4ed8;
+  --admin-badge-pending: #dbeafe;
+  --admin-badge-pending-text: #2563eb;
+  --admin-header-bg: #ffffff;
+  --admin-header-text: #1e293b;
+  --admin-header-border: #dbeafe;
+  --admin-header-subtitle: #64748b;
+}
+
+.admin-theme-green {
+  --admin-primary: #15803d;
+  --admin-primary-hover: #166534;
+  --admin-bg-gradient-start: #f0fdf4;
+  --admin-bg-gradient-end: #dcfce7;
+  --admin-card-bg: #ffffff;
+  --admin-card-border: #dcfce7;
+  --admin-text-main: #1e293b;
+  --admin-text-muted: #64748b;
+  --admin-sidebar-bg: #14532d;
+  --admin-sidebar-text: #f8fafc;
+  --admin-sidebar-active: #15803d;
+  --admin-badge-pending: #dcfce7;
+  --admin-badge-pending-text: #16a34a;
+  --admin-header-bg: #ffffff;
+  --admin-header-text: #1e293b;
+  --admin-header-border: #dcfce7;
+  --admin-header-subtitle: #64748b;
+}
+
+.admin-theme-dark {
+  --admin-primary: #f59e0b;
+  --admin-primary-hover: #d97706;
+  --admin-bg-gradient-start: #0f172a;
+  --admin-bg-gradient-end: #020617;
+  --admin-card-bg: #1e293b;
+  --admin-card-border: #334155;
+  --admin-text-main: #f8fafc;
+  --admin-text-muted: #94a3b8;
+  --admin-sidebar-bg: #030712;
+  --admin-sidebar-text: #f8fafc;
+  --admin-sidebar-active: #f59e0b;
+  --admin-badge-pending: #334155;
+  --admin-badge-pending-text: #f59e0b;
+  --admin-header-bg: #1e293b;
+  --admin-header-text: #f8fafc;
+  --admin-header-border: #334155;
+  --admin-header-subtitle: #94a3b8;
+}
+

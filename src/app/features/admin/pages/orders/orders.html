@@ -1,0 +1,377 @@
+<div class="h-full flex flex-col space-y-6 no-print animate-in fade-in duration-300">
+  
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-black uppercase tracking-tight">Cola de Producción (Kanban)</h2>
+      <p class="text-xs text-slate-500 font-medium">Arrastra o avanza los pedidos conforme se preparan en cocina.</p>
+    </div>
+    
+    <!-- Quick action to clear history -->
+    <button 
+      (click)="orderService.clearAllOrders()"
+      class="bg-red-500/10 hover:bg-red-500/20 text-red-600 text-xs px-4 py-2.5 rounded-2xl font-bold transition-all duration-150 active:scale-95 cursor-pointer flex items-center gap-1.5"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+      </svg>
+      Limpiar Historial
+    </button>
+  </div>
+
+  <!-- Kanban Board Layout -->
+  <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden min-h-[450px]">
+    
+    <!-- Column: Pendiente -->
+    <div class="flex flex-col h-full rounded-3xl bg-slate-50/10 border border-slate-100/5 p-4 space-y-4">
+      <div class="flex items-center justify-between px-2">
+        <div class="flex items-center gap-2">
+          <span class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+          <h3 class="text-xs uppercase font-black tracking-wider text-slate-400">Pendientes</h3>
+        </div>
+        <span class="text-xs font-black bg-red-500/10 text-red-500 px-2.5 py-1 rounded-full">
+          {{ getPendingOrders().length }}
+        </span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-3 pr-1">
+        @for (order of getPendingOrders(); track order.id) {
+          <div 
+            (click)="selectOrder(order)"
+            class="p-4 rounded-2xl border bg-white shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-0.5 border-red-100 hover:border-red-300"
+            style="background-color: var(--admin-card-bg);"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-black text-red-600">{{ order.orderNumber }}</span>
+              <span class="text-[10px] text-slate-400 font-bold uppercase">{{ order.time }}</span>
+            </div>
+            <p class="text-xs font-bold text-slate-500 mb-3 truncate">
+              @for (item of order.items; track item.id; let last = $last) {
+                {{ item.cantidad }}x {{ item.pizza.nombre }} ({{ item.size.nombre }}){{ !last ? ', ' : '' }}
+              }
+            </p>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100/10">
+              <span class="text-xs font-black">${{ order.total | number:'1.2-2' }}</span>
+              <button 
+                (click)="$event.stopPropagation(); advanceStatus(order)"
+                class="bg-amber-500 text-white text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider shadow hover:bg-amber-600 transition-colors"
+              >
+                Preparar
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="h-40 flex items-center justify-center text-slate-400 text-xs font-bold border border-dashed border-slate-200 rounded-2xl">
+            Sin pedidos pendientes
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Column: Preparando -->
+    <div class="flex flex-col h-full rounded-3xl bg-slate-50/10 border border-slate-100/5 p-4 space-y-4">
+      <div class="flex items-center justify-between px-2">
+        <div class="flex items-center gap-2">
+          <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <h3 class="text-xs uppercase font-black tracking-wider text-slate-400">Preparando</h3>
+        </div>
+        <span class="text-xs font-black bg-amber-500/10 text-amber-500 px-2.5 py-1 rounded-full">
+          {{ getPreparingOrders().length }}
+        </span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-3 pr-1">
+        @for (order of getPreparingOrders(); track order.id) {
+          <div 
+            (click)="selectOrder(order)"
+            class="p-4 rounded-2xl border bg-white shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-0.5 border-amber-100 hover:border-amber-300"
+            style="background-color: var(--admin-card-bg);"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-black text-amber-600">{{ order.orderNumber }}</span>
+              <span class="text-[10px] text-slate-400 font-bold uppercase">{{ order.time }}</span>
+            </div>
+            <p class="text-xs font-bold text-slate-500 mb-3 truncate">
+              @for (item of order.items; track item.id; let last = $last) {
+                {{ item.cantidad }}x {{ item.pizza.nombre }} ({{ item.size.nombre }}){{ !last ? ', ' : '' }}
+              }
+            </p>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100/10">
+              <span class="text-xs font-black">${{ order.total | number:'1.2-2' }}</span>
+              <button 
+                (click)="$event.stopPropagation(); advanceStatus(order)"
+                class="bg-blue-600 text-white text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider shadow hover:bg-blue-700 transition-colors"
+              >
+                Terminar
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="h-40 flex items-center justify-center text-slate-400 text-xs font-bold border border-dashed border-slate-200 rounded-2xl">
+            Sin pizzas en el horno
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Column: Listo para entregar -->
+    <div class="flex flex-col h-full rounded-3xl bg-slate-50/10 border border-slate-100/5 p-4 space-y-4">
+      <div class="flex items-center justify-between px-2">
+        <div class="flex items-center gap-2">
+          <span class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+          <h3 class="text-xs uppercase font-black tracking-wider text-slate-400">Listos</h3>
+        </div>
+        <span class="text-xs font-black bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full">
+          {{ getReadyOrders().length }}
+        </span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-3 pr-1">
+        @for (order of getReadyOrders(); track order.id) {
+          <div 
+            (click)="selectOrder(order)"
+            class="p-4 rounded-2xl border bg-white shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-0.5 border-blue-100 hover:border-blue-300"
+            style="background-color: var(--admin-card-bg);"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-black text-blue-600">{{ order.orderNumber }}</span>
+              <span class="text-[10px] text-slate-400 font-bold uppercase">{{ order.time }}</span>
+            </div>
+            <p class="text-xs font-bold text-slate-500 mb-3 truncate">
+              @for (item of order.items; track item.id; let last = $last) {
+                {{ item.cantidad }}x {{ item.pizza.nombre }} ({{ item.size.nombre }}){{ !last ? ', ' : '' }}
+              }
+            </p>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100/10">
+              <span class="text-xs font-black">${{ order.total | number:'1.2-2' }}</span>
+              <button 
+                (click)="$event.stopPropagation(); advanceStatus(order)"
+                class="bg-emerald-600 text-white text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider shadow hover:bg-emerald-700 transition-colors"
+              >
+                Entregar
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="h-40 flex items-center justify-center text-slate-400 text-xs font-bold border border-dashed border-slate-200 rounded-2xl">
+            Sin pedidos por entregar
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Historial de Pedidos Entregados -->
+  <div 
+    class="p-6 rounded-3xl border shadow-md"
+    style="background-color: var(--admin-card-bg); border-color: var(--admin-card-border);"
+  >
+    <div class="mb-4">
+      <h3 class="text-md font-black uppercase tracking-wider">Historial Reciente (Entregados)</h3>
+      <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Órdenes completadas con éxito</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (order of getDeliveredOrders(); track order.id) {
+        <div 
+          (click)="selectOrder(order)"
+          class="p-4 rounded-2xl bg-slate-50/5 border border-slate-100/10 shadow-sm flex items-center justify-between hover:bg-slate-50/10 cursor-pointer transition-colors"
+        >
+          <div>
+            <span class="text-sm font-black text-slate-400 block">{{ order.orderNumber }}</span>
+            <span class="text-[9px] font-bold text-slate-500 uppercase">{{ order.time }}</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-black block">${{ order.total | number:'1.2-2' }}</span>
+            <span class="text-[9px] bg-emerald-500/10 text-emerald-500 font-black uppercase px-2 py-0.5 rounded-full">Entregado</span>
+          </div>
+        </div>
+      } @empty {
+        <div class="col-span-4 text-center text-slate-400 font-black text-xs py-4">
+          No hay órdenes entregadas hoy.
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Detail side-drawer overlay -->
+  @if (selectedOrder(); as order) {
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div 
+        class="w-full max-w-lg rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        style="background-color: var(--admin-card-bg); border-color: var(--admin-card-border);"
+      >
+        <!-- Modal Header -->
+        <div class="p-6 border-b border-slate-100/10 flex items-center justify-between bg-black/5">
+          <div>
+            <h3 class="text-lg font-black" style="color: var(--admin-primary);">Pedido {{ order.orderNumber }}</h3>
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Registrado a las {{ order.time }}</span>
+          </div>
+          <button 
+            (click)="closeDetails()"
+            class="h-8 w-8 rounded-full bg-slate-100/10 hover:bg-slate-100/20 flex items-center justify-center cursor-pointer text-slate-400 hover:text-slate-100 transition-colors"
+          >
+            &times;
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 overflow-y-auto space-y-4 flex-1">
+          
+          <!-- State Badge -->
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold text-slate-400">Estado actual:</span>
+            <span 
+              class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
+              [ngClass]="{
+                'bg-red-500/10 text-red-500': order.status === 'Pendiente',
+                'bg-amber-500/10 text-amber-500': order.status === 'Preparando',
+                'bg-blue-500/10 text-blue-500': order.status === 'Listo',
+                'bg-emerald-500/10 text-emerald-500': order.status === 'Entregado'
+              }"
+            >
+              {{ order.status }}
+            </span>
+          </div>
+
+          <!-- Items list -->
+          <div class="space-y-4">
+            <h4 class="text-xs uppercase font-black tracking-widest text-slate-400 border-b border-slate-100/5 pb-2">Productos</h4>
+            
+            @for (item of order.items; track item.id) {
+              <div class="space-y-1.5 p-4 rounded-2xl bg-slate-50/5 border border-slate-100/10">
+                <div class="flex items-center justify-between">
+                  <h5 class="text-sm font-black">{{ item.cantidad }}x {{ item.pizza.nombre }}</h5>
+                  <span class="text-xs font-black">${{ item.totalItem | number:'1.2-2' }}</span>
+                </div>
+                
+                <!-- Detailed choices -->
+                <div class="text-[11px] font-bold text-slate-500 space-y-1 pl-2">
+                  <div>TAMAÑO: <span class="text-slate-400">{{ item.size.nombre }} ({{ item.size.medida }})</span></div>
+                  <div>MASA: <span class="text-slate-400">{{ item.masa.nombre }} (+${{ item.masa.precio }})</span></div>
+                  <div>SALSA: <span class="text-slate-400">{{ item.salsa.nombre }} (+${{ item.salsa.precio }})</span></div>
+                  <div>QUESO: <span class="text-slate-400">{{ item.queso.nombre }} (+${{ item.queso.precio }})</span></div>
+                  @if (item.extras.length > 0) {
+                    <div>EXTRAS: 
+                      <span class="text-slate-400">
+                        @for (extra of item.extras; track extra.nombre; let last = $last) {
+                          {{ extra.nombre }} (+${{ extra.precio }}){{ !last ? ', ' : '' }}
+                        }
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Summary Total -->
+          <div class="flex items-center justify-between p-4 rounded-2xl bg-black/10 font-black text-md">
+            <span>TOTAL FACTURADO:</span>
+            <span style="color: var(--admin-primary);">${{ order.total | number:'1.2-2' }}</span>
+          </div>
+
+        </div>
+
+        <!-- Modal Actions Footer -->
+        <div class="p-6 border-t border-slate-100/10 flex flex-wrap gap-3 bg-black/5">
+          <!-- Advance order -->
+          @if (order.status !== 'Entregado') {
+            <button 
+              (click)="advanceStatus(order)"
+              class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow transition-all duration-150 active:scale-95 cursor-pointer"
+            >
+              @if (order.status === 'Pendiente') { Preparar Pedido }
+              @else if (order.status === 'Preparando') { Terminar Cocción }
+              @else if (order.status === 'Listo') { Marcar como Entregado }
+            </button>
+          }
+          
+          <!-- Print Ticket -->
+          <button 
+            (click)="printTicket(order)"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow transition-all duration-150 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.82l2.6-2.6m0 0l2.6 2.6m-2.6-2.6v6.5m10-2.6l2.6-2.6m0 0l2.6 2.6m-2.6-2.6v6.5M12 3v13.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Imprimir Ticket
+          </button>
+
+          <!-- Cancel order -->
+          <button 
+            (click)="cancelOrder(order.id)"
+            class="bg-red-500/10 hover:bg-red-500/20 text-red-600 px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all duration-150 active:scale-95 cursor-pointer"
+          >
+            Cancelar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+</div>
+
+<!-- ========================================== -->
+<!-- PHYSICIAL RECEIPT SIMULATION (PRINT ONLY) -->
+<!-- ========================================== -->
+@if (selectedOrder(); as order) {
+  <div id="printable-ticket" style="display: none;">
+    <div class="text-center">
+      <h2>PLANET PIZZA</h2>
+      <span class="text-center">Kiosco de Autoservicio</span>
+      <span class="text-center">TICKET DE COCINA</span>
+      <span class="text-center">-----------------------------</span>
+    </div>
+    
+    <div>
+      <span>ORDEN: {{ order.orderNumber }}</span>
+      <span>HORA: {{ order.time }}</span>
+      <span>ESTADO: {{ order.status }}</span>
+      <span>-----------------------------</span>
+    </div>
+
+    <div>
+      <span class="text-center text-5xl">{{ order.orderNumber }}</span>
+      <span>-----------------------------</span>
+    </div>
+
+    <ul>
+      @for (item of order.items; track item.id) {
+        <li>
+          <div class="flex justify-between">
+            <strong>{{ item.cantidad }}x {{ item.pizza.nombre }}</strong>
+            <span>${{ item.totalItem }}</span>
+          </div>
+          <div style="font-size: 10px; margin-left: 10px;">
+            - Tamaño: {{ item.size.nombre }}<br/>
+            - Masa: {{ item.masa.nombre }}<br/>
+            - Salsa: {{ item.salsa.nombre }}<br/>
+            - Queso: {{ item.queso.nombre }}<br/>
+            @if (item.extras.length > 0) {
+              - Extras: 
+              @for (e of item.extras; track e.nombre; let last = $last) {
+                {{ e.nombre }}{{ !last ? ', ' : '' }}
+              }
+            }
+          </div>
+        </li>
+      }
+    </ul>
+
+    <div>
+      <span>-----------------------------</span>
+      <div class="flex justify-between text-2xl">
+        <strong>TOTAL:</strong>
+        <strong>${{ order.total }}</strong>
+      </div>
+      <span>-----------------------------</span>
+    </div>
+    
+    <div class="text-center" style="margin-top: 15px;">
+      <span>¡Gracias por su preferencia!</span>
+      <span> planetpizza.kiosk </span>
+    </div>
+  </div>
+}

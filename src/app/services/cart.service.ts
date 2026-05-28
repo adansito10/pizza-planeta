@@ -1,4 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { OrderService } from './order.service';
+import { ProductService } from './product.service';
 
 export interface Pizza {
   id: string;
@@ -6,7 +8,12 @@ export interface Pizza {
   descripcion: string;
   imagen: string;
   precioBase: number;
+  defaultMasa?: string;
+  defaultSalsa?: string;
+  defaultQueso?: string;
+  defaultExtras?: string[];
 }
+
 
 export interface SizeOption {
   nombre: string;
@@ -37,6 +44,10 @@ export interface CartItem {
   providedIn: 'root'
 })
 export class CartService {
+  private readonly orderService = inject(OrderService);
+  private readonly productService = inject(ProductService);
+
+  
   // Cart state signals
   public readonly cart = signal<CartItem[]>([]);
   public readonly orderCounter = signal<number>(1);
@@ -52,48 +63,27 @@ export class CartService {
   public readonly lastConfirmedOrderTime = signal<string>('');
   public readonly lastConfirmedOrderTotal = signal<number>(0);
 
-  // Constants
-  public readonly SIZES: SizeOption[] = [
-    { nombre: 'Chica', medida: '8" - 4 rebanadas', precio: 99 },
-    { nombre: 'Mediana', medida: '12" - 8 rebanadas', precio: 149 },
-    { nombre: 'Grande', medida: '16" - 12 rebanadas', precio: 199 }
-  ];
+  // Getters reading from ProductService dynamically
+  public get SIZES(): SizeOption[] {
+    return this.productService.sizes();
+  }
 
-  public readonly MASAS: IngredientOption[] = [
-    { nombre: 'Tradicional', precio: 0, categoria: 'masa' },
-    { nombre: 'Delgada', precio: 0, categoria: 'masa' },
-    { nombre: 'Gruesa', precio: 10, categoria: 'masa' },
-    { nombre: 'Orilla Rellena de Queso', precio: 25, categoria: 'masa' }
-  ];
+  public get MASAS(): IngredientOption[] {
+    return this.productService.ingredients().filter(i => i.categoria === 'masa');
+  }
 
-  public readonly SALSAS: IngredientOption[] = [
-    { nombre: 'Salsa de Tomate', precio: 0, categoria: 'salsa' },
-    { nombre: 'BBQ', precio: 10, categoria: 'salsa' },
-    { nombre: 'Alfredo', precio: 15, categoria: 'salsa' },
-    { nombre: 'Pesto', precio: 15, categoria: 'salsa' }
-  ];
+  public get SALSAS(): IngredientOption[] {
+    return this.productService.ingredients().filter(i => i.categoria === 'salsa');
+  }
 
-  public readonly QUESOS: IngredientOption[] = [
-    { nombre: 'Mozzarella', precio: 0, categoria: 'queso' },
-    { nombre: 'Cheddar', precio: 10, categoria: 'queso' },
-    { nombre: 'Parmesano', precio: 10, categoria: 'queso' },
-    { nombre: 'Mezcla de 3 Quesos', precio: 20, categoria: 'queso' }
-  ];
+  public get QUESOS(): IngredientOption[] {
+    return this.productService.ingredients().filter(i => i.categoria === 'queso');
+  }
 
-  public readonly EXTRAS: IngredientOption[] = [
-    { nombre: 'Pepperoni', precio: 15, categoria: 'extra' },
-    { nombre: 'Jamón', precio: 12, categoria: 'extra' },
-    { nombre: 'Salchicha Italiana', precio: 15, categoria: 'extra' },
-    { nombre: 'Pollo', precio: 15, categoria: 'extra' },
-    { nombre: 'Tocino', precio: 18, categoria: 'extra' },
-    { nombre: 'Champiñones', precio: 10, categoria: 'extra' },
-    { nombre: 'Pimientos', precio: 8, categoria: 'extra' },
-    { nombre: 'Cebolla', precio: 8, categoria: 'extra' },
-    { nombre: 'Aceitunas Negras', precio: 10, categoria: 'extra' },
-    { nombre: 'Piña', precio: 10, categoria: 'extra' },
-    { nombre: 'Tomate', precio: 8, categoria: 'extra' },
-    { nombre: 'Jalapeños', precio: 8, categoria: 'extra' }
-  ];
+  public get EXTRAS(): IngredientOption[] {
+    return this.productService.ingredients().filter(i => i.categoria === 'extra');
+  }
+
 
   // Computed signals
   public readonly totalCart = computed(() => {
@@ -190,8 +180,8 @@ export class CartService {
   public confirmOrder(): void {
     if (this.cart().length === 0) return;
     
-    // Store details of confirmed order
-    const formattedOrderNumber = '#' + String(this.orderCounter()).padStart(4, '0');
+    // Register the order via OrderService
+    const newOrder = this.orderService.addOrder(this.cart(), this.totalCart());
     
     const now = new Date();
     const options: Intl.DateTimeFormatOptions = { 
@@ -202,7 +192,6 @@ export class CartService {
       minute: '2-digit',
       hour12: true
     };
-    // Translate date description to Spanish (e.g. 19 de mayo de 2026 a las 07:35 p.m.)
     const formattedTime = now.toLocaleDateString('es-ES', options)
       .replace(', ', ' a las ')
       .replace(' p. m.', ' p.m.')
@@ -210,13 +199,10 @@ export class CartService {
       .replace(' p. m.', ' p.m.')
       .replace(' a. m.', ' a.m.');
     
-    this.lastConfirmedOrder.set(this.cart());
-    this.lastConfirmedOrderNumber.set(formattedOrderNumber);
+    this.lastConfirmedOrder.set(newOrder.items);
+    this.lastConfirmedOrderNumber.set(newOrder.orderNumber);
     this.lastConfirmedOrderTime.set(formattedTime);
-    this.lastConfirmedOrderTotal.set(this.totalCart());
-    
-    // Increment order counter for next customer
-    this.orderCounter.update(count => count + 1);
+    this.lastConfirmedOrderTotal.set(newOrder.total);
     
     // Reset cart and open order success modal
     this.cart.set([]);

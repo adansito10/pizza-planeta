@@ -1,0 +1,199 @@
+<!-- Digital Kiosk Layout Container -->
+<div class="h-screen flex flex-col overflow-hidden no-print">
+
+  <!-- Top Header Banner -->
+  <header class="bg-pizza-red h-20 text-white flex items-center justify-between px-8 shadow-md shrink-0 border-b border-red-700">
+    <!-- Brand Logo and Subtitle -->
+    <div class="flex items-center gap-3.5">
+      <div class="h-12 w-12 rounded-full overflow-hidden bg-white flex items-center justify-center p-0.5 border border-white/20 shadow-inner">
+        <img 
+          src="assets/images/logo_pizza.JPG" 
+          alt="Planet Pizza Logo" 
+          class="h-full w-full object-cover rounded-full"
+        />
+      </div>
+      <div>
+        <h1 class="text-2xl font-black tracking-tight leading-none">Planet Pizza</h1>
+        <span class="text-[10px] text-white/80 font-bold uppercase tracking-widest mt-1 block leading-none">Ordena fácil y rápido</span>
+      </div>
+    </div>
+
+    <!-- Right Side Actions (Admin Link & Wait Time) -->
+    <div class="flex items-center gap-4">
+      <!-- Admin Button Link (Opens login modal over Kiosk) -->
+      <button 
+        (click)="openLogin()"
+        class="bg-white/10 hover:bg-white/20 text-white text-xs px-4 py-2 rounded-2xl border border-white/20 font-bold transition-all duration-150 active:scale-95 flex items-center gap-1.5 cursor-pointer"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-pizza-yellow">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Panel Admin
+      </button>
+
+      <!-- Wait Time estimation -->
+      <div class="bg-red-700/40 backdrop-blur-sm border border-red-500/20 px-4 py-2 rounded-2xl flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-pizza-yellow animate-pulse">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div class="text-right">
+          <span class="text-[9px] text-white/70 font-bold uppercase tracking-wider block leading-none">Tiempo de espera</span>
+          <span class="text-sm font-black text-pizza-yellow leading-none">15-20 min</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Kiosk Body (70% Menu/Promos Grid | 30% Cart Sidebar) -->
+  <main class="flex-1 flex overflow-hidden bg-slate-50/50">
+    
+    <!-- Left Area: Catalog / Grid Area (70%) -->
+    <section class="w-[70%] h-full overflow-y-auto p-8 space-y-6 flex flex-col">
+      <!-- Tabs (Menú vs Promos Capsules) -->
+      <div class="flex gap-4 pb-2">
+        <button 
+          (click)="setTab('menu')"
+          class="px-8 py-3.5 rounded-full font-black text-sm transition-all duration-150 active:scale-95 cursor-pointer shadow-sm border"
+          [class]="activeTab() === 'menu' 
+            ? 'bg-pizza-red text-white shadow-red-100 hover:bg-red-700 border-pizza-red' 
+            : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100'"
+        >
+          Menú
+        </button>
+        <button 
+          (click)="setTab('promos')"
+          class="px-8 py-3.5 rounded-full font-black text-sm transition-all duration-150 active:scale-95 cursor-pointer shadow-sm border"
+          [class]="activeTab() === 'promos' 
+            ? 'bg-pizza-red text-white shadow-red-100 hover:bg-red-700 border-pizza-red' 
+            : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100'"
+        >
+          Promos
+        </button>
+      </div>
+
+      <!-- Tab Content Switcher -->
+      <div class="flex-1">
+        @if (activeTab() === 'menu') {
+          <app-catalogo class="block animate-in fade-in duration-200"></app-catalogo>
+        } @else {
+          <app-promociones class="block animate-in fade-in duration-200"></app-promociones>
+        }
+      </div>
+    </section>
+
+    <!-- Right Area: Fixed Cart Sidebar (30%) -->
+    <aside class="w-[30%] h-full shrink-0">
+      <app-carrito class="block h-full"></app-carrito>
+    </aside>
+
+  </main>
+</div>
+
+<!-- Modal Overlays (Controlled reactively via CartService) -->
+<app-seleccion-tamano></app-seleccion-tamano>
+<app-seleccion-ingredientes></app-seleccion-ingredientes>
+<app-confirmacion-orden></app-confirmacion-orden>
+
+<!-- Admin Login Modal Overlay -->
+@if (showLoginModal()) {
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-3xl p-8 flex flex-col space-y-6 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="h-8 w-8 rounded-lg overflow-hidden bg-white flex items-center justify-center p-0.5 border border-slate-200 shadow-inner flex-shrink-0">
+            <img 
+              src="assets/images/logo_pizza.JPG" 
+              alt="Planet Pizza Logo" 
+              class="h-full w-full object-cover rounded-lg"
+            />
+          </div>
+
+          <div>
+            <h3 class="text-md font-black uppercase tracking-wider text-slate-800 leading-none">Acceso Admin</h3>
+            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none block mt-1">Ingresar al panel de control</span>
+          </div>
+        </div>
+        <button 
+          (click)="closeLogin()"
+          class="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          &times;
+        </button>
+      </div>
+
+      <!-- Login Form inside modal -->
+      <form (ngSubmit)="onLoginSubmit()" class="space-y-4">
+        
+        <!-- Login error message -->
+        @if (loginError(); as msg) {
+          <div class="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-[11px] font-black text-red-500 uppercase tracking-wide flex items-center gap-2 animate-in shake duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 shrink-0">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            {{ msg }}
+          </div>
+        }
+
+        <!-- Username field -->
+        <div class="space-y-1">
+          <label class="text-[9px] uppercase font-bold tracking-widest text-slate-400">Usuario</label>
+          <input 
+            type="text" 
+            name="username"
+            [(ngModel)]="username"
+            placeholder="Usuario (admin)"
+            class="w-full px-4 py-3 rounded-2xl border text-xs font-black bg-slate-50 border-slate-200 focus:outline-none focus:ring-2 focus:ring-pizza-red/20 focus:border-pizza-red transition-all"
+            required
+            [disabled]="loginLoading()"
+          >
+        </div>
+
+        <!-- Password field -->
+        <div class="space-y-1">
+          <label class="text-[9px] uppercase font-bold tracking-widest text-slate-400">Contraseña</label>
+          <input 
+            type="password" 
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Contraseña (admin123)"
+            class="w-full px-4 py-3 rounded-2xl border text-xs font-black bg-slate-50 border-slate-200 focus:outline-none focus:ring-2 focus:ring-pizza-red/20 focus:border-pizza-red transition-all"
+            required
+            [disabled]="loginLoading()"
+          >
+        </div>
+
+        <!-- Submit actions -->
+        <div class="pt-4 border-t border-slate-100 flex gap-3">
+          <button 
+            type="submit"
+            class="flex-1 bg-pizza-red hover:bg-red-700 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow transition-all duration-150 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+            [disabled]="loginLoading()"
+          >
+            @if (loginLoading()) {
+              <svg class="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Comprobando...
+            } @else {
+              Iniciar Sesión
+            }
+          </button>
+          <button 
+            type="button"
+            (click)="closeLogin()"
+            class="bg-slate-100 hover:bg-slate-200 text-slate-500 px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            [disabled]="loginLoading()"
+          >
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}
+
