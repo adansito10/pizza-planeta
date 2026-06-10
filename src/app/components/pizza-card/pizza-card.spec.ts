@@ -14,6 +14,13 @@ describe('PizzaCard', () => {
 
     fixture = TestBed.createComponent(PizzaCard);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('pizza', {
+      id: '1',
+      nombre: 'Margarita',
+      descripcion: 'Clásica',
+      imagen: '',
+      precioBase: 100
+    });
     await fixture.whenStable();
   });
 

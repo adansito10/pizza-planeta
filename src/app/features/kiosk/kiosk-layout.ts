@@ -1,6 +1,6 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
@@ -16,7 +16,6 @@ import { ConfirmacionOrden } from '../../components/modales/confirmacion-orden/c
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     FormsModule,
     Catalogo,
     Promociones,
@@ -42,6 +41,17 @@ export class KioskLayout {
   public password = '';
   public readonly loginError = signal<string | null>(null);
   public readonly loginLoading = signal<boolean>(false);
+
+  // Privacy Modal Control State
+  public readonly showPrivacyModal = signal<boolean>(false);
+
+  public openPrivacyModal(): void {
+    this.showPrivacyModal.set(true);
+  }
+
+  public closePrivacyModal(): void {
+    this.showPrivacyModal.set(false);
+  }
 
   public setTab(tab: 'menu' | 'promos'): void {
     this.activeTab.set(tab);

@@ -27,19 +27,7 @@
         </div>
       </div>
 
-      <!-- User Profile Card (Less Minimalist Detail) -->
-      <div class="px-6 py-4 border-b border-white/5 flex items-center gap-3.5 bg-black/5">
-        <div class="h-9 w-9 rounded-full bg-pizza-red text-white flex items-center justify-center font-black text-sm shadow border border-white/10 shrink-0">
-          AP
-        </div>
-        <div class="truncate">
-          <div class="text-xs font-black text-white leading-none">Admin Peralta</div>
-          <span class="text-[8px] text-emerald-400 font-bold uppercase tracking-wider block mt-1.5 flex items-center gap-1">
-            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Súper Admin
-          </span>
-        </div>
-      </div>
+   
 
       <!-- Navigation Links -->
       <nav class="p-4 space-y-1">
@@ -59,22 +47,7 @@
     <!-- Live Indicators & Logout (Density Details) -->
     <div>
       <!-- Live Metrics Widget (Less Minimalist Detail) -->
-      <div class="px-4 py-3 mx-4 mb-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
-        <div class="flex items-center justify-between">
-          <span class="text-[8px] font-black uppercase tracking-widest text-white/40 block">KPIs del Turno</span>
-          <span class="h-1.5 w-1.5 rounded-full bg-pizza-yellow animate-ping"></span>
-        </div>
-        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-white/5">
-          <div class="space-y-0.5">
-            <span class="text-[7px] text-white/50 uppercase font-black tracking-wider block leading-none">Ventas</span>
-            <span class="text-xs font-black text-emerald-400 block leading-none">${{ orderService.totalSales() | number:'1.0-0' }}</span>
-          </div>
-          <div class="space-y-0.5">
-            <span class="text-[7px] text-white/50 uppercase font-black tracking-wider block leading-none">Pedidos</span>
-            <span class="text-xs font-black text-pizza-yellow block leading-none">{{ orderService.activeOrders().length }} Act.</span>
-          </div>
-        </div>
-      </div>
+  
 
       <!-- Exit Button Section (ONLY ONE LOGOUT BUTTON) -->
       <div class="p-4 border-t border-white/5 bg-black/10">
@@ -112,19 +85,9 @@
       <!-- Quick Metrics/Badges (Less Minimalist Details) -->
       <div class="flex items-center gap-4">
         <!-- Terminal & DB Connection Indicators (Less Minimalist) -->
-        <div class="hidden md:flex flex-col text-right text-[9px] font-bold uppercase tracking-wider opacity-85 space-y-0.5">
-          <span>Terminal: #01-CAJA</span>
-          <span class="text-[8px] text-emerald-400 font-black">Base de Datos: Activa</span>
-        </div>
+       
 
-        <!-- System Clock & Status -->
-        <div 
-          class="flex items-center gap-2.5 px-4 py-2 rounded-2xl border bg-white/10 backdrop-blur-sm shadow-sm transition-all duration-300"
-          style="border-color: var(--admin-header-border);"
-        >
-          <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="text-xs font-black tracking-wide uppercase text-white">Sistema En Línea</span>
-        </div>
+      
       </div>
     </header>
 

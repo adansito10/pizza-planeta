@@ -316,45 +316,12 @@
             <textarea name="descripcion" [(ngModel)]="pizzaDescripcion" rows="3" placeholder="Ingredientes y descripción..." class="w-full px-4 py-3 rounded-2xl border text-sm font-semibold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20"></textarea>
           </div>
 
-          <!-- Relación de Receta (Bases de preparación por defecto) -->
+          <!-- Ingredientes por Defecto -->
           <div class="p-4 rounded-2xl bg-slate-50/5 border border-slate-100/10 space-y-4">
-            <h4 class="text-xs uppercase font-black tracking-wider text-slate-400 border-b border-slate-100/5 pb-2">Relación de Receta Base</h4>
+            <h4 class="text-xs uppercase font-black tracking-wider text-slate-400 border-b border-slate-100/5 pb-2">Ingredientes Incluidos por Defecto</h4>
             
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <!-- Default Masa selector -->
-              <div class="space-y-1">
-                <label class="text-[9px] uppercase font-bold tracking-widest text-slate-400">Masa por defecto</label>
-                <select name="defaultMasa" [(ngModel)]="pizzaDefaultMasa" class="w-full px-3 py-2.5 rounded-xl border text-xs font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none">
-                  @for (masa of getIngredientsOfCategory('masa'); track masa.nombre) {
-                    <option [value]="masa.nombre">{{ masa.nombre }}</option>
-                  }
-                </select>
-              </div>
-
-              <!-- Default Salsa selector -->
-              <div class="space-y-1">
-                <label class="text-[9px] uppercase font-bold tracking-widest text-slate-400">Salsa por defecto</label>
-                <select name="defaultSalsa" [(ngModel)]="pizzaDefaultSalsa" class="w-full px-3 py-2.5 rounded-xl border text-xs font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none">
-                  @for (salsa of getIngredientsOfCategory('salsa'); track salsa.nombre) {
-                    <option [value]="salsa.nombre">{{ salsa.nombre }}</option>
-                  }
-                </select>
-              </div>
-
-              <!-- Default Queso selector -->
-              <div class="space-y-1">
-                <label class="text-[9px] uppercase font-bold tracking-widest text-slate-400">Queso por defecto</label>
-                <select name="defaultQueso" [(ngModel)]="pizzaDefaultQueso" class="w-full px-3 py-2.5 rounded-xl border text-xs font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none">
-                  @for (queso of getIngredientsOfCategory('queso'); track queso.nombre) {
-                    <option [value]="queso.nombre">{{ queso.nombre }}</option>
-                  }
-                </select>
-              </div>
-            </div>
-
             <!-- Default Extras toppings list -->
             <div class="space-y-2">
-              <label class="text-[9px] uppercase font-bold tracking-widest text-slate-400">Ingredientes Incluidos por Defecto (Extras)</label>
               <div class="flex flex-wrap gap-2">
                 @for (extra of getIngredientsOfCategory('extra'); track extra.nombre) {
                   <button 

@@ -56,6 +56,7 @@ export class CartService {
   public readonly activeModal = signal<'none' | 'size' | 'ingredients' | 'success'>('none');
   public readonly customizingPizza = signal<Pizza | null>(null);
   public readonly selectedSize = signal<SizeOption | null>(null);
+  public readonly showCart = signal<boolean>(false);
   
   // Last confirmed order details for success screen & ticket printing
   public readonly lastConfirmedOrder = signal<CartItem[]>([]);
@@ -152,6 +153,7 @@ export class CartService {
     }
     
     this.closeModal();
+    this.showCart.set(true);
   }
 
   public updateQuantity(itemId: string, delta: number): void {
@@ -207,6 +209,7 @@ export class CartService {
     // Reset cart and open order success modal
     this.cart.set([]);
     this.activeModal.set('success');
+    this.showCart.set(false);
   }
 
   public resetFlow(): void {
