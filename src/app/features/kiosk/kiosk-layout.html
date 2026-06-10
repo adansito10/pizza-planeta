@@ -117,7 +117,10 @@
       <!-- Close button on top of cart -->
       <button 
         (click)="cartService.showCart.set(false)"
-        class="absolute top-5 left-[-45px] h-10 w-10 bg-white border border-slate-200 border-r-0 shadow-lg rounded-l-2xl flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-pointer transition-colors font-bold text-lg"
+        class="absolute top-5 left-[-45px] h-10 w-10 bg-white border border-slate-200 border-r-0 shadow-lg rounded-l-2xl flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-pointer transition-all duration-300 font-bold text-lg"
+        [class.opacity-0]="!cartService.showCart()"
+        [class.pointer-events-none]="!cartService.showCart()"
+        [class.opacity-100]="cartService.showCart()"
       >
         &times;
       </button>
