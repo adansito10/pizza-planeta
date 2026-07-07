@@ -1,4 +1,7 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { CartItem } from './cart.service';
 
 export type OrderStatus = 'Pendiente' | 'Preparando' | 'Listo' | 'Entregado';
@@ -17,15 +20,15 @@ export interface Order {
   providedIn: 'root'
 })
 export class OrderService {
-  private readonly STORAGE_KEY = 'planet_pizza_orders';
-  private readonly COUNTER_KEY = 'planet_pizza_order_counter';
+  private http = inject(HttpClient);
+  private readonly apiUrl = 'http://localhost:3000/api/orders';
 
   // State signals
   public readonly orders = signal<Order[]>([]);
   public readonly orderCounter = signal<number>(1);
 
   constructor() {
-    this.loadFromStorage();
+    this.loadFromBackend();
   }
 
   // Computed signals for Dashboard KPIs
@@ -52,10 +55,14 @@ export class OrderService {
   public readonly topSellingPizzas = computed(() => {
     const counts: { [name: string]: number } = {};
     this.orders().forEach(order => {
-      order.items.forEach(item => {
-        const name = item.pizza.nombre;
-        counts[name] = (counts[name] || 0) + item.cantidad;
-      });
+      if (order.items && Array.isArray(order.items)) {
+        order.items.forEach(item => {
+          if (item.pizza && item.pizza.nombre) {
+            const name = item.pizza.nombre;
+            counts[name] = (counts[name] || 0) + item.cantidad;
+          }
+        });
+      }
     });
     return Object.entries(counts)
       .map(([name, quantity]) => ({ name, quantity }))
@@ -64,204 +71,62 @@ export class OrderService {
   });
 
   // Actions
-  public addOrder(items: CartItem[], total: number): Order {
-    const currentCounter = this.orderCounter();
-    const orderNumber = '#' + String(currentCounter).padStart(4, '0');
-    
-    const now = new Date();
-    const options: Intl.DateTimeFormatOptions = {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    };
-    const time = now.toLocaleTimeString('es-ES', options);
-
-    const newOrder: Order = {
-      id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
-      orderNumber,
-      items: [...items],
-      total,
-      status: 'Pendiente',
-      time,
-      timestamp: now.getTime()
-    };
-
-    const updatedOrders = [newOrder, ...this.orders()];
-    this.orders.set(updatedOrders);
-    this.orderCounter.set(currentCounter + 1);
-    
-    this.saveToStorage();
-    return newOrder;
+  public addOrder(items: CartItem[], total: number): Observable<Order> {
+    const payload = { items, total };
+    return this.http.post<Order>(this.apiUrl, payload).pipe(
+      tap((newOrder) => {
+        this.orders.update(current => [newOrder, ...current]);
+        this.orderCounter.set(this.orderCounter() + 1);
+      })
+    );
   }
 
   public updateOrderStatus(orderId: string, status: OrderStatus): void {
-    const updated = this.orders().map(order => {
-      if (order.id === orderId) {
-        return { ...order, status };
-      }
-      return order;
+    this.http.put<Order>(`${this.apiUrl}/${orderId}/status`, { status }).subscribe({
+      next: (updatedOrder) => {
+        this.orders.update(current => current.map(order => 
+          order.id === orderId ? { ...order, status: updatedOrder.status } : order
+        ));
+      },
+      error: (err) => console.error('Error al actualizar el estado del pedido', err)
     });
-    this.orders.set(updated);
-    this.saveToStorage();
   }
 
   public deleteOrder(orderId: string): void {
-    const filtered = this.orders().filter(o => o.id !== orderId);
-    this.orders.set(filtered);
-    this.saveToStorage();
+    this.http.delete(`${this.apiUrl}/${orderId}`).subscribe({
+      next: () => {
+        this.orders.update(current => current.filter(o => o.id !== orderId));
+      },
+      error: (err) => console.error('Error al eliminar el pedido', err)
+    });
   }
 
   public clearAllOrders(): void {
-    this.orders.set([]);
-    this.orderCounter.set(1);
-    localStorage.removeItem(this.STORAGE_KEY);
-    localStorage.removeItem(this.COUNTER_KEY);
-    this.initializeMockData();
+    this.http.post(`${this.apiUrl}/clear`, {}).subscribe({
+      next: () => {
+        this.orders.set([]);
+        this.orderCounter.set(1);
+      },
+      error: (err) => console.error('Error al limpiar los pedidos', err)
+    });
   }
 
-  private saveToStorage(): void {
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.orders()));
-      localStorage.setItem(this.COUNTER_KEY, String(this.orderCounter()));
-    } catch (e) {
-      console.error('Error saving to localStorage', e);
-    }
-  }
-
-  private loadFromStorage(): void {
-    try {
-      const storedOrders = localStorage.getItem(this.STORAGE_KEY);
-      const storedCounter = localStorage.getItem(this.COUNTER_KEY);
-
-      if (storedOrders) {
-        this.orders.set(JSON.parse(storedOrders));
-      } else {
-        this.initializeMockData();
-      }
-
-      if (storedCounter) {
-        this.orderCounter.set(Number(storedCounter));
-      } else if (!storedOrders) {
-        this.orderCounter.set(5); // Start after mocks
-      }
-    } catch (e) {
-      console.error('Error reading localStorage', e);
-      this.initializeMockData();
-    }
-  }
-
-  private initializeMockData(): void {
-    // Generate some mock orders so dashboard doesn't start empty
-    const mockPizzas = [
-      { id: 'pepperoni', nombre: 'Pepperoni', descripcion: '', imagen: '', precioBase: 199 },
-      { id: 'hawaiana', nombre: 'Hawaiana', descripcion: '', imagen: '', precioBase: 199 },
-      { id: 'mexicana', nombre: 'Mexicana', descripcion: '', imagen: '', precioBase: 199 }
-    ];
-
-    const mockOrders: Order[] = [
-      {
-        id: 'mock-1',
-        orderNumber: '#0001',
-        status: 'Entregado',
-        time: '08:15 AM',
-        timestamp: Date.now() - 3600000 * 3,
-        total: 249,
-        items: [
-          {
-            id: 'item-1',
-            pizza: mockPizzas[0],
-            cantidad: 1,
-            precioUnitario: 249,
-            totalItem: 249,
-            size: { nombre: 'Grande', medida: '16"', precio: 199 },
-            masa: { nombre: 'Tradicional', precio: 0, categoria: 'masa' },
-            salsa: { nombre: 'Salsa de Tomate', precio: 0, categoria: 'salsa' },
-            queso: { nombre: 'Mozzarella', precio: 0, categoria: 'queso' },
-            extras: [{ nombre: 'Pepperoni', precio: 15, categoria: 'extra' }]
-          }
-        ]
+  private loadFromBackend(): void {
+    this.http.get<Order[]>(this.apiUrl).subscribe({
+      next: (data) => {
+        this.orders.set(data);
+        if (data.length > 0) {
+          // Ajustar el contador de pedidos al máximo número existente + 1
+          const maxNum = data.reduce((max, order) => {
+            const num = parseInt(order.orderNumber.replace('#', ''), 10);
+            return isNaN(num) ? max : Math.max(max, num);
+          }, 0);
+          this.orderCounter.set(maxNum + 1);
+        } else {
+          this.orderCounter.set(1);
+        }
       },
-      {
-        id: 'mock-2',
-        orderNumber: '#0002',
-        status: 'Listo',
-        time: '09:02 AM',
-        timestamp: Date.now() - 3600000 * 2,
-        total: 199,
-        items: [
-          {
-            id: 'item-2',
-            pizza: mockPizzas[1],
-            cantidad: 1,
-            precioUnitario: 199,
-            totalItem: 199,
-            size: { nombre: 'Grande', medida: '16"', precio: 199 },
-            masa: { nombre: 'Delgada', precio: 0, categoria: 'masa' },
-            salsa: { nombre: 'Salsa de Tomate', precio: 0, categoria: 'salsa' },
-            queso: { nombre: 'Mozzarella', precio: 0, categoria: 'queso' },
-            extras: []
-          }
-        ]
-      },
-      {
-        id: 'mock-3',
-        orderNumber: '#0003',
-        status: 'Preparando',
-        time: '09:10 AM',
-        timestamp: Date.now() - 1800000,
-        total: 219,
-        items: [
-          {
-            id: 'item-3',
-            pizza: mockPizzas[2],
-            cantidad: 1,
-            precioUnitario: 219,
-            totalItem: 219,
-            size: { nombre: 'Grande', medida: '16"', precio: 199 },
-            masa: { nombre: 'Gruesa', precio: 10, categoria: 'masa' },
-            salsa: { nombre: 'Salsa de Tomate', precio: 0, categoria: 'salsa' },
-            queso: { nombre: 'Cheddar', precio: 10, categoria: 'queso' },
-            extras: []
-          }
-        ]
-      },
-      {
-        id: 'mock-4',
-        orderNumber: '#0004',
-        status: 'Pendiente',
-        time: '09:12 AM',
-        timestamp: Date.now() - 300000,
-        total: 448,
-        items: [
-          {
-            id: 'item-4a',
-            pizza: mockPizzas[0],
-            cantidad: 1,
-            precioUnitario: 249,
-            totalItem: 249,
-            size: { nombre: 'Grande', medida: '16"', precio: 199 },
-            masa: { nombre: 'Tradicional', precio: 0, categoria: 'masa' },
-            salsa: { nombre: 'Salsa de Tomate', precio: 0, categoria: 'salsa' },
-            queso: { nombre: 'Mozzarella', precio: 0, categoria: 'queso' },
-            extras: [{ nombre: 'Pepperoni', precio: 15, categoria: 'extra' }]
-          },
-          {
-            id: 'item-4b',
-            pizza: mockPizzas[1],
-            cantidad: 1,
-            precioUnitario: 199,
-            totalItem: 199,
-            size: { nombre: 'Grande', medida: '16"', precio: 199 },
-            masa: { nombre: 'Tradicional', precio: 0, categoria: 'masa' },
-            salsa: { nombre: 'Salsa de Tomate', precio: 0, categoria: 'salsa' },
-            queso: { nombre: 'Mozzarella', precio: 0, categoria: 'queso' },
-            extras: []
-          }
-        ]
-      }
-    ];
-
-    this.orders.set(mockOrders);
-    this.saveToStorage();
+      error: (err) => console.error('Error al leer pedidos de la API', err)
+    });
   }
 }

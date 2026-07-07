@@ -1,15 +1,15 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Pizza, SizeOption, IngredientOption } from './cart.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-  private readonly STORAGE_PIZZAS = 'planet_pizza_catalog_pizzas';
-  private readonly STORAGE_SIZES = 'planet_pizza_catalog_sizes';
-  private readonly STORAGE_INGREDIENTS = 'planet_pizza_catalog_ingredients';
+  private http = inject(HttpClient);
+  private readonly apiUrl = 'http://localhost:3000/api';
 
-  // Default values
+  // Valores predeterminados en memoria (para resetear si el usuario lo desea)
   public readonly defaultPizzas: Pizza[] = [
     {
       id: 'pepperoni',
@@ -79,7 +79,6 @@ export class ProductService {
     }
   ];
 
-
   public readonly defaultSizes: SizeOption[] = [
     { nombre: 'Chica', medida: '8" - 4 rebanadas', precio: 99 },
     { nombre: 'Mediana', medida: '12" - 8 rebanadas', precio: 149 },
@@ -128,127 +127,135 @@ export class ProductService {
 
   // --- PIZZAS CRUD ---
   public addPizza(pizza: Omit<Pizza, 'id'>): void {
-    const id = pizza.nombre.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 5);
-    this.pizzas.update(items => [...items, { ...pizza, id }]);
-    this.savePizzas();
+    this.http.post<Pizza>(`${this.apiUrl}/pizzas`, pizza).subscribe({
+      next: (data) => {
+        this.pizzas.update(items => [...items, data]);
+      },
+      error: (err) => console.error('Error al agregar pizza', err)
+    });
   }
 
   public updatePizza(updated: Pizza): void {
-    this.pizzas.update(items => items.map(p => p.id === updated.id ? updated : p));
-    this.savePizzas();
+    this.http.put<Pizza>(`${this.apiUrl}/pizzas/${updated.id}`, updated).subscribe({
+      next: (data) => {
+        this.pizzas.update(items => items.map(p => p.id === updated.id ? { ...p, ...data } : p));
+      },
+      error: (err) => console.error('Error al actualizar pizza', err)
+    });
   }
 
   public deletePizza(id: string): void {
-    this.pizzas.update(items => items.filter(p => p.id !== id));
-    this.savePizzas();
+    this.http.delete(`${this.apiUrl}/pizzas/${id}`).subscribe({
+      next: () => {
+        this.pizzas.update(items => items.filter(p => p.id !== id));
+      },
+      error: (err) => console.error('Error al eliminar pizza', err)
+    });
   }
 
   // --- SIZES CRUD ---
   public addSize(size: SizeOption): void {
-    this.sizes.update(items => [...items, size]);
-    this.saveSizes();
+    this.http.post<SizeOption>(`${this.apiUrl}/catalog/sizes`, size).subscribe({
+      next: (data) => {
+        this.sizes.update(items => [...items, data]);
+      },
+      error: (err) => console.error('Error al agregar tamaño', err)
+    });
   }
 
   public updateSize(oldName: string, updated: SizeOption): void {
-    this.sizes.update(items => items.map(s => s.nombre === oldName ? updated : s));
-    this.saveSizes();
+    const size = this.sizes().find(s => s.nombre === oldName);
+    if (size && size.id) {
+      this.http.put<SizeOption>(`${this.apiUrl}/catalog/sizes/${size.id}`, updated).subscribe({
+        next: (data) => {
+          this.sizes.update(items => items.map(s => s.id === size.id ? { ...s, ...data } : s));
+        },
+        error: (err) => console.error('Error al actualizar tamaño', err)
+      });
+    }
   }
 
   public deleteSize(name: string): void {
-    this.sizes.update(items => items.filter(s => s.nombre !== name));
-    this.saveSizes();
+    const size = this.sizes().find(s => s.nombre === name);
+    if (size && size.id) {
+      this.http.delete(`${this.apiUrl}/catalog/sizes/${size.id}`).subscribe({
+        next: () => {
+          this.sizes.update(items => items.filter(s => s.id !== size.id));
+        },
+        error: (err) => console.error('Error al eliminar tamaño', err)
+      });
+    }
   }
 
   // --- INGREDIENTS CRUD ---
   public addIngredient(ing: IngredientOption): void {
-    this.ingredients.update(items => [...items, ing]);
-    this.saveIngredients();
+    this.http.post<IngredientOption>(`${this.apiUrl}/catalog/ingredients`, ing).subscribe({
+      next: (data) => {
+        this.ingredients.update(items => [...items, data]);
+      },
+      error: (err) => console.error('Error al agregar ingrediente', err)
+    });
   }
 
   public updateIngredient(oldName: string, updated: IngredientOption): void {
-    this.ingredients.update(items => items.map(i => i.nombre === oldName ? updated : i));
-    this.saveIngredients();
+    const ing = this.ingredients().find(i => i.nombre === oldName);
+    if (ing && ing.id) {
+      this.http.put<IngredientOption>(`${this.apiUrl}/catalog/ingredients/${ing.id}`, updated).subscribe({
+        next: (data) => {
+          this.ingredients.update(items => items.map(i => i.id === ing.id ? { ...i, ...data } : i));
+        },
+        error: (err) => console.error('Error al actualizar ingrediente', err)
+      });
+    }
   }
 
   public deleteIngredient(name: string): void {
-    this.ingredients.update(items => items.filter(i => i.nombre !== name));
-    this.saveIngredients();
+    const ing = this.ingredients().find(i => i.nombre === name);
+    if (ing && ing.id) {
+      this.http.delete(`${this.apiUrl}/catalog/ingredients/${ing.id}`).subscribe({
+        next: () => {
+          this.ingredients.update(items => items.filter(i => i.id !== ing.id));
+        },
+        error: (err) => console.error('Error al eliminar ingrediente', err)
+      });
+    }
   }
 
   // --- GLOBAL RESET ---
   public resetCatalog(): void {
-    this.pizzas.set([...this.defaultPizzas]);
-    this.sizes.set([...this.defaultSizes]);
-    this.ingredients.set([...this.defaultIngredients]);
-    this.saveAll();
-  }
+    // Eliminar todo
+    this.pizzas().forEach(p => this.deletePizza(p.id));
+    this.sizes().forEach(s => { if (s.nombre) this.deleteSize(s.nombre); });
+    this.ingredients().forEach(i => { if (i.nombre) this.deleteIngredient(i.nombre); });
 
-  // --- STORAGE HELPERS ---
-  private savePizzas(): void {
-    localStorage.setItem(this.STORAGE_PIZZAS, JSON.stringify(this.pizzas()));
-  }
-
-  private saveSizes(): void {
-    localStorage.setItem(this.STORAGE_SIZES, JSON.stringify(this.sizes()));
-  }
-
-  private saveIngredients(): void {
-    localStorage.setItem(this.STORAGE_INGREDIENTS, JSON.stringify(this.ingredients()));
-  }
-
-  private saveAll(): void {
-    this.savePizzas();
-    this.saveSizes();
-    this.saveIngredients();
+    // Recrear datos por defecto tras breves delays para evitar colisiones
+    setTimeout(() => {
+      this.defaultSizes.forEach(s => this.addSize(s));
+      this.defaultIngredients.forEach(i => this.addIngredient(i));
+      
+      setTimeout(() => {
+        this.defaultPizzas.forEach(p => {
+          const { id, ...pizzaData } = p;
+          this.addPizza(pizzaData);
+        });
+      }, 1000);
+    }, 1000);
   }
 
   private loadCatalog(): void {
-    try {
-      const storedPizzas = localStorage.getItem(this.STORAGE_PIZZAS);
-      const storedSizes = localStorage.getItem(this.STORAGE_SIZES);
-      const storedIngredients = localStorage.getItem(this.STORAGE_INGREDIENTS);
+    this.http.get<Pizza[]>(`${this.apiUrl}/pizzas`).subscribe({
+      next: (data) => this.pizzas.set(data),
+      error: (err) => console.error('Error al cargar pizzas', err)
+    });
 
-      if (storedPizzas) {
-        const parsed = JSON.parse(storedPizzas) as Pizza[];
-        // Upgrade database logic (if recipes default values are missing)
-        const upgraded = parsed.map(pizza => {
-          const matchDefault = this.defaultPizzas.find(d => d.id === pizza.id);
-          if (matchDefault && (!pizza.defaultMasa || !pizza.defaultSalsa || !pizza.defaultQueso)) {
-            return {
-              ...pizza,
-              defaultMasa: pizza.defaultMasa || matchDefault.defaultMasa,
-              defaultSalsa: pizza.defaultSalsa || matchDefault.defaultSalsa,
-              defaultQueso: pizza.defaultQueso || matchDefault.defaultQueso,
-              defaultExtras: pizza.defaultExtras || matchDefault.defaultExtras
-            };
-          }
-          return pizza;
-        });
-        this.pizzas.set(upgraded);
-      } else {
-        this.pizzas.set([...this.defaultPizzas]);
-        this.savePizzas();
-      }
+    this.http.get<SizeOption[]>(`${this.apiUrl}/catalog/sizes`).subscribe({
+      next: (data) => this.sizes.set(data),
+      error: (err) => console.error('Error al cargar tamaños', err)
+    });
 
-
-      if (storedSizes) {
-        this.sizes.set(JSON.parse(storedSizes));
-      } else {
-        this.sizes.set([...this.defaultSizes]);
-        this.saveSizes();
-      }
-
-      if (storedIngredients) {
-        this.ingredients.set(JSON.parse(storedIngredients));
-      } else {
-        this.ingredients.set([...this.defaultIngredients]);
-        this.saveIngredients();
-      }
-    } catch (e) {
-      console.error('Error loading catalog data', e);
-      this.pizzas.set([...this.defaultPizzas]);
-      this.sizes.set([...this.defaultSizes]);
-      this.ingredients.set([...this.defaultIngredients]);
-    }
+    this.http.get<IngredientOption[]>(`${this.apiUrl}/catalog/ingredients`).subscribe({
+      next: (data) => this.ingredients.set(data),
+      error: (err) => console.error('Error al cargar ingredientes', err)
+    });
   }
 }

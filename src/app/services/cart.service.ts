@@ -16,12 +16,14 @@ export interface Pizza {
 
 
 export interface SizeOption {
+  id?: string;
   nombre: string;
   medida: string;
   precio: number;
 }
 
 export interface IngredientOption {
+  id?: string;
   nombre: string;
   precio: number;
   categoria: 'masa' | 'salsa' | 'queso' | 'extra';
@@ -183,33 +185,36 @@ export class CartService {
     if (this.cart().length === 0) return;
     
     // Register the order via OrderService
-    const newOrder = this.orderService.addOrder(this.cart(), this.totalCart());
-    
-    const now = new Date();
-    const options: Intl.DateTimeFormatOptions = { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true
-    };
-    const formattedTime = now.toLocaleDateString('es-ES', options)
-      .replace(', ', ' a las ')
-      .replace(' p. m.', ' p.m.')
-      .replace(' a. m.', ' a.m.')
-      .replace(' p. m.', ' p.m.')
-      .replace(' a. m.', ' a.m.');
-    
-    this.lastConfirmedOrder.set(newOrder.items);
-    this.lastConfirmedOrderNumber.set(newOrder.orderNumber);
-    this.lastConfirmedOrderTime.set(formattedTime);
-    this.lastConfirmedOrderTotal.set(newOrder.total);
-    
-    // Reset cart and open order success modal
-    this.cart.set([]);
-    this.activeModal.set('success');
-    this.showCart.set(false);
+    this.orderService.addOrder(this.cart(), this.totalCart()).subscribe({
+      next: (newOrder) => {
+        const now = new Date();
+        const options: Intl.DateTimeFormatOptions = { 
+          day: 'numeric', 
+          month: 'long', 
+          year: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: true
+        };
+        const formattedTime = now.toLocaleDateString('es-ES', options)
+          .replace(', ', ' a las ')
+          .replace(' p. m.', ' p.m.')
+          .replace(' a. m.', ' a.m.')
+          .replace(' p. m.', ' p.m.')
+          .replace(' a. m.', ' a.m.');
+        
+        this.lastConfirmedOrder.set(newOrder.items);
+        this.lastConfirmedOrderNumber.set(newOrder.orderNumber);
+        this.lastConfirmedOrderTime.set(formattedTime);
+        this.lastConfirmedOrderTotal.set(newOrder.total);
+        
+        // Reset cart and open order success modal
+        this.cart.set([]);
+        this.activeModal.set('success');
+        this.showCart.set(false);
+      },
+      error: (err) => console.error('Error al registrar la orden en el servidor', err)
+    });
   }
 
   public resetFlow(): void {

@@ -1,6 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../../../services/product.service';
 import { Pizza, SizeOption, IngredientOption } from '../../../../services/cart.service';
 
@@ -13,9 +14,80 @@ import { Pizza, SizeOption, IngredientOption } from '../../../../services/cart.s
 })
 export class CatalogMgrComponent {
   public readonly productService = inject(ProductService);
+  private http = inject(HttpClient);
 
   // Sub-navigation tab: pizzas, ingredients (extras), options (masas, salsas, quesos), sizes
   public readonly activeSubTab = signal<'pizzas' | 'ingredients' | 'options' | 'sizes'>('pizzas');
+
+  // Search state and helper computed lists (Shopify style)
+  public readonly searchQuery = signal<string>('');
+
+  public onSearchChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchQuery.set(input.value.toLowerCase());
+  }
+
+  public readonly filteredPizzas = computed(() => {
+    const query = this.searchQuery();
+    const pizzas = this.productService.pizzas();
+    if (!query) return pizzas;
+    return pizzas.filter(p => 
+      p.nombre.toLowerCase().includes(query) || 
+      (p.descripcion && p.descripcion.toLowerCase().includes(query))
+    );
+  });
+
+  public readonly filteredIngredients = computed(() => {
+    const query = this.searchQuery();
+    const ingredients = this.productService.ingredients();
+    const extras = ingredients.filter(i => i.categoria === 'extra');
+    if (!query) return extras;
+    return extras.filter(i => i.nombre.toLowerCase().includes(query));
+  });
+
+  public readonly filteredOptions = computed(() => {
+    const query = this.searchQuery();
+    const ingredients = this.productService.ingredients();
+    const bases = ingredients.filter(i => i.categoria !== 'extra');
+    if (!query) return bases;
+    return bases.filter(i => i.nombre.toLowerCase().includes(query));
+  });
+
+  public readonly filteredSizes = computed(() => {
+    const query = this.searchQuery();
+    const sizes = this.productService.sizes();
+    if (!query) return sizes;
+    return sizes.filter(s => 
+      s.nombre.toLowerCase().includes(query) || 
+      s.medida.toLowerCase().includes(query)
+    );
+  });
+
+  // Image upload status
+  public readonly isUploadingImage = signal<boolean>(false);
+
+  public onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+
+      this.isUploadingImage.set(true);
+
+      this.http.post<{ imageUrl: string }>('http://localhost:3000/api/upload', formData).subscribe({
+        next: (res) => {
+          this.pizzaImagen = res.imageUrl;
+          this.isUploadingImage.set(false);
+        },
+        error: (err) => {
+          console.error('Error al subir la imagen', err);
+          alert('Hubo un error al subir la imagen. Asegúrate de tener la API backend encendida y configurada.');
+          this.isUploadingImage.set(false);
+        }
+      });
+    }
+  }
 
   // Form Editor control signals
   public readonly isEditingPizza = signal<boolean>(false);
@@ -51,6 +123,7 @@ export class CatalogMgrComponent {
 
   public setSubTab(tab: 'pizzas' | 'ingredients' | 'options' | 'sizes'): void {
     this.activeSubTab.set(tab);
+    this.searchQuery.set('');
   }
 
   // --- PIZZAS EDIT METHODS ---

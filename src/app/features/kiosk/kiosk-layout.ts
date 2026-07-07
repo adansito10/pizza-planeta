@@ -57,6 +57,26 @@ export class KioskLayout {
     this.activeTab.set(tab);
   }
 
+  // Clicks counter for secret admin access
+  private logoClicks = 0;
+  private logoClicksTimeout: any = null;
+
+  public onLogoClick(): void {
+    this.logoClicks++;
+    if (this.logoClicksTimeout) {
+      clearTimeout(this.logoClicksTimeout);
+    }
+
+    if (this.logoClicks >= 5) {
+      this.logoClicks = 0;
+      this.openLogin();
+    } else {
+      this.logoClicksTimeout = setTimeout(() => {
+        this.logoClicks = 0;
+      }, 2000); // Resetea el contador si pasan más de 2 segundos sin clics
+    }
+  }
+
   public openLogin(): void {
     this.username = '';
     this.password = '';

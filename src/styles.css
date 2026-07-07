@@ -30,19 +30,35 @@ body {
   background: #94a3b8;
 }
 
+/* Print-only helper hidden on screen */
+.print-only {
+  display: none !important;
+}
+
 /* Print-specific styles for physical receipt simulation (Bulletproof POS printer simulation) */
 @media print {
-  /* 1. Hide the entire main kiosk shell, tabs, other modals and screen buttons */
-  .no-print,
-  app-root > :not(app-confirmacion-orden),
-  app-seleccion-tamano,
-  app-seleccion-ingredientes,
-  button,
-  .absolute {
-    display: none !important;
+  /* Print-only helper shown on print */
+  .print-only {
+    display: block !important;
   }
 
-  /* 2. Format page background and colors for physical ink/paper */
+  /* Remove default browser print margin headers/footers */
+  @page {
+    margin: 0;
+  }
+
+  /* 1. Hide everything on the page during print */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2. Show only the printable ticket and its child components */
+  #printable-ticket,
+  #printable-ticket * {
+    visibility: visible !important;
+  }
+
+  /* 3. Reset document background and print defaults */
   html, body {
     background: #ffffff !important;
     color: #000000 !important;
@@ -54,34 +70,27 @@ body {
     print-color-adjust: exact !important;
   }
 
-  /* 3. Strip all modal wrappers (fixed backdrop, cards, shadow overlays) to make it static */
+  /* 4. Strip modal positioning and sizing wrappers during print */
   app-confirmacion-orden,
   app-confirmacion-orden * {
     position: static !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  app-confirmacion-orden > div,
+  app-confirmacion-orden > div > div {
+    position: static !important;
+    display: block !important;
     background: transparent !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
-    border: none !important;
-    width: 100% !important;
+    padding: 0 !important;
     margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Remove outer modal overlay styles */
-  app-confirmacion-orden > div {
-    background: transparent !important;
-    backdrop-filter: none !important;
-    position: static !important;
-    display: block !important;
-    padding: 0 !important;
-  }
-
-  app-confirmacion-orden > div > div {
-    background: transparent !important;
-    position: static !important;
-    display: block !important;
-    padding: 0 !important;
+    width: auto !important;
     max-width: 100% !important;
+    max-height: none !important; /* Fix cutoff bug */
+    overflow: visible !important;  /* Fix cutoff bug */
   }
 
   /* 4. Format the printable ticket container to standard 80mm width */

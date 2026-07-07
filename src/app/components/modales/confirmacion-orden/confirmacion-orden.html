@@ -28,10 +28,15 @@
         </div>
 
         <!-- Ticket Header (Show in print too) -->
-        <h2 class="text-2xl font-black text-slate-800 mb-1 text-center">¡Orden Confirmada!</h2>
+        <div class="text-center flex flex-col items-center mb-2 w-full border-b border-slate-100 pb-3">
+          <h1 class="text-xl font-black tracking-tight text-slate-800 leading-none">PLANET PIZZA</h1>
+          <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1 block">Kiosco de Autoservicio</span>
+        </div>
+
+        <h2 class="text-lg font-black text-slate-800 mb-1 text-center mt-2">¡Orden Confirmada!</h2>
         
         <div class="flex flex-col items-center my-3">
-          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-0.5">Número de Orden</span>
+          <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Número de Orden</span>
           <span class="text-5xl font-black text-slate-800 tracking-tight my-1">
             {{ cartService.lastConfirmedOrderNumber() }}
           </span>
@@ -50,7 +55,7 @@
             @for (item of cartService.lastConfirmedOrder(); track item.id; let idx = $index) {
               <div>
                 <div class="flex justify-between items-start text-sm font-bold text-slate-800">
-                  <span>{{ idx + 1 }}. {{ item.pizza.nombre }} ({{ item.size.nombre }})</span>
+                  <span>{{ idx + 1 }}. {{ item.cantidad }}x {{ item.pizza.nombre }} ({{ item.size.nombre }})</span>
                   <span>${{ item.totalItem }}</span>
                 </div>
                 <!-- Customization details -->
@@ -78,16 +83,31 @@
               ${{ cartService.lastConfirmedOrderTotal() }}
             </span>
           </div>
+
+          <!-- Payment Info Line -->
+          <div class="flex justify-between items-center text-xs font-bold text-slate-500 pt-2.5">
+            <span>Método de Pago:</span>
+            <span class="uppercase tracking-wider text-slate-700">Efectivo (Pendiente)</span>
+          </div>
         </div>
 
         <!-- Ticket Footer note (Show in print too) -->
-        <div class="w-full border-t border-slate-100 pt-4 mt-6 flex flex-col items-center">
+        <!-- Ticket Footer note (Show in print too) -->
+        <div class="w-full border-t border-slate-100 pt-4 mt-6 flex flex-col items-center gap-3">
+          
+          <!-- Nota de Pago (Solo Impresión en Blanco y Negro, sin emojis) -->
+          <div class="print-only text-[10px] text-center font-bold uppercase tracking-wide leading-normal border-t border-black pt-3.5 w-full">
+            PAGO EN EFECTIVO: Presenta este ticket o número en caja para pagar y comenzar la preparación.
+          </div>
+
           <div class="text-xs text-slate-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-pizza-orange shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-pizza-orange shrink-0 no-print">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Tiempo estimado: 15-20 min
           </div>
+
+
         </div>
       </div>
 

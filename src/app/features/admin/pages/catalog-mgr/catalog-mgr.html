@@ -121,49 +121,97 @@
     
     <!-- SUB-TAB: PIZZAS -->
     @if (activeSubTab() === 'pizzas') {
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm font-medium border-collapse">
-          <thead>
-            <tr class="border-b border-slate-100/10 text-[10px] uppercase font-bold tracking-widest text-slate-400">
-              <th class="py-3 px-4 w-20">Foto</th>
-              <th class="py-3 px-4">Nombre</th>
-              <th class="py-3 px-4">Descripción</th>
-              <th class="py-3 px-4 text-right">Precio Base</th>
-              <th class="py-3 px-4 text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100/5">
-            @for (pizza of productService.pizzas(); track pizza.id) {
-              <tr class="hover:bg-slate-50/5 transition-colors">
-                <td class="py-3 px-4">
-                  <div class="h-12 w-12 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-inner flex-shrink-0">
-                    <img [src]="pizza.imagen" [alt]="pizza.nombre" class="h-full w-full object-cover">
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-black">{{ pizza.nombre }}</td>
-                <td class="py-3 px-4 text-xs font-semibold text-slate-500 max-w-sm truncate">
-                  {{ pizza.descripcion || 'Sin descripción disponible.' }}
-                </td>
-                <td class="py-3 px-4 text-right font-black">${{ pizza.precioBase | number:'1.2-2' }}</td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button (click)="openEditPizzaForm(pizza)" class="h-8 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 font-bold text-xs transition-colors cursor-pointer">Editar</button>
-                    <button (click)="deletePizza(pizza.id)" class="h-8 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs transition-colors cursor-pointer">Eliminar</button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5" class="py-12 text-center text-slate-400 font-black text-xs">Sin pizzas registradas.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+      <!-- Barra de Búsqueda de Pizzas -->
+      <div class="mb-6">
+        <div class="relative w-full max-w-md">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+            </svg>
+          </span>
+          <input 
+            type="text" 
+            placeholder="Buscar pizza por nombre o descripción..." 
+            [value]="searchQuery()"
+            (input)="onSearchChange($event)"
+            class="w-full pl-11 pr-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+          >
+        </div>
+      </div>
+
+      <!-- Grid de Pizzas (Estilo Shopify) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (pizza of filteredPizzas(); track pizza.id) {
+          <div 
+            class="rounded-3xl border border-slate-200/40 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col group"
+            style="background-color: var(--admin-card-bg);"
+          >
+            <!-- Foto de Pizza -->
+            <div class="h-44 relative bg-slate-100/5 overflow-hidden">
+              <img [src]="pizza.imagen" [alt]="pizza.nombre" class="h-full w-full object-cover group-hover:scale-102 transition-transform duration-300">
+              <div class="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-xs font-black text-white border border-white/10 shadow-sm">
+                ${{ pizza.precioBase | number:'1.2-2' }}
+              </div>
+            </div>
+
+            <!-- Cuerpo de Tarjeta -->
+            <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+              <div class="space-y-1">
+                <h4 class="font-black text-md leading-tight text-white/90">{{ pizza.nombre }}</h4>
+                <p class="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
+                  {{ pizza.descripcion || 'Sin descripción disponible en el menú.' }}
+                </p>
+              </div>
+
+              <!-- Ingredientes / Bases Predeterminadas -->
+              <div class="text-[10px] uppercase font-bold text-slate-400 space-y-1 bg-slate-50/5 p-3 rounded-2xl border border-slate-200/5">
+                <div>Masa: <span class="text-slate-300">{{ pizza.defaultMasa || 'Tradicional' }}</span></div>
+                <div>Salsa: <span class="text-slate-300">{{ pizza.defaultSalsa || 'Salsa de Tomate' }}</span></div>
+                <div>Queso: <span class="text-slate-300">{{ pizza.defaultQueso || 'Mozzarella' }}</span></div>
+                @if (pizza.defaultExtras && pizza.defaultExtras.length > 0) {
+                  <div class="truncate">Extras: <span class="text-slate-300">{{ pizza.defaultExtras.join(', ') }}</span></div>
+                }
+              </div>
+
+              <!-- Botones de Acción -->
+              <div class="flex items-center gap-2 pt-2 border-t border-slate-100/10">
+                <button (click)="openEditPizzaForm(pizza)" class="flex-1 h-9 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 font-black text-[10px] uppercase tracking-wider transition-colors cursor-pointer">
+                  Editar
+                </button>
+                <button (click)="deletePizza(pizza.id)" class="flex-1 h-9 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black text-[10px] uppercase tracking-wider transition-colors cursor-pointer">
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-span-full py-16 text-center text-slate-400 font-black text-xs border border-dashed border-slate-200/50 rounded-3xl">
+            No se encontraron pizzas con los filtros actuales.
+          </div>
+        }
       </div>
     }
 
     <!-- SUB-TAB: INGREDIENTES EXTRAS -->
     @if (activeSubTab() === 'ingredients') {
+      <!-- Barra de Búsqueda de Ingredientes -->
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div class="relative w-full max-w-md">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+            </svg>
+          </span>
+          <input 
+            type="text" 
+            placeholder="Buscar ingrediente extra..." 
+            [value]="searchQuery()"
+            (input)="onSearchChange($event)"
+            class="w-full pl-11 pr-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+          >
+        </div>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm font-medium border-collapse">
           <thead>
@@ -175,7 +223,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100/5">
-            @for (ing of getIngredientsOfCategory('extra'); track ing.nombre) {
+            @for (ing of filteredIngredients(); track ing.nombre) {
               <tr class="hover:bg-slate-50/5 transition-colors">
                 <td class="py-4 px-4 font-black">{{ ing.nombre }}</td>
                 <td class="py-4 px-4">
@@ -191,7 +239,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="py-12 text-center text-slate-400 font-black text-xs">Sin ingredientes adicionales registrados.</td>
+                <td colspan="4" class="py-12 text-center text-slate-400 font-black text-xs">Sin ingredientes adicionales coincidentes.</td>
               </tr>
             }
           </tbody>
@@ -201,6 +249,24 @@
 
     <!-- SUB-TAB: BASES (MASAS, SALSAS Y QUESOS) -->
     @if (activeSubTab() === 'options') {
+      <!-- Barra de Búsqueda de Bases -->
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div class="relative w-full max-w-md">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+            </svg>
+          </span>
+          <input 
+            type="text" 
+            placeholder="Buscar masa, salsa o queso..." 
+            [value]="searchQuery()"
+            (input)="onSearchChange($event)"
+            class="w-full pl-11 pr-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+          >
+        </div>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm font-medium border-collapse">
           <thead>
@@ -212,36 +278,34 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100/5">
-            @for (ing of productService.ingredients(); track ing.nombre) {
-              @if (ing.categoria !== 'extra') {
-                <tr class="hover:bg-slate-50/5 transition-colors">
-                  <td class="py-4 px-4 font-black">{{ ing.nombre }}</td>
-                  <td class="py-4 px-4">
-                    <span 
-                      class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider"
-                      [ngClass]="{
-                        'bg-purple-500/10 text-purple-500': ing.categoria === 'masa',
-                        'bg-red-500/10 text-red-500': ing.categoria === 'salsa',
-                        'bg-yellow-500/10 text-yellow-500': ing.categoria === 'queso'
-                      }"
-                    >
-                      @if (ing.categoria === 'masa') { Tipo de Masa }
-                      @else if (ing.categoria === 'salsa') { Salsa Base }
-                      @else if (ing.categoria === 'queso') { Queso Base }
-                    </span>
-                  </td>
-                  <td class="py-4 px-4 text-right font-black">+${{ ing.precio | number:'1.2-2' }}</td>
-                  <td class="py-4 px-4 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                      <button (click)="openEditIngredientForm(ing)" class="h-8 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 font-bold text-xs transition-colors cursor-pointer">Editar</button>
-                      <button (click)="deleteIngredient(ing.nombre)" class="h-8 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs transition-colors cursor-pointer">Eliminar</button>
-                    </div>
-                  </td>
-                </tr>
-              }
+            @for (ing of filteredOptions(); track ing.nombre) {
+              <tr class="hover:bg-slate-50/5 transition-colors">
+                <td class="py-4 px-4 font-black">{{ ing.nombre }}</td>
+                <td class="py-4 px-4">
+                  <span 
+                    class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider"
+                    [ngClass]="{
+                      'bg-purple-500/10 text-purple-500': ing.categoria === 'masa',
+                      'bg-red-500/10 text-red-500': ing.categoria === 'salsa',
+                      'bg-yellow-500/10 text-yellow-500': ing.categoria === 'queso'
+                    }"
+                  >
+                    @if (ing.categoria === 'masa') { Tipo de Masa }
+                    @else if (ing.categoria === 'salsa') { Salsa Base }
+                    @else if (ing.categoria === 'queso') { Queso Base }
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-right font-black">+${{ ing.precio | number:'1.2-2' }}</td>
+                <td class="py-4 px-4 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button (click)="openEditIngredientForm(ing)" class="h-8 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 font-bold text-xs transition-colors cursor-pointer">Editar</button>
+                    <button (click)="deleteIngredient(ing.nombre)" class="h-8 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs transition-colors cursor-pointer">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="py-12 text-center text-slate-400 font-black text-xs">Sin bases de preparación registradas.</td>
+                <td colspan="4" class="py-12 text-center text-slate-400 font-black text-xs">Sin bases registradas con los filtros.</td>
               </tr>
             }
           </tbody>
@@ -251,6 +315,24 @@
 
     <!-- SUB-TAB: TAMAÑOS -->
     @if (activeSubTab() === 'sizes') {
+      <!-- Barra de Búsqueda de Tamaños -->
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div class="relative w-full max-w-md">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+            </svg>
+          </span>
+          <input 
+            type="text" 
+            placeholder="Buscar tamaño..." 
+            [value]="searchQuery()"
+            (input)="onSearchChange($event)"
+            class="w-full pl-11 pr-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+          >
+        </div>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm font-medium border-collapse">
           <thead>
@@ -262,7 +344,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100/5">
-            @for (size of productService.sizes(); track size.nombre) {
+            @for (size of filteredSizes(); track size.nombre) {
               <tr class="hover:bg-slate-50/5 transition-colors">
                 <td class="py-4 px-4 font-black">{{ size.nombre }}</td>
                 <td class="py-4 px-4 text-xs font-semibold text-slate-500">{{ size.medida }}</td>
@@ -276,7 +358,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="py-12 text-center text-slate-400 font-black text-xs">Sin tamaños registrados.</td>
+                <td colspan="4" class="py-12 text-center text-slate-400 font-black text-xs">Sin tamaños registrados con estos filtros.</td>
               </tr>
             }
           </tbody>
@@ -308,12 +390,71 @@
             <input type="number" name="precio" [(ngModel)]="pizzaPrecio" min="0" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
           </div>
           <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">URL de la Imagen</label>
+            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Subir Imagen a Cloudinary</label>
+            <div class="flex items-center gap-3">
+              <input type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden" #fileInput>
+              <button type="button" (click)="fileInput.click()" [disabled]="isUploadingImage()" class="px-4 py-3 rounded-2xl border border-dashed border-slate-200/40 text-xs font-bold hover:bg-slate-50/10 cursor-pointer flex items-center gap-2 text-slate-300">
+                @if (isUploadingImage()) {
+                  <svg class="animate-spin h-3.5 w-3.5 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Subiendo...
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                  </svg>
+                  Seleccionar Imagen
+                }
+              </button>
+              @if (pizzaImagen) {
+                <span class="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+                  ✓ Listo
+                </span>
+              }
+            </div>
+            <!-- Vista Previa de la Imagen Subida -->
+            @if (pizzaImagen && !isUploadingImage()) {
+              <div class="mt-2.5 h-24 w-40 rounded-2xl overflow-hidden border border-slate-200/20 shadow-sm animate-in fade-in duration-200">
+                <img [src]="pizzaImagen" alt="Vista previa de la pizza" class="h-full w-full object-cover">
+              </div>
+            }
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">O URL de la Imagen (Manual)</label>
             <input type="text" name="imagen" [(ngModel)]="pizzaImagen" placeholder="Ej. https://images.unsplash.com/..." class="w-full px-4 py-3 rounded-2xl border text-sm font-semibold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20">
           </div>
           <div class="space-y-1">
             <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Descripción</label>
             <textarea name="descripcion" [(ngModel)]="pizzaDescripcion" rows="3" placeholder="Ingredientes y descripción..." class="w-full px-4 py-3 rounded-2xl border text-sm font-semibold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20"></textarea>
+          </div>
+
+          <!-- Bases por Defecto (Masa, Salsa, Queso) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-2xl bg-slate-50/5 border border-slate-100/10">
+            <div class="space-y-1">
+              <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Masa por Defecto</label>
+              <select name="defaultMasa" [(ngModel)]="pizzaDefaultMasa" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+                @for (masa of getIngredientsOfCategory('masa'); track masa.nombre) {
+                  <option [value]="masa.nombre">{{ masa.nombre }}</option>
+                }
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Salsa por Defecto</label>
+              <select name="defaultSalsa" [(ngModel)]="pizzaDefaultSalsa" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+                @for (salsa of getIngredientsOfCategory('salsa'); track salsa.nombre) {
+                  <option [value]="salsa.nombre">{{ salsa.nombre }}</option>
+                }
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Queso por Defecto</label>
+              <select name="defaultQueso" [(ngModel)]="pizzaDefaultQueso" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+                @for (queso of getIngredientsOfCategory('queso'); track queso.nombre) {
+                  <option [value]="queso.nombre">{{ queso.nombre }}</option>
+                }
+              </select>
+            </div>
           </div>
 
           <!-- Ingredientes por Defecto -->
@@ -357,30 +498,57 @@
       <div class="w-full max-w-lg rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" style="background-color: var(--admin-card-bg); border-color: var(--admin-card-border);">
         <div class="p-6 border-b border-slate-100/10 flex items-center justify-between bg-black/5">
           <h3 class="text-lg font-black uppercase tracking-tight" style="color: var(--admin-primary);">
-            {{ selectedIngredient() ? 'Editar Ingrediente/Opción' : 'Añadir Ingrediente/Opción' }}
+            @if (selectedIngredient()) {
+              Editar
+            } @else {
+              Añadir
+            }
+            @if (ingredientCategoria === 'masa') { Tipo de Masa }
+            @else if (ingredientCategoria === 'salsa') { Salsa Base }
+            @else if (ingredientCategoria === 'queso') { Queso Base }
+            @else { Ingrediente Extra (Topping) }
           </h3>
           <button (click)="isEditingIngredient.set(false)" class="h-8 w-8 rounded-full bg-slate-100/10 hover:bg-slate-100/20 flex items-center justify-center text-slate-400 hover:text-slate-100 cursor-pointer">&times;</button>
         </div>
         <form (ngSubmit)="saveIngredient()" class="flex-1 overflow-y-auto p-6 space-y-4">
           <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Nombre</label>
-            <input type="text" name="nombre" [(ngModel)]="ingredientNombre" placeholder="Ej. Salsa BBQ, Tocino picado" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
+            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">
+              @if (ingredientCategoria === 'masa') { Nombre de la Masa }
+              @else if (ingredientCategoria === 'salsa') { Nombre de la Salsa }
+              @else if (ingredientCategoria === 'queso') { Nombre del Queso }
+              @else { Nombre del Ingrediente (Topping) }
+            </label>
+            <input 
+              type="text" 
+              name="nombre" 
+              [(ngModel)]="ingredientNombre" 
+              [placeholder]="
+                ingredientCategoria === 'masa' ? 'Ej. Masa Delgada, Masa Integral' :
+                ingredientCategoria === 'salsa' ? 'Ej. Salsa BBQ, Salsa Alfredo' :
+                ingredientCategoria === 'queso' ? 'Ej. Queso Cheddar, Mezcla de 3 Quesos' :
+                'Ej. Pepperoni, Champiñones, Tocino'
+              " 
+              class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" 
+              required
+            >
+          </div>
+          <!-- Categoría / Tipo (Campo de solo lectura para evitar confusiones) -->
+          <div class="space-y-1">
+            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Tipo de Elemento</label>
+            <div class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 text-slate-400 select-none">
+              @if (ingredientCategoria === 'masa') { Masa (Base) }
+              @else if (ingredientCategoria === 'salsa') { Salsa (Base) }
+              @else if (ingredientCategoria === 'queso') { Queso (Base) }
+              @else { Ingrediente Extra (Topping) }
+            </div>
           </div>
           <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Categoría</label>
-            <select name="categoria" [(ngModel)]="ingredientCategoria" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" [disabled]="selectedIngredient() !== null">
-              <option value="masa">Tipo de Masa</option>
-              <option value="salsa">Salsa Base</option>
-              <option value="queso">Queso Base</option>
-              <option value="extra">Ingrediente Extra (Topping)</option>
-            </select>
-          </div>
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Precio Adicional ($)</label>
+            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Costo Adicional para el Cliente ($)</label>
             <input type="number" name="precio" [(ngModel)]="ingredientPrecio" min="0" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
+            <span class="text-[10px] text-slate-400 block mt-1 font-semibold">Ingresa 0 si no tiene costo extra (ej. masas y salsas básicas).</span>
           </div>
           <div class="pt-4 border-t border-slate-100/10 flex gap-3 bg-black/5 -mx-6 -mb-6 p-6">
-            <button type="submit" class="flex-1 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow cursor-pointer" style="background-color: var(--admin-primary);">Guardar</button>
+            <button type="submit" class="flex-1 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow cursor-pointer" style="background-color: var(--admin-primary);">Guardar Elemento</button>
             <button type="button" (click)="isEditingIngredient.set(false)" class="bg-slate-100/10 hover:bg-slate-100/20 text-slate-500 px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer">Cancelar</button>
           </div>
         </form>
@@ -403,19 +571,19 @@
         <form (ngSubmit)="saveSize()" class="flex-1 overflow-y-auto p-6 space-y-4">
           <div class="space-y-1">
             <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Nombre del Tamaño</label>
-            <input type="text" name="nombre" [(ngModel)]="sizeNombre" placeholder="Ej. Familiar, Jumbo" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
+            <input type="text" name="nombre" [(ngModel)]="sizeNombre" placeholder="Ej. Chica, Mediana, Grande, Familiar, Jumbo" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
           </div>
           <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Medida / Porciones</label>
-            <input type="text" name="medida" [(ngModel)]="sizeMedida" placeholder='Ej. 18" - 16 rebanadas' class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
-
+            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Medida / Porciones y Diámetro</label>
+            <input type="text" name="medida" [(ngModel)]="sizeMedida" placeholder='Ej. 12" - 8 rebanadas' class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
+            <span class="text-[10px] text-slate-400 block mt-1 font-semibold">Especifica el diámetro en pulgadas y la cantidad de rebanadas estimadas.</span>
           </div>
           <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Precio Base ($)</label>
+            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Precio Base del Tamaño ($)</label>
             <input type="number" name="precio" [(ngModel)]="sizePrecio" min="0" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
           </div>
           <div class="pt-4 border-t border-slate-100/10 flex gap-3 bg-black/5 -mx-6 -mb-6 p-6">
-            <button type="submit" class="flex-1 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow cursor-pointer" style="background-color: var(--admin-primary);">Guardar</button>
+            <button type="submit" class="flex-1 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow cursor-pointer" style="background-color: var(--admin-primary);">Guardar Tamaño</button>
             <button type="button" (click)="isEditingSize.set(false)" class="bg-slate-100/10 hover:bg-slate-100/20 text-slate-500 px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer">Cancelar</button>
           </div>
         </form>
