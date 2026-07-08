@@ -10,7 +10,6 @@ export const authGuard: CanActivateFn = () => {
     return true;
   }
 
-  // Not logged in -> redirect to kiosk page where they see the menu
   return router.createUrlTree(['/kiosk']);
 
 };

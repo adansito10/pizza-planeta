@@ -6,7 +6,6 @@ import { Injectable, signal } from '@angular/core';
 export class AuthService {
   private readonly AUTH_KEY = 'planet_pizza_admin_session';
 
-  // State signal for authentication status
   public readonly isLoggedIn = signal<boolean>(false);
 
   constructor() {
