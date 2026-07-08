@@ -82,13 +82,25 @@ export class OrderService {
   }
 
   public updateOrderStatus(orderId: string, status: OrderStatus): void {
+    const previousOrders = this.orders();
+    
+    // Optimistic UI update
+    this.orders.update(current => current.map(order => 
+      order.id === orderId ? { ...order, status } : order
+    ));
+
     this.http.put<Order>(`${this.apiUrl}/${orderId}/status`, { status }).subscribe({
       next: (updatedOrder) => {
+        // Sync with exact status from server
         this.orders.update(current => current.map(order => 
           order.id === orderId ? { ...order, status: updatedOrder.status } : order
         ));
       },
-      error: (err) => console.error('Error al actualizar el estado del pedido', err)
+      error: (err) => {
+        console.error('Error al actualizar el estado del pedido', err);
+        // Rollback on error
+        this.orders.set(previousOrders);
+      }
     });
   }
 

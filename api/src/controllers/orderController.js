@@ -41,9 +41,20 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'La orden debe contener al menos un producto' });
     }
 
-    // Generación de número de orden consecutivo
-    const count = await Order.count();
-    const orderNumber = '#' + String(count + 1).padStart(4, '0');
+    // Generación de número de orden consecutivo buscando el máximo existente
+    const lastOrder = await Order.findOne({
+      order: [['timestamp', 'DESC']],
+    });
+
+    let nextNum = 1;
+    if (lastOrder) {
+      const lastNumStr = lastOrder.orderNumber.replace('#', '');
+      const lastNum = parseInt(lastNumStr, 10);
+      if (!isNaN(lastNum)) {
+        nextNum = lastNum + 1;
+      }
+    }
+    const orderNumber = '#' + String(nextNum).padStart(4, '0');
 
     // Hora formateada
     const now = new Date();
