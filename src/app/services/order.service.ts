@@ -9,11 +9,15 @@ export type OrderStatus = 'Pendiente' | 'Preparando' | 'Listo' | 'Entregado';
 export interface Order {
   id: string;
   orderNumber: string;
+  clienteNombre?: string;
   items: CartItem[];
   total: number;
   status: OrderStatus;
   time: string;
   timestamp: number;
+  pickupCode?: string;
+  userId?: string | null;
+  paymentStatus?: string;
 }
 
 @Injectable({
@@ -70,9 +74,17 @@ export class OrderService {
       .slice(0, 3);
   });
 
-  // Actions
-  public addOrder(items: CartItem[], total: number): Observable<Order> {
-    const payload = { items, total };
+  public confirmOrderPayment(orderId: string): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${orderId}/confirm-payment`, {}).pipe(
+      tap((updatedOrder) => {
+        this.orders.update(current => current.map(order => 
+          order.id === orderId ? updatedOrder : order
+        ));
+      })
+    );
+  }
+  public addOrder(items: CartItem[], total: number, clienteNombre: string = '', userId: string | null = null): Observable<Order> {
+    const payload = { items, total, clienteNombre, userId };
     return this.http.post<Order>(this.apiUrl, payload).pipe(
       tap((newOrder) => {
         this.orders.update(current => [newOrder, ...current]);
@@ -121,6 +133,10 @@ export class OrderService {
       },
       error: (err) => console.error('Error al limpiar los pedidos', err)
     });
+  }
+
+  public getOrderById(orderId: string): Observable<Order> {
+    return this.http.get<Order>(`${this.apiUrl}/${orderId}`);
   }
 
   private loadFromBackend(): void {

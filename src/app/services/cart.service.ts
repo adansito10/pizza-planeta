@@ -1,6 +1,8 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { OrderService } from './order.service';
 import { ProductService } from './product.service';
+import { AuthService } from './auth.service';
 
 export interface Pizza {
   id: string;
@@ -12,6 +14,17 @@ export interface Pizza {
   defaultSalsa?: string;
   defaultQueso?: string;
   defaultExtras?: string[];
+}
+
+export interface Promo {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  imagen: string;
+  pizzaBase: Pizza;
+  badge: string;
+  pizzaBaseId?: string;
 }
 
 
@@ -48,6 +61,8 @@ export interface CartItem {
 export class CartService {
   private readonly orderService = inject(OrderService);
   private readonly productService = inject(ProductService);
+  private readonly authService = inject(AuthService);
+  private readonly http = inject(HttpClient);
 
   
   // Cart state signals
@@ -55,8 +70,9 @@ export class CartService {
   public readonly orderCounter = signal<number>(1);
   
   // Navigation & Flow state signals
-  public readonly activeModal = signal<'none' | 'size' | 'ingredients' | 'success'>('none');
+  public readonly activeModal = signal<string>('none');
   public readonly customizingPizza = signal<Pizza | null>(null);
+  public readonly customizingPromo = signal<Promo | null>(null);
   public readonly selectedSize = signal<SizeOption | null>(null);
   public readonly showCart = signal<boolean>(false);
   
@@ -65,6 +81,12 @@ export class CartService {
   public readonly lastConfirmedOrderNumber = signal<string>('');
   public readonly lastConfirmedOrderTime = signal<string>('');
   public readonly lastConfirmedOrderTotal = signal<number>(0);
+  public readonly lastConfirmedOrderName = signal<string>('');
+  public readonly lastConfirmedOrderPickupCode = signal<string>('');
+
+  // Payment states
+  public readonly tempCustomerName = signal<string>('');
+  public readonly isProcessingPayment = signal<boolean>(false);
 
   // Getters reading from ProductService dynamically
   public get SIZES(): SizeOption[] {
@@ -99,9 +121,33 @@ export class CartService {
 
   // Flow control methods
   public openSizeModal(pizza: Pizza): void {
+    this.customizingPromo.set(null);
     this.customizingPizza.set(pizza);
     this.selectedSize.set(null);
     this.activeModal.set('size');
+  }
+
+  public openPromoModal(promo: Promo): void {
+    this.customizingPromo.set(promo);
+    this.customizingPizza.set(promo.pizzaBase);
+
+    // Auto-detect the size from the promo title/description
+    let sizeName = 'Mediana'; // default fallback
+    const lowerNombre = promo.nombre.toLowerCase();
+    const lowerDesc = promo.descripcion.toLowerCase();
+    if (lowerNombre.includes('familiar') || lowerNombre.includes('grande') || lowerDesc.includes('familiar') || lowerDesc.includes('grande')) {
+      sizeName = 'Familiar';
+    } else if (lowerNombre.includes('personal') || lowerNombre.includes('chica') || lowerDesc.includes('personal') || lowerDesc.includes('chica')) {
+      sizeName = 'Personal';
+    } else if (lowerNombre.includes('mediana') || lowerDesc.includes('mediana')) {
+      sizeName = 'Mediana';
+    }
+
+    const matchedSize = this.SIZES.find(s => s.nombre.toLowerCase() === sizeName.toLowerCase()) || this.SIZES[0];
+    this.selectedSize.set(matchedSize);
+    
+    // Bypass size selection, go straight to ingredients customization
+    this.activeModal.set('ingredients');
   }
 
   public selectSize(size: SizeOption): void {
@@ -112,6 +158,7 @@ export class CartService {
   public closeModal(): void {
     this.activeModal.set('none');
     this.customizingPizza.set(null);
+    this.customizingPromo.set(null);
     this.selectedSize.set(null);
   }
 
@@ -181,39 +228,68 @@ export class CartService {
     this.cart.set(this.cart().filter(item => item.id !== itemId));
   }
 
-  public confirmOrder(): void {
+  public confirmOrder(clienteNombre: string, metodoPago: 'Efectivo' | 'MercadoPago'): void {
     if (this.cart().length === 0) return;
     
+    this.isProcessingPayment.set(true);
+    
+    const customer = this.authService.customerUser();
+    const userId = customer ? customer.id : null;
+    
     // Register the order via OrderService
-    this.orderService.addOrder(this.cart(), this.totalCart()).subscribe({
+    this.orderService.addOrder(this.cart(), this.totalCart(), clienteNombre, userId).subscribe({
       next: (newOrder) => {
-        const now = new Date();
-        const options: Intl.DateTimeFormatOptions = { 
-          day: 'numeric', 
-          month: 'long', 
-          year: 'numeric', 
-          hour: '2-digit', 
-          minute: '2-digit',
-          hour12: true
-        };
-        const formattedTime = now.toLocaleDateString('es-ES', options)
-          .replace(', ', ' a las ')
-          .replace(' p. m.', ' p.m.')
-          .replace(' a. m.', ' a.m.')
-          .replace(' p. m.', ' p.m.')
-          .replace(' a. m.', ' a.m.');
-        
-        this.lastConfirmedOrder.set(newOrder.items);
-        this.lastConfirmedOrderNumber.set(newOrder.orderNumber);
-        this.lastConfirmedOrderTime.set(formattedTime);
-        this.lastConfirmedOrderTotal.set(newOrder.total);
-        
-        // Reset cart and open order success modal
-        this.cart.set([]);
-        this.activeModal.set('success');
-        this.showCart.set(false);
+        if (metodoPago === 'Efectivo') {
+          const now = new Date();
+          const options: Intl.DateTimeFormatOptions = { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true
+          };
+          const formattedTime = now.toLocaleDateString('es-ES', options)
+            .replace(', ', ' a las ')
+            .replace(' p. m.', ' p.m.')
+            .replace(' a. m.', ' a.m.')
+            .replace(' p. m.', ' p.m.')
+            .replace(' a. m.', ' a.m.');
+          
+          this.lastConfirmedOrder.set(newOrder.items);
+          this.lastConfirmedOrderNumber.set(newOrder.orderNumber);
+          this.lastConfirmedOrderTime.set(formattedTime);
+          this.lastConfirmedOrderTotal.set(newOrder.total);
+          this.lastConfirmedOrderName.set(newOrder.clienteNombre || clienteNombre);
+          this.lastConfirmedOrderPickupCode.set(newOrder.pickupCode || '');
+          
+          // Reset cart and open order success modal
+          this.cart.set([]);
+          this.activeModal.set('success');
+          this.showCart.set(false);
+          this.isProcessingPayment.set(false);
+        } else {
+          // Mercado Pago payment option selected
+          this.http.post<{ initPoint: string }>('http://localhost:3000/api/payments/create-preference', { orderId: newOrder.id }).subscribe({
+            next: (paymentRes) => {
+              this.cart.set([]); // Clear cart
+              this.closeModal();
+              this.isProcessingPayment.set(false);
+              // Redirect customer to Mercado Pago checkout
+              window.location.href = paymentRes.initPoint;
+            },
+            error: (err) => {
+              console.error('Error al generar preferencia de Mercado Pago', err);
+              alert('Hubo un error al iniciar Mercado Pago. Por favor realiza tu pago en caja (Efectivo).');
+              this.isProcessingPayment.set(false);
+            }
+          });
+        }
       },
-      error: (err) => console.error('Error al registrar la orden en el servidor', err)
+      error: (err) => {
+        console.error('Error al registrar la orden en el servidor', err);
+        this.isProcessingPayment.set(false);
+      }
     });
   }
 

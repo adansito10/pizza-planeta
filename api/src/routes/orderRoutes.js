@@ -6,6 +6,7 @@ import {
   updateOrderStatus,
   deleteOrder,
   clearAllOrders,
+  confirmOrderPayment,
 } from '../controllers/orderController.js';
 
 const router = express.Router();
@@ -23,5 +24,8 @@ router.route('/:id')
 
 router.route('/:id/status')
   .put(updateOrderStatus);
+
+router.route('/:id/confirm-payment')
+  .put(confirmOrderPayment);
 
 export default router;

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../../../services/product.service';
-import { Pizza, SizeOption, IngredientOption } from '../../../../services/cart.service';
+import { Pizza, SizeOption, IngredientOption, Promo } from '../../../../services/cart.service';
 
 @Component({
   selector: 'app-catalog-mgr',
@@ -16,8 +16,8 @@ export class CatalogMgrComponent {
   public readonly productService = inject(ProductService);
   private http = inject(HttpClient);
 
-  // Sub-navigation tab: pizzas, ingredients (extras), options (masas, salsas, quesos), sizes
-  public readonly activeSubTab = signal<'pizzas' | 'ingredients' | 'options' | 'sizes'>('pizzas');
+  // Sub-navigation tab: pizzas, ingredients (extras), options (masas, salsas, quesos), sizes, promos
+  public readonly activeSubTab = signal<'pizzas' | 'ingredients' | 'options' | 'sizes' | 'promos'>('pizzas');
 
   // Search state and helper computed lists (Shopify style)
   public readonly searchQuery = signal<string>('');
@@ -63,6 +63,17 @@ export class CatalogMgrComponent {
     );
   });
 
+  public readonly filteredPromos = computed(() => {
+    const query = this.searchQuery();
+    const promos = this.productService.promos();
+    if (!query) return promos;
+    return promos.filter(p => 
+      p.nombre.toLowerCase().includes(query) || 
+      (p.descripcion && p.descripcion.toLowerCase().includes(query)) ||
+      (p.badge && p.badge.toLowerCase().includes(query))
+    );
+  });
+
   // Image upload status
   public readonly isUploadingImage = signal<boolean>(false);
 
@@ -77,7 +88,11 @@ export class CatalogMgrComponent {
 
       this.http.post<{ imageUrl: string }>('http://localhost:3000/api/upload', formData).subscribe({
         next: (res) => {
-          this.pizzaImagen = res.imageUrl;
+          if (this.activeSubTab() === 'promos') {
+            this.promoImagen = res.imageUrl;
+          } else {
+            this.pizzaImagen = res.imageUrl;
+          }
           this.isUploadingImage.set(false);
         },
         error: (err) => {
@@ -101,6 +116,9 @@ export class CatalogMgrComponent {
   public readonly selectedSize = signal<SizeOption | null>(null);
   private sizeOldName = '';
 
+  public readonly isEditingPromo = signal<boolean>(false);
+  public readonly selectedPromo = signal<Promo | null>(null);
+
   // Form pizza models
   public pizzaNombre = '';
   public pizzaPrecio = 199;
@@ -121,7 +139,15 @@ export class CatalogMgrComponent {
   public sizeMedida = '';
   public sizePrecio = 99;
 
-  public setSubTab(tab: 'pizzas' | 'ingredients' | 'options' | 'sizes'): void {
+  // Form promo models
+  public promoNombre = '';
+  public promoPrecio = 199;
+  public promoDescripcion = '';
+  public promoImagen = '';
+  public promoBadge = '';
+  public promoPizzaBaseId = '';
+
+  public setSubTab(tab: 'pizzas' | 'ingredients' | 'options' | 'sizes' | 'promos'): void {
     this.activeSubTab.set(tab);
     this.searchQuery.set('');
   }
@@ -295,6 +321,65 @@ export class CatalogMgrComponent {
   public deleteSize(name: string): void {
     if (confirm(`¿Deseas eliminar el tamaño "${name}"?`)) {
       this.productService.deleteSize(name);
+    }
+  }
+
+  // --- PROMOS EDIT METHODS ---
+  public openNewPromoForm(): void {
+    this.selectedPromo.set(null);
+    this.promoNombre = '';
+    this.promoPrecio = 199;
+    this.promoDescripcion = '';
+    this.promoImagen = '';
+    this.promoBadge = '';
+    
+    const pizzas = this.productService.pizzas();
+    this.promoPizzaBaseId = pizzas.length > 0 ? pizzas[0].id : '';
+    this.isEditingPromo.set(true);
+  }
+
+  public openEditPromoForm(promo: Promo): void {
+    this.selectedPromo.set(promo);
+    this.promoNombre = promo.nombre;
+    this.promoPrecio = promo.precio;
+    this.promoDescripcion = promo.descripcion;
+    this.promoImagen = promo.imagen;
+    this.promoBadge = promo.badge;
+    this.promoPizzaBaseId = promo.pizzaBase ? promo.pizzaBase.id : (promo.pizzaBaseId || '');
+    this.isEditingPromo.set(true);
+  }
+
+  public savePromo(): void {
+    if (!this.promoNombre.trim()) {
+      alert('Por favor introduce el nombre de la promoción.');
+      return;
+    }
+    if (!this.promoPizzaBaseId) {
+      alert('Por favor selecciona una pizza base para esta promoción.');
+      return;
+    }
+
+    const promoData = {
+      nombre: this.promoNombre.trim(),
+      precio: this.promoPrecio,
+      descripcion: this.promoDescripcion.trim(),
+      imagen: this.promoImagen.trim() || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&auto=format&fit=crop&q=80',
+      badge: this.promoBadge.trim(),
+      pizzaBaseId: this.promoPizzaBaseId
+    };
+
+    const currentPromo = this.selectedPromo();
+    if (currentPromo) {
+      this.productService.updatePromo({ ...currentPromo, ...promoData });
+    } else {
+      this.productService.addPromo(promoData);
+    }
+    this.isEditingPromo.set(false);
+  }
+
+  public deletePromo(id: string): void {
+    if (confirm('¿Estás seguro de que deseas eliminar esta promoción?')) {
+      this.productService.deletePromo(id);
     }
   }
 

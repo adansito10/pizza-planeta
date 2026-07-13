@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { KioskLayout } from './features/kiosk/kiosk-layout';
+import { SuccessComponent } from './features/success/success';
+import { CustomerAuthComponent } from './features/customer-auth/customer-auth';
 import { AdminLayout } from './features/admin/pages/admin-layout/admin-layout';
 import { DashboardComponent } from './features/admin/pages/dashboard/dashboard';
 import { OrdersComponent } from './features/admin/pages/orders/orders';
@@ -11,6 +13,14 @@ export const routes: Routes = [
   {
     path: 'kiosk',
     component: KioskLayout
+  },
+  {
+    path: 'login',
+    component: CustomerAuthComponent
+  },
+  {
+    path: 'success',
+    component: SuccessComponent
   },
 
   {

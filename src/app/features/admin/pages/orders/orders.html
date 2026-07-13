@@ -1,16 +1,38 @@
-<div class="h-full flex flex-col space-y-6 no-print animate-in fade-in duration-300">
+<div class="h-full flex flex-col space-y-6 no-print">
   
   <!-- Page Header -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <h2 class="text-2xl font-black uppercase tracking-tight">Cola de Producción (Kanban)</h2>
-      <p class="text-xs text-slate-500 font-medium">Arrastra o avanza los pedidos conforme se preparan en cocina.</p>
+      <h2 class="text-xl font-bold text-slate-900">Cola de Producción</h2>
+      <p class="text-sm text-slate-500">Administra los pedidos conforme se preparan en cocina.</p>
+    </div>
+    
+    <!-- View Switcher Toggle (Cajero vs Cocina) -->
+    <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 self-start md:self-center">
+      <button 
+        (click)="setViewMode('cajero')"
+        class="px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+        [class]="viewMode() === 'cajero' 
+          ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50' 
+          : 'text-slate-500 hover:text-slate-800 bg-transparent border border-transparent'"
+      >
+        Cajero / Caja
+      </button>
+      <button 
+        (click)="setViewMode('cocina')"
+        class="px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+        [class]="viewMode() === 'cocina' 
+          ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50' 
+          : 'text-slate-500 hover:text-slate-800 bg-transparent border border-transparent'"
+      >
+        Cocina / Horno
+      </button>
     </div>
     
     <!-- Quick action to clear history -->
     <button 
       (click)="orderService.clearAllOrders()"
-      class="bg-red-500/10 hover:bg-red-500/20 text-red-600 text-xs px-4 py-2.5 rounded-2xl font-bold transition-all duration-150 active:scale-95 cursor-pointer flex items-center gap-1.5"
+      class="bg-red-50 hover:bg-red-100 text-red-600 text-xs px-4 py-2 rounded-lg font-semibold border border-red-200 transition-colors cursor-pointer flex items-center gap-1.5 self-start md:self-auto"
     >
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
         <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -19,95 +41,188 @@
     </button>
   </div>
 
+  <!-- Search Input Bar -->
+  <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+    <div class="relative w-full md:max-w-md">
+      <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
+        </svg>
+      </span>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        placeholder="Buscar por código (PP-XXXX) o nombre..."
+        class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-9 pr-4 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:bg-white transition-colors"
+      />
+    </div>
+    <div class="flex items-center gap-2 text-xs font-semibold text-slate-450 text-slate-500 uppercase tracking-wider">
+      <span class="h-2.5 w-2.5 rounded-full bg-red-650 bg-red-600 animate-pulse"></span>
+      <span>Panel de preparación en tiempo real</span>
+    </div>
+  </div>
+
   <!-- Kanban Board Layout -->
-  <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden min-h-[450px]">
+  <div 
+    class="flex-1 grid grid-cols-1 gap-6 overflow-hidden min-h-[450px]"
+    [class.lg:grid-cols-3]="viewMode() === 'cajero'"
+    [class.lg:grid-cols-2]="viewMode() === 'cocina'"
+  >
     
     <!-- Column: Pendiente -->
-    <div class="flex flex-col h-full rounded-3xl bg-slate-50/10 border border-slate-100/5 p-4 space-y-4">
-      <div class="flex items-center justify-between px-2">
-        <div class="flex items-center gap-2">
-          <span class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
-          <h3 class="text-xs uppercase font-black tracking-wider text-slate-400">Pendientes</h3>
+    @if (viewMode() === 'cajero') {
+      <div class="flex flex-col h-full rounded-xl bg-slate-100/70 border border-slate-200 p-4 space-y-4">
+        <div class="flex items-center justify-between px-2">
+          <div class="flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+            <h3 class="text-xs uppercase font-bold tracking-wider text-slate-500">Pendientes</h3>
+          </div>
+          <span class="text-xs font-bold bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full">
+            {{ getPendingOrders().length }}
+          </span>
         </div>
-        <span class="text-xs font-black bg-red-500/10 text-red-500 px-2.5 py-1 rounded-full">
-          {{ getPendingOrders().length }}
-        </span>
-      </div>
 
-      <div class="flex-1 overflow-y-auto space-y-3 pr-1">
-        @for (order of getPendingOrders(); track order.id) {
-          <div 
-            (click)="selectOrder(order)"
-            class="p-4 rounded-2xl border bg-white shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-0.5 border-red-100 hover:border-red-300"
-            style="background-color: var(--admin-card-bg);"
-          >
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-black text-red-600">{{ order.orderNumber }}</span>
-              <span class="text-[10px] text-slate-400 font-bold uppercase">{{ order.time }}</span>
-            </div>
-            <p class="text-xs font-bold text-slate-500 mb-3 truncate">
-              @for (item of order.items; track item.id; let last = $last) {
-                {{ item.cantidad }}x {{ item.pizza.nombre }} ({{ item.size.nombre }}){{ !last ? ', ' : '' }}
+        <div class="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[450px]">
+          @for (order of getPendingOrders(); track order.id) {
+            <div 
+              (click)="selectOrder(order)"
+              class="p-4 rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow hover:border-slate-300 cursor-pointer transition-all duration-150"
+            >
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-semibold text-slate-900">{{ order.orderNumber }}</span>
+                  @if (order.pickupCode) {
+                    <span class="text-[9px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">
+                      {{ order.pickupCode }}
+                    </span>
+                  }
+                </div>
+                <span class="text-xs text-slate-500">{{ order.time }}</span>
+              </div>
+              @if (order.clienteNombre) {
+                <div class="text-xs font-semibold text-red-600 mb-1">
+                  Cliente: {{ order.clienteNombre }}
+                </div>
               }
-            </p>
-            <div class="flex items-center justify-between pt-2 border-t border-slate-100/10">
-              <span class="text-xs font-black">${{ order.total | number:'1.2-2' }}</span>
-              <button 
-                (click)="$event.stopPropagation(); advanceStatus(order)"
-                class="bg-amber-500 text-white text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider shadow hover:bg-amber-600 transition-colors"
-              >
-                Preparar
-              </button>
+              <div class="max-h-[75px] overflow-y-auto mb-3 pr-1 space-y-1">
+                @for (item of order.items; track item.id) {
+                  <div class="text-xs text-slate-600 font-medium">
+                    {{ item.cantidad }}x {{ item.pizza.nombre }} <span class="text-slate-400 font-normal">({{ item.size.nombre }})</span>
+                  </div>
+                }
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span class="text-sm font-semibold text-slate-900">${{ order.total | number:'1.2-2' }}</span>
+                @if (order.paymentStatus !== 'approved') {
+                  <button 
+                    (click)="$event.stopPropagation(); advanceStatus(order)"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-lg uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    Cobrar y Preparar
+                  </button>
+                } @else {
+                  <button 
+                    (click)="$event.stopPropagation(); advanceStatus(order)"
+                    class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-lg uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    Preparar
+                  </button>
+                }
+              </div>
             </div>
-          </div>
-        } @empty {
-          <div class="h-40 flex items-center justify-center text-slate-400 text-xs font-bold border border-dashed border-slate-200 rounded-2xl">
-            Sin pedidos pendientes
-          </div>
-        }
+          } @empty {
+            <div class="h-40 flex items-center justify-center text-slate-400 text-xs font-medium border border-dashed border-slate-350 border-slate-300 rounded-lg bg-white/50">
+              Sin pedidos pendientes
+            </div>
+          }
+        </div>
       </div>
-    </div>
+    }
 
     <!-- Column: Preparando -->
-    <div class="flex flex-col h-full rounded-3xl bg-slate-50/10 border border-slate-100/5 p-4 space-y-4">
+    <div class="flex flex-col h-full rounded-xl bg-slate-100/70 border border-slate-200 p-4 space-y-4">
       <div class="flex items-center justify-between px-2">
         <div class="flex items-center gap-2">
           <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
-          <h3 class="text-xs uppercase font-black tracking-wider text-slate-400">Preparando</h3>
+          <h3 class="text-xs uppercase font-bold tracking-wider text-slate-500">Preparando</h3>
         </div>
-        <span class="text-xs font-black bg-amber-500/10 text-amber-500 px-2.5 py-1 rounded-full">
+        <span class="text-xs font-bold bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full">
           {{ getPreparingOrders().length }}
         </span>
       </div>
 
-      <div class="flex-1 overflow-y-auto space-y-3 pr-1">
+      <div class="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[450px]">
         @for (order of getPreparingOrders(); track order.id) {
           <div 
             (click)="selectOrder(order)"
-            class="p-4 rounded-2xl border bg-white shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-0.5 border-amber-100 hover:border-amber-300"
-            style="background-color: var(--admin-card-bg);"
+            class="p-4 rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow hover:border-slate-300 cursor-pointer transition-all duration-150"
           >
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-black text-amber-600">{{ order.orderNumber }}</span>
-              <span class="text-[10px] text-slate-400 font-bold uppercase">{{ order.time }}</span>
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-slate-900">{{ order.orderNumber }}</span>
+                @if (order.pickupCode) {
+                  <span class="text-[9px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">
+                    {{ order.pickupCode }}
+                  </span>
+                }
+              </div>
+              <span class="text-xs text-slate-500">{{ order.time }}</span>
             </div>
-            <p class="text-xs font-bold text-slate-500 mb-3 truncate">
-              @for (item of order.items; track item.id; let last = $last) {
-                {{ item.cantidad }}x {{ item.pizza.nombre }} ({{ item.size.nombre }}){{ !last ? ', ' : '' }}
+            @if (viewMode() === 'cajero') {
+              @if (order.clienteNombre) {
+                <div class="text-xs font-semibold text-red-600 mb-1">
+                  Cliente: {{ order.clienteNombre }}
+                </div>
               }
-            </p>
-            <div class="flex items-center justify-between pt-2 border-t border-slate-100/10">
-              <span class="text-xs font-black">${{ order.total | number:'1.2-2' }}</span>
-              <button 
-                (click)="$event.stopPropagation(); advanceStatus(order)"
-                class="bg-blue-600 text-white text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider shadow hover:bg-blue-700 transition-colors"
-              >
-                Terminar
-              </button>
-            </div>
+              <div class="max-h-[75px] overflow-y-auto mb-3 pr-1 space-y-1">
+                @for (item of order.items; track item.id) {
+                  <div class="text-xs text-slate-600 font-medium">
+                    {{ item.cantidad }}x {{ item.pizza.nombre }} <span class="text-slate-400 font-normal">({{ item.size.nombre }})</span>
+                  </div>
+                }
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span class="text-sm font-semibold text-slate-900">${{ order.total | number:'1.2-2' }}</span>
+              </div>
+            } @else {
+              <!-- Cook View: Focus on pizza building details, hide pricing and keep text readable -->
+              <div class="max-h-[220px] overflow-y-auto space-y-2 mb-3 pr-1">
+                @for (item of order.items; track item.id) {
+                  <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                    <div class="font-bold text-slate-900 mb-1">
+                      {{ item.cantidad }}x {{ item.pizza.nombre }} ({{ item.size.nombre }})
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] text-slate-500 font-medium">
+                      <div>Masa: <span class="text-slate-800 font-semibold">{{ item.masa.nombre }}</span></div>
+                      <div>Salsa: <span class="text-slate-800 font-semibold">{{ item.salsa.nombre }}</span></div>
+                      <div class="col-span-2">Queso: <span class="text-slate-800 font-semibold">{{ item.queso.nombre }}</span></div>
+                      @if (item.extras.length > 0) {
+                        <div class="col-span-2 mt-1">
+                          Extras: 
+                          <span class="text-red-600 font-bold">
+                            @for (extra of item.extras; track extra.nombre; let lastExtra = $last) {
+                              {{ extra.nombre }}{{ !lastExtra ? ', ' : '' }}
+                            }
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span class="text-[10px] text-slate-400 font-semibold font-mono">CODE: {{ order.pickupCode }}</span>
+                <button 
+                  (click)="$event.stopPropagation(); advanceStatus(order)"
+                  class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3 py-2 rounded-lg uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  Terminar Cocción
+                </button>
+              </div>
+            }
           </div>
         } @empty {
-          <div class="h-40 flex items-center justify-center text-slate-400 text-xs font-bold border border-dashed border-slate-200 rounded-2xl">
+          <div class="h-40 flex items-center justify-center text-slate-400 text-xs font-medium border border-dashed border-slate-350 border-slate-300 rounded-lg bg-white/50">
             Sin pizzas en el horno
           </div>
         }
@@ -115,45 +230,73 @@
     </div>
 
     <!-- Column: Listo para entregar -->
-    <div class="flex flex-col h-full rounded-3xl bg-slate-50/10 border border-slate-100/5 p-4 space-y-4">
+    <div class="flex flex-col h-full rounded-xl bg-slate-100/70 border border-slate-200 p-4 space-y-4">
       <div class="flex items-center justify-between px-2">
         <div class="flex items-center gap-2">
           <span class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
-          <h3 class="text-xs uppercase font-black tracking-wider text-slate-400">Listos</h3>
+          <h3 class="text-xs uppercase font-bold tracking-wider text-slate-500">Listos</h3>
         </div>
-        <span class="text-xs font-black bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full">
+        <span class="text-xs font-bold bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full">
           {{ getReadyOrders().length }}
         </span>
       </div>
 
-      <div class="flex-1 overflow-y-auto space-y-3 pr-1">
+      <div class="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[450px]">
         @for (order of getReadyOrders(); track order.id) {
           <div 
             (click)="selectOrder(order)"
-            class="p-4 rounded-2xl border bg-white shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-0.5 border-blue-100 hover:border-blue-300"
-            style="background-color: var(--admin-card-bg);"
+            class="p-4 rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow hover:border-slate-300 cursor-pointer transition-all duration-150"
           >
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-black text-blue-600">{{ order.orderNumber }}</span>
-              <span class="text-[10px] text-slate-400 font-bold uppercase">{{ order.time }}</span>
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-slate-900">{{ order.orderNumber }}</span>
+                @if (order.pickupCode) {
+                  <span class="text-[9px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">
+                    {{ order.pickupCode }}
+                  </span>
+                }
+              </div>
+              <span class="text-xs text-slate-500">{{ order.time }}</span>
             </div>
-            <p class="text-xs font-bold text-slate-500 mb-3 truncate">
-              @for (item of order.items; track item.id; let last = $last) {
-                {{ item.cantidad }}x {{ item.pizza.nombre }} ({{ item.size.nombre }}){{ !last ? ', ' : '' }}
+            @if (viewMode() === 'cajero') {
+              @if (order.clienteNombre) {
+                <div class="text-xs font-semibold text-red-600 mb-1">
+                  Cliente: {{ order.clienteNombre }}
+                </div>
               }
-            </p>
-            <div class="flex items-center justify-between pt-2 border-t border-slate-100/10">
-              <span class="text-xs font-black">${{ order.total | number:'1.2-2' }}</span>
-              <button 
-                (click)="$event.stopPropagation(); advanceStatus(order)"
-                class="bg-emerald-600 text-white text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider shadow hover:bg-emerald-700 transition-colors"
-              >
-                Entregar
-              </button>
-            </div>
+              <div class="max-h-[75px] overflow-y-auto mb-3 pr-1 space-y-1">
+                @for (item of order.items; track item.id) {
+                  <div class="text-xs text-slate-600 font-medium">
+                    {{ item.cantidad }}x {{ item.pizza.nombre }} <span class="text-slate-400 font-normal">({{ item.size.nombre }})</span>
+                  </div>
+                }
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span class="text-sm font-semibold text-slate-900">${{ order.total | number:'1.2-2' }}</span>
+                <button 
+                  (click)="$event.stopPropagation(); advanceStatus(order)"
+                  class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-lg uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  Entregar
+                </button>
+              </div>
+            } @else {
+              <!-- Cook View: Summarized items, pickup code and a flat state badge -->
+              <div class="max-h-[75px] overflow-y-auto mb-3 pr-1 space-y-1">
+                @for (item of order.items; track item.id) {
+                  <div class="text-xs text-slate-600 font-semibold">
+                    {{ item.cantidad }}x {{ item.pizza.nombre }} <span class="text-slate-400 font-normal">({{ item.size.nombre }})</span>
+                  </div>
+                }
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span class="text-[10px] text-slate-400 font-semibold font-mono">CODE: {{ order.pickupCode }}</span>
+                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded-full uppercase tracking-wider">Listo para Entregar</span>
+              </div>
+            }
           </div>
         } @empty {
-          <div class="h-40 flex items-center justify-center text-slate-400 text-xs font-bold border border-dashed border-slate-200 rounded-2xl">
+          <div class="h-40 flex items-center justify-center text-slate-400 text-xs font-medium border border-dashed border-slate-350 border-slate-300 rounded-lg bg-white/50">
             Sin pedidos por entregar
           </div>
         }
@@ -163,98 +306,119 @@
   </div>
 
   <!-- Historial de Pedidos Entregados -->
-  <div 
-    class="p-6 rounded-3xl border shadow-md"
-    style="background-color: var(--admin-card-bg); border-color: var(--admin-card-border);"
-  >
-    <div class="mb-4">
-      <h3 class="text-md font-black uppercase tracking-wider">Historial Reciente (Entregados)</h3>
-      <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Órdenes completadas con éxito</p>
-    </div>
+  @if (viewMode() === 'cajero') {
+    <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">Historial Reciente (Entregados)</h3>
+        <p class="text-xs text-slate-500 mt-1">Órdenes completadas con éxito</p>
+      </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      @for (order of getDeliveredOrders(); track order.id) {
-        <div 
-          (click)="selectOrder(order)"
-          class="p-4 rounded-2xl bg-slate-50/5 border border-slate-100/10 shadow-sm flex items-center justify-between hover:bg-slate-50/10 cursor-pointer transition-colors"
-        >
-          <div>
-            <span class="text-sm font-black text-slate-400 block">{{ order.orderNumber }}</span>
-            <span class="text-[9px] font-bold text-slate-500 uppercase">{{ order.time }}</span>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        @for (order of getDeliveredOrders(); track order.id) {
+          <div 
+            (click)="selectOrder(order)"
+            class="p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-200 cursor-pointer transition-colors flex items-center justify-between"
+          >
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-slate-800 block truncate max-w-[150px]">{{ order.orderNumber }} {{ order.clienteNombre ? ' - ' + order.clienteNombre : '' }}</span>
+                @if (order.pickupCode) {
+                  <span class="text-[9px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 border border-slate-200 rounded">
+                    {{ order.pickupCode }}
+                  </span>
+                }
+              </div>
+              <span class="text-[10px] text-slate-500 font-medium">{{ order.time }}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-semibold block text-slate-900">${{ order.total | number:'1.2-2' }}</span>
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase mt-0.5 inline-block">Entregado</span>
+            </div>
           </div>
-          <div class="text-right">
-            <span class="text-xs font-black block">${{ order.total | number:'1.2-2' }}</span>
-            <span class="text-[9px] bg-emerald-500/10 text-emerald-500 font-black uppercase px-2 py-0.5 rounded-full">Entregado</span>
+        } @empty {
+          <div class="col-span-4 text-center text-slate-400 font-semibold text-xs py-4">
+            No hay órdenes entregadas hoy.
           </div>
-        </div>
-      } @empty {
-        <div class="col-span-4 text-center text-slate-400 font-black text-xs py-4">
-          No hay órdenes entregadas hoy.
-        </div>
-      }
+        }
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Detail side-drawer overlay -->
   @if (selectedOrder(); as order) {
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div 
-        class="w-full max-w-lg rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-        style="background-color: var(--admin-card-bg); border-color: var(--admin-card-border);"
-      >
+    <div class="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
         <!-- Modal Header -->
-        <div class="p-6 border-b border-slate-100/10 flex items-center justify-between bg-black/5">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div>
-            <h3 class="text-lg font-black" style="color: var(--admin-primary);">Pedido {{ order.orderNumber }}</h3>
-            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Registrado a las {{ order.time }}</span>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-semibold text-slate-900">Pedido {{ order.orderNumber }}</h3>
+              @if (order.pickupCode) {
+                <span class="text-[9px] bg-red-50 text-red-700 border border-red-100 font-semibold px-2 py-0.5 rounded font-mono">
+                  {{ order.pickupCode }}
+                </span>
+              }
+            </div>
+            <span class="text-xs text-slate-500 mt-1 block">Cliente: {{ order.clienteNombre || 'Sin Nombre' }} | Registrado a las {{ order.time }}</span>
           </div>
           <button 
             (click)="closeDetails()"
-            class="h-8 w-8 rounded-full bg-slate-100/10 hover:bg-slate-100/20 flex items-center justify-center cursor-pointer text-slate-400 hover:text-slate-100 transition-colors"
+            class="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer text-slate-500 hover:text-slate-800 transition-colors text-lg"
           >
             &times;
           </button>
         </div>
 
         <!-- Modal Body -->
-        <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <div class="p-5 overflow-y-auto space-y-4 flex-1">
           
-          <!-- State Badge -->
-          <div class="flex items-center gap-3">
-            <span class="text-xs font-bold text-slate-400">Estado actual:</span>
+          <!-- State Badge & Payment Status -->
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="text-xs font-semibold text-slate-500">Estado actual:</span>
             <span 
-              class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
+              class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider"
               [ngClass]="{
-                'bg-red-500/10 text-red-500': order.status === 'Pendiente',
-                'bg-amber-500/10 text-amber-500': order.status === 'Preparando',
-                'bg-blue-500/10 text-blue-500': order.status === 'Listo',
-                'bg-emerald-500/10 text-emerald-500': order.status === 'Entregado'
+                'bg-red-50 text-red-700 border border-red-100': order.status === 'Pendiente',
+                'bg-amber-50 text-amber-700 border border-amber-100': order.status === 'Preparando',
+                'bg-blue-50 text-blue-700 border border-blue-100': order.status === 'Listo',
+                'bg-emerald-50 text-emerald-700 border border-emerald-100': order.status === 'Entregado'
               }"
             >
               {{ order.status }}
             </span>
+
+            <span class="text-xs font-semibold text-slate-500 font-medium">Pago:</span>
+            <span 
+              class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider"
+              [ngClass]="{
+                'bg-emerald-50 text-emerald-700 border border-emerald-100': order.paymentStatus === 'approved',
+                'bg-amber-50 text-amber-700 border border-amber-100': order.paymentStatus !== 'approved'
+              }"
+            >
+              {{ order.paymentStatus === 'approved' ? 'Pagado' : 'Pendiente en Caja' }}
+            </span>
           </div>
 
           <!-- Items list -->
-          <div class="space-y-4">
-            <h4 class="text-xs uppercase font-black tracking-widest text-slate-400 border-b border-slate-100/5 pb-2">Productos</h4>
+          <div class="space-y-3">
+            <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400 border-b border-slate-100 pb-1.5">Productos</h4>
             
             @for (item of order.items; track item.id) {
-              <div class="space-y-1.5 p-4 rounded-2xl bg-slate-50/5 border border-slate-100/10">
+              <div class="space-y-1.5 p-4 rounded-lg bg-slate-50 border border-slate-200">
                 <div class="flex items-center justify-between">
-                  <h5 class="text-sm font-black">{{ item.cantidad }}x {{ item.pizza.nombre }}</h5>
-                  <span class="text-xs font-black">${{ item.totalItem | number:'1.2-2' }}</span>
+                  <h5 class="text-sm font-semibold text-slate-900">{{ item.cantidad }}x {{ item.pizza.nombre }}</h5>
+                  <span class="text-sm font-semibold text-slate-900">${{ item.totalItem | number:'1.2-2' }}</span>
                 </div>
                 
                 <!-- Detailed choices -->
-                <div class="text-[11px] font-bold text-slate-500 space-y-1 pl-2">
-                  <div>TAMAÑO: <span class="text-slate-400">{{ item.size.nombre }} ({{ item.size.medida }})</span></div>
-                  <div>MASA: <span class="text-slate-400">{{ item.masa.nombre }} (+${{ item.masa.precio }})</span></div>
-                  <div>SALSA: <span class="text-slate-400">{{ item.salsa.nombre }} (+${{ item.salsa.precio }})</span></div>
-                  <div>QUESO: <span class="text-slate-400">{{ item.queso.nombre }} (+${{ item.queso.precio }})</span></div>
+                <div class="text-xs text-slate-600 space-y-1 pl-2">
+                  <div>TAMAÑO: <span class="text-slate-500 font-medium">{{ item.size.nombre }} ({{ item.size.medida }})</span></div>
+                  <div>MASA: <span class="text-slate-500 font-medium">{{ item.masa.nombre }} (+${{ item.masa.precio }})</span></div>
+                  <div>SALSA: <span class="text-slate-500 font-medium">{{ item.salsa.nombre }} (+${{ item.salsa.precio }})</span></div>
+                  <div>QUESO: <span class="text-slate-500 font-medium">{{ item.queso.nombre }} (+${{ item.queso.precio }})</span></div>
                   @if (item.extras.length > 0) {
                     <div>EXTRAS: 
-                      <span class="text-slate-400">
+                      <span class="text-slate-500 font-medium">
                         @for (extra of item.extras; track extra.nombre; let last = $last) {
                           {{ extra.nombre }} (+${{ extra.precio }}){{ !last ? ', ' : '' }}
                         }
@@ -267,22 +431,24 @@
           </div>
 
           <!-- Summary Total -->
-          <div class="flex items-center justify-between p-4 rounded-2xl bg-black/10 font-black text-md">
+          <div class="flex items-center justify-between p-3.5 rounded-lg bg-slate-100 font-bold text-sm text-slate-900">
             <span>TOTAL FACTURADO:</span>
-            <span style="color: var(--admin-primary);">${{ order.total | number:'1.2-2' }}</span>
+            <span class="text-red-650 bg-transparent text-red-600 text-base">${{ order.total | number:'1.2-2' }}</span>
           </div>
 
         </div>
 
         <!-- Modal Actions Footer -->
-        <div class="p-6 border-t border-slate-100/10 flex flex-wrap gap-3 bg-black/5">
+        <div class="p-5 border-t border-slate-200 flex flex-wrap gap-3 bg-slate-50">
           <!-- Advance order -->
-          @if (order.status !== 'Entregado') {
+          @if (order.status !== 'Entregado' && (order.status !== 'Preparando' || viewMode() === 'cocina')) {
             <button 
               (click)="advanceStatus(order)"
-              class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow transition-all duration-150 active:scale-95 cursor-pointer"
+              class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-colors cursor-pointer"
             >
-              @if (order.status === 'Pendiente') { Preparar Pedido }
+              @if (order.status === 'Pendiente') {
+                {{ order.paymentStatus === 'approved' ? 'Iniciar Preparación' : 'Confirmar Cobro en Caja' }}
+              }
               @else if (order.status === 'Preparando') { Terminar Cocción }
               @else if (order.status === 'Listo') { Marcar como Entregado }
             </button>
@@ -291,7 +457,7 @@
           <!-- Print Ticket -->
           <button 
             (click)="printTicket(order)"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow transition-all duration-150 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.82l2.6-2.6m0 0l2.6 2.6m-2.6-2.6v6.5m10-2.6l2.6-2.6m0 0l2.6 2.6m-2.6-2.6v6.5M12 3v13.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -302,7 +468,7 @@
           <!-- Cancel order -->
           <button 
             (click)="cancelOrder(order.id)"
-            class="bg-red-500/10 hover:bg-red-500/20 text-red-600 px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all duration-150 active:scale-95 cursor-pointer"
+            class="bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-colors cursor-pointer"
           >
             Cancelar
           </button>
@@ -314,7 +480,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- PHYSICIAL RECEIPT SIMULATION (PRINT ONLY) -->
+<!-- PHYSICAL RECEIPT SIMULATION (PRINT ONLY) -->
 <!-- ========================================== -->
 @if (selectedOrder(); as order) {
   <div id="printable-ticket" style="display: none;">
@@ -327,6 +493,9 @@
     
     <div>
       <span>ORDEN: {{ order.orderNumber }}</span>
+      @if (order.clienteNombre) {
+        <span>CLIENTE: {{ order.clienteNombre }}</span>
+      }
       <span>HORA: {{ order.time }}</span>
       <span>ESTADO: {{ order.status }}</span>
       <span>-----------------------------</span>

@@ -1,33 +1,31 @@
 <!-- Administrative Panel Outer Wrapper -->
 <div 
-  class="h-screen w-screen flex overflow-hidden transition-all duration-300 font-sans"
+  class="h-screen w-screen flex overflow-hidden font-sans"
   [class]="themeService.activeTheme.class"
-  style="background: linear-gradient(135deg, var(--admin-bg-gradient-start) 0%, var(--admin-bg-gradient-end) 100%); color: var(--admin-text-main);"
+  style="background-color: var(--admin-bg); color: var(--admin-text-main);"
 >
 
   <!-- Sidebar Component -->
   <aside 
-    class="w-64 flex-shrink-0 flex flex-col justify-between shadow-2xl z-20 transition-all duration-300 border-r border-white/5"
+    class="w-64 flex-shrink-0 flex flex-col justify-between border-r border-slate-800 z-10"
     style="background-color: var(--admin-sidebar-bg); color: var(--admin-sidebar-text);"
   >
     <!-- Top Brand & User profile block -->
     <div>
       <!-- Logo Header -->
-      <div class="h-20 flex items-center gap-3 px-6 border-b border-white/5 bg-black/10">
-        <div class="h-10 w-10 rounded-xl overflow-hidden bg-white flex items-center justify-center p-0.5 border border-white/10 shadow-inner flex-shrink-0">
+      <div class="h-20 flex items-center gap-3 px-6 border-b border-slate-800 bg-black/10">
+        <div class="h-9 w-9 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
           <img 
             src="assets/images/logo_pizza.JPG" 
             alt="Planet Pizza Logo" 
-            class="h-full w-full object-cover rounded-xl"
+            class="h-full w-full object-cover rounded-full"
           />
         </div>
         <div>
-          <h2 class="text-lg font-black tracking-wider leading-none text-white uppercase">Planet Admin</h2>
-          <span class="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-1 block">Panel de Control</span>
+          <h2 class="text-sm font-bold tracking-wider leading-none text-white uppercase">Planet Admin</h2>
+          <span class="text-[9px] text-slate-400 font-semibold uppercase tracking-widest mt-1 block">Panel de Control</span>
         </div>
       </div>
-
-   
 
       <!-- Navigation Links -->
       <nav class="p-4 space-y-1">
@@ -35,32 +33,29 @@
           <a
             [routerLink]="item.route"
             routerLinkActive="active-link"
-            class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 hover:bg-white/5 hover:translate-x-1 group"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors duration-150 hover:bg-white/5 hover:text-white group"
           >
-            <span [innerHTML]="item.icon" class="text-white/50 group-hover:text-white transition-colors duration-200"></span>
+            <span [innerHTML]="item.icon" class="text-slate-400 group-hover:text-white transition-colors duration-150"></span>
             <span>{{ item.label }}</span>
           </a>
         }
       </nav>
     </div>
 
-    <!-- Live Indicators & Logout (Density Details) -->
+    <!-- Live Indicators & Logout -->
     <div>
-      <!-- Live Metrics Widget (Less Minimalist Detail) -->
-  
-
-      <!-- Exit Button Section (ONLY ONE LOGOUT BUTTON) -->
-      <div class="p-4 border-t border-white/5 bg-black/10">
+      <!-- Exit Button Section -->
+      <div class="p-4 border-t border-slate-800 bg-black/10">
         <button
           (click)="onLogout()"
-          class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-red-600/15 hover:bg-red-600/25 text-red-400 hover:text-red-300 font-bold text-xs uppercase tracking-wider transition-all duration-150 active:scale-95 text-center cursor-pointer border border-red-500/10 shadow-inner"
+          class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-bold text-xs uppercase tracking-wider transition-colors duration-150 text-center cursor-pointer"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-red-500">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
           </svg>
-          Cerrar Sesión (Salir)
+          Cerrar Sesión
         </button>
-        <div class="text-center mt-3.5 text-[8px] text-white/30 font-semibold uppercase tracking-wider">
+        <div class="text-center mt-3 text-[8px] text-slate-500 font-semibold uppercase tracking-wider">
           Planet Pizza &copy; {{ currentYear }}
         </div>
       </div>
@@ -73,21 +68,17 @@
     
     <!-- Topbar Header -->
     <header 
-      class="h-20 flex items-center justify-between px-8 border-b transition-all duration-300 shadow-sm"
+      class="h-20 flex items-center justify-between px-8 border-b shadow-sm z-10"
       style="background-color: var(--admin-header-bg); border-color: var(--admin-header-border); color: var(--admin-header-text);"
     >
       <!-- Title & Context -->
       <div>
-        <h1 class="text-xl font-black tracking-tight uppercase leading-none">Administración</h1>
-        <span class="text-[9px] uppercase font-bold tracking-widest block transition-colors duration-300 mt-1.5" style="color: var(--admin-header-subtitle);">Gestión General del Kiosco</span>
+        <h1 class="text-base font-bold tracking-tight text-slate-900 leading-none">Administración</h1>
+        <span class="text-[10px] font-medium block mt-1" style="color: var(--admin-header-subtitle);">Gestión General del Kiosco</span>
       </div>
 
-      <!-- Quick Metrics/Badges (Less Minimalist Details) -->
+      <!-- Quick Metrics/Badges -->
       <div class="flex items-center gap-4">
-        <!-- Terminal & DB Connection Indicators (Less Minimalist) -->
-       
-
-      
       </div>
     </header>
 

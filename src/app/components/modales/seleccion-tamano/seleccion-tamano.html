@@ -28,12 +28,12 @@
               <!-- Pizza Slice SVG with size-based scaling -->
               <div 
                 class="mb-4 text-amber-500 transition-transform duration-300 group-hover:scale-110 flex items-center justify-center"
-                [class.w-12]="size.nombre === 'Chica'"
-                [class.h-12]="size.nombre === 'Chica'"
+                [class.w-12]="size.nombre === 'Chica' || size.nombre === 'Personal'"
+                [class.h-12]="size.nombre === 'Chica' || size.nombre === 'Personal'"
                 [class.w-16]="size.nombre === 'Mediana'"
                 [class.h-16]="size.nombre === 'Mediana'"
-                [class.w-20]="size.nombre === 'Grande'"
-                [class.h-20]="size.nombre === 'Grande'"
+                [class.w-20]="size.nombre === 'Grande' || size.nombre === 'Familiar'"
+                [class.h-20]="size.nombre === 'Grande' || size.nombre === 'Familiar'"
               >
                 <!-- Beautiful Vector Pizza Slice SVG -->
                 <svg 

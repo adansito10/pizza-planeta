@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import Order from '../models/Order.js';
 
 // @desc    Obtener todas las órdenes
@@ -35,7 +36,7 @@ export const getOrderById = async (req, res) => {
 // @access  Public
 export const createOrder = async (req, res) => {
   try {
-    const { items, total } = req.body;
+    const { items, total, clienteNombre, userId } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'La orden debe contener al menos un producto' });
@@ -65,13 +66,29 @@ export const createOrder = async (req, res) => {
     };
     const time = now.toLocaleTimeString('es-ES', options);
 
+    // Generar código de retiro único (ej. PP-C34F)
+    let pickupCode = '';
+    let isUnique = false;
+    let attempts = 0;
+    while (!isUnique && attempts < 10) {
+      pickupCode = 'PP-' + crypto.randomBytes(2).toString('hex').toUpperCase();
+      const existing = await Order.findOne({ where: { pickupCode } });
+      if (!existing) {
+        isUnique = true;
+      }
+      attempts++;
+    }
+
     const order = await Order.create({
       orderNumber,
+      clienteNombre: clienteNombre || '',
       items,
       total,
       time,
       status: 'Pendiente',
       paymentStatus: 'pending',
+      pickupCode,
+      userId: userId || null
     });
 
     res.status(201).json(order);
@@ -131,5 +148,24 @@ export const clearAllOrders = async (req, res) => {
     res.json({ message: 'Todas las órdenes fueron eliminadas correctamente' });
   } catch (error) {
     res.status(500).json({ message: 'Error al limpiar las órdenes', error: error.message });
+  }
+};
+
+// @desc    Confirmar pago de una orden (Mercado Pago o Caja)
+// @route   PUT /api/orders/:id/confirm-payment
+// @access  Public
+export const confirmOrderPayment = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+    if (order) {
+      order.status = 'Preparando';
+      order.paymentStatus = 'approved';
+      const updated = await order.save();
+      res.json(updated);
+    } else {
+      res.status(404).json({ message: 'Orden no encontrada' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error al confirmar pago de orden', error: error.message });
   }
 };

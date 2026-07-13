@@ -1,19 +1,31 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly AUTH_KEY = 'planet_pizza_admin_session';
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = 'http://localhost:3000/api/auth';
 
-  public readonly isLoggedIn = signal<boolean>(false);
+  private readonly AUTH_KEY = 'planet_pizza_admin_session';
+  private readonly CUSTOMER_TOKEN_KEY = 'planet_pizza_customer_token';
+  private readonly CUSTOMER_USER_KEY = 'planet_pizza_customer_user';
+
+  public readonly isLoggedIn = signal<boolean>(false); // Admin login state
+  
+  // Customer login states
+  public readonly customerUser = signal<{ id: string, nombre: string, email: string } | null>(null);
+  public readonly customerToken = signal<string | null>(null);
+  public readonly isCustomerLoggedIn = computed(() => this.customerUser() !== null);
 
   constructor() {
     this.checkSession();
   }
 
+  // --- Admin Login ---
   public login(usuario: string, contrasenia: string): boolean {
-    // Validate credentials (admin / admin123)
     if (usuario.trim() === 'admin' && contrasenia === 'admin123') {
       this.isLoggedIn.set(true);
       try {
@@ -35,11 +47,51 @@ export class AuthService {
     }
   }
 
+  // --- Customer Login ---
+  public customerRegister(nombre: string, email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/register`, { nombre, email, password });
+  }
+
+  public customerLogin(email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, { email, password }).pipe(
+      tap(res => {
+        this.customerToken.set(res.token);
+        this.customerUser.set(res.user);
+        try {
+          localStorage.setItem(this.CUSTOMER_TOKEN_KEY, res.token);
+          localStorage.setItem(this.CUSTOMER_USER_KEY, JSON.stringify(res.user));
+        } catch (e) {
+          console.error('Error saving customer session to localStorage', e);
+        }
+      })
+    );
+  }
+
+  public customerLogout(): void {
+    this.customerToken.set(null);
+    this.customerUser.set(null);
+    try {
+      localStorage.removeItem(this.CUSTOMER_TOKEN_KEY);
+      localStorage.removeItem(this.CUSTOMER_USER_KEY);
+    } catch (e) {
+      console.error('Error removing customer session from localStorage', e);
+    }
+  }
+
   private checkSession(): void {
     try {
+      // Check admin session
       const active = localStorage.getItem(this.AUTH_KEY);
       if (active === 'true') {
         this.isLoggedIn.set(true);
+      }
+
+      // Check customer session
+      const cToken = localStorage.getItem(this.CUSTOMER_TOKEN_KEY);
+      const cUserStr = localStorage.getItem(this.CUSTOMER_USER_KEY);
+      if (cToken && cUserStr) {
+        this.customerToken.set(cToken);
+        this.customerUser.set(JSON.parse(cUserStr));
       }
     } catch (e) {
       console.error('Error checking active session', e);

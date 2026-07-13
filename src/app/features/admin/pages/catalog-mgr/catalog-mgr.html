@@ -1,17 +1,17 @@
-<div class="space-y-6 no-print animate-in fade-in duration-300">
+<div class="space-y-6 no-print">
   
   <!-- Page Header -->
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <h2 class="text-2xl font-black uppercase tracking-tight">Catálogo e Ingredientes</h2>
-      <p class="text-xs text-slate-500 font-medium">Administra las pizzas, ingredientes base, personalizaciones y tamaños de venta.</p>
+      <h2 class="text-xl font-bold text-slate-900">Catálogo e Ingredientes</h2>
+      <p class="text-sm text-slate-500">Administra las pizzas, ingredientes base, personalizaciones y tamaños de venta.</p>
     </div>
 
     <div class="flex items-center gap-3">
       <!-- Reset defaults button -->
       <button 
         (click)="resetCatalog()"
-        class="bg-slate-100/10 hover:bg-slate-100/20 text-slate-600 text-xs px-4 py-2.5 rounded-2xl font-bold transition-all duration-150 active:scale-95 cursor-pointer border border-slate-200/50"
+        class="bg-slate-100/50 hover:bg-slate-100 text-slate-600 text-xs px-4 py-2 rounded-lg font-semibold border border-slate-200 transition-colors cursor-pointer"
       >
         Restablecer Todo
       </button>
@@ -20,16 +20,14 @@
       @if (activeSubTab() === 'pizzas') {
         <button 
           (click)="openNewPizzaForm()"
-          class="text-white text-xs px-5 py-2.5 rounded-2xl font-black uppercase tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-md"
-          style="background-color: var(--admin-primary);"
+          class="text-white bg-red-600 hover:bg-red-700 text-xs px-4 py-2 rounded-lg font-semibold transition-colors cursor-pointer"
         >
           + Nueva Pizza
         </button>
       } @else if (activeSubTab() === 'ingredients') {
         <button 
           (click)="openNewIngredientForm('extra')"
-          class="text-white text-xs px-5 py-2.5 rounded-2xl font-black uppercase tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-md"
-          style="background-color: var(--admin-primary);"
+          class="text-white bg-red-600 hover:bg-red-700 text-xs px-4 py-2 rounded-lg font-semibold transition-colors cursor-pointer"
         >
           + Nuevo Ingrediente
         </button>
@@ -37,22 +35,19 @@
         <div class="flex gap-2">
           <button 
             (click)="openNewIngredientForm('masa')"
-            class="text-white text-[10px] px-3 py-2 rounded-xl font-bold uppercase tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow"
-            style="background-color: var(--admin-primary);"
+            class="text-white bg-red-600 hover:bg-red-700 text-[10px] px-3 py-1.5 rounded-lg font-semibold uppercase tracking-wider transition-colors cursor-pointer"
           >
             + Masa
           </button>
           <button 
             (click)="openNewIngredientForm('salsa')"
-            class="text-white text-[10px] px-3 py-2 rounded-xl font-bold uppercase tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow"
-            style="background-color: var(--admin-primary);"
+            class="text-white bg-red-600 hover:bg-red-700 text-[10px] px-3 py-1.5 rounded-lg font-semibold uppercase tracking-wider transition-colors cursor-pointer"
           >
             + Salsa
           </button>
           <button 
             (click)="openNewIngredientForm('queso')"
-            class="text-white text-[10px] px-3 py-2 rounded-xl font-bold uppercase tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow"
-            style="background-color: var(--admin-primary);"
+            class="text-white bg-red-600 hover:bg-red-700 text-[10px] px-3 py-1.5 rounded-lg font-semibold uppercase tracking-wider transition-colors cursor-pointer"
           >
             + Queso
           </button>
@@ -60,72 +55,79 @@
       } @else if (activeSubTab() === 'sizes') {
         <button 
           (click)="openNewSizeForm()"
-          class="text-white text-xs px-5 py-2.5 rounded-2xl font-black uppercase tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-md"
-          style="background-color: var(--admin-primary);"
+          class="text-white bg-red-600 hover:bg-red-700 text-xs px-4 py-2 rounded-lg font-semibold transition-colors cursor-pointer"
         >
           + Nuevo Tamaño
+        </button>
+      } @else if (activeSubTab() === 'promos') {
+        <button 
+          (click)="openNewPromoForm()"
+          class="text-white bg-red-600 hover:bg-red-700 text-xs px-4 py-2 rounded-lg font-semibold transition-colors cursor-pointer"
+        >
+          + Nueva Promoción
         </button>
       }
     </div>
   </div>
 
   <!-- Sub-Tabs Navigation Bar -->
-  <div class="flex gap-2 border-b border-slate-100/10 pb-1">
+  <div class="flex gap-2 border-b border-slate-200 pb-px">
     <button 
       (click)="setSubTab('pizzas')"
-      class="px-5 py-2.5 font-bold text-xs uppercase tracking-wider rounded-t-xl transition-all border-b-2 cursor-pointer"
+      class="px-4 py-2 font-semibold text-xs uppercase tracking-wider transition-all border-b-2 cursor-pointer"
       [class]="activeSubTab() === 'pizzas' 
-        ? 'border-b-2 text-white bg-white/5 font-black' 
-        : 'border-transparent text-slate-400 hover:text-slate-200'"
-      [style.borderBottomColor]="activeSubTab() === 'pizzas' ? 'var(--admin-primary)' : 'transparent'"
+        ? 'border-red-600 text-red-600 font-bold' 
+        : 'border-transparent text-slate-500 hover:text-slate-800'"
     >
       Pizzas del Menú
     </button>
     <button 
       (click)="setSubTab('ingredients')"
-      class="px-5 py-2.5 font-bold text-xs uppercase tracking-wider rounded-t-xl transition-all border-b-2 cursor-pointer"
+      class="px-4 py-2 font-semibold text-xs uppercase tracking-wider transition-all border-b-2 cursor-pointer"
       [class]="activeSubTab() === 'ingredients' 
-        ? 'border-b-2 text-white bg-white/5 font-black' 
-        : 'border-transparent text-slate-400 hover:text-slate-200'"
-      [style.borderBottomColor]="activeSubTab() === 'ingredients' ? 'var(--admin-primary)' : 'transparent'"
+        ? 'border-red-600 text-red-600 font-bold' 
+        : 'border-transparent text-slate-500 hover:text-slate-800'"
     >
       Ingredientes (Extras)
     </button>
     <button 
       (click)="setSubTab('options')"
-      class="px-5 py-2.5 font-bold text-xs uppercase tracking-wider rounded-t-xl transition-all border-b-2 cursor-pointer"
+      class="px-4 py-2 font-semibold text-xs uppercase tracking-wider transition-all border-b-2 cursor-pointer"
       [class]="activeSubTab() === 'options' 
-        ? 'border-b-2 text-white bg-white/5 font-black' 
-        : 'border-transparent text-slate-400 hover:text-slate-200'"
-      [style.borderBottomColor]="activeSubTab() === 'options' ? 'var(--admin-primary)' : 'transparent'"
+        ? 'border-red-600 text-red-600 font-bold' 
+        : 'border-transparent text-slate-500 hover:text-slate-800'"
     >
       Bases (Masas, Salsas, Quesos)
     </button>
     <button 
       (click)="setSubTab('sizes')"
-      class="px-5 py-2.5 font-bold text-xs uppercase tracking-wider rounded-t-xl transition-all border-b-2 cursor-pointer"
+      class="px-4 py-2 font-semibold text-xs uppercase tracking-wider transition-all border-b-2 cursor-pointer"
       [class]="activeSubTab() === 'sizes' 
-        ? 'border-b-2 text-white bg-white/5 font-black' 
-        : 'border-transparent text-slate-400 hover:text-slate-200'"
-      [style.borderBottomColor]="activeSubTab() === 'sizes' ? 'var(--admin-primary)' : 'transparent'"
+        ? 'border-red-600 text-red-600 font-bold' 
+        : 'border-transparent text-slate-500 hover:text-slate-800'"
     >
       Tamaños
+    </button>
+    <button 
+      (click)="setSubTab('promos')"
+      class="px-4 py-2 font-semibold text-xs uppercase tracking-wider transition-all border-b-2 cursor-pointer"
+      [class]="activeSubTab() === 'promos' 
+        ? 'border-red-600 text-red-600 font-bold' 
+        : 'border-transparent text-slate-500 hover:text-slate-800'"
+    >
+      Promociones
     </button>
   </div>
 
   <!-- Content Section based on activeSubTab -->
-  <div 
-    class="p-6 rounded-3xl border shadow-md"
-    style="background-color: var(--admin-card-bg); border-color: var(--admin-card-border);"
-  >
+  <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-sm">
     
     <!-- SUB-TAB: PIZZAS -->
     @if (activeSubTab() === 'pizzas') {
-      <!-- Barra de Búsqueda de Pizzas -->
       <div class="mb-6">
         <div class="relative w-full max-w-md">
-          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
             </svg>
           </span>
@@ -134,58 +136,50 @@
             placeholder="Buscar pizza por nombre o descripción..." 
             [value]="searchQuery()"
             (input)="onSearchChange($event)"
-            class="w-full pl-11 pr-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+            class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 text-xs font-semibold bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:bg-white transition-colors"
           >
         </div>
       </div>
 
-      <!-- Grid de Pizzas (Estilo Shopify) -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @for (pizza of filteredPizzas(); track pizza.id) {
-          <div 
-            class="rounded-3xl border border-slate-200/40 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col group"
-            style="background-color: var(--admin-card-bg);"
-          >
-            <!-- Foto de Pizza -->
-            <div class="h-44 relative bg-slate-100/5 overflow-hidden">
-              <img [src]="pizza.imagen" [alt]="pizza.nombre" class="h-full w-full object-cover group-hover:scale-102 transition-transform duration-300">
-              <div class="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-xs font-black text-white border border-white/10 shadow-sm">
+          <div class="rounded-lg border border-slate-200 overflow-hidden shadow-sm hover:shadow hover:border-slate-300 transition-all duration-150 flex flex-col bg-white">
+            <div class="h-40 relative bg-slate-100 overflow-hidden border-b border-slate-100">
+              <img [src]="pizza.imagen" [alt]="pizza.nombre" class="h-full w-full object-cover">
+              <div class="absolute top-2.5 right-2.5 bg-slate-900/85 px-2.5 py-0.5 rounded-full text-xs font-semibold text-white border border-slate-800 shadow-sm">
                 ${{ pizza.precioBase | number:'1.2-2' }}
               </div>
             </div>
 
-            <!-- Cuerpo de Tarjeta -->
-            <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
               <div class="space-y-1">
-                <h4 class="font-black text-md leading-tight text-white/90">{{ pizza.nombre }}</h4>
-                <p class="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
+                <h4 class="font-bold text-sm text-slate-900 leading-tight">{{ pizza.nombre }}</h4>
+                <p class="text-xs text-slate-500 font-normal leading-relaxed line-clamp-2">
                   {{ pizza.descripcion || 'Sin descripción disponible en el menú.' }}
                 </p>
               </div>
 
-              <!-- Ingredientes / Bases Predeterminadas -->
-              <div class="text-[10px] uppercase font-bold text-slate-400 space-y-1 bg-slate-50/5 p-3 rounded-2xl border border-slate-200/5">
-                <div>Masa: <span class="text-slate-300">{{ pizza.defaultMasa || 'Tradicional' }}</span></div>
-                <div>Salsa: <span class="text-slate-300">{{ pizza.defaultSalsa || 'Salsa de Tomate' }}</span></div>
-                <div>Queso: <span class="text-slate-300">{{ pizza.defaultQueso || 'Mozzarella' }}</span></div>
+              <div class="text-[11px] text-slate-600 space-y-1 bg-slate-50 p-3 rounded-lg border border-slate-200 font-medium">
+                <div>Masa: <span class="text-slate-800 font-semibold">{{ pizza.defaultMasa || 'Tradicional' }}</span></div>
+                <div>Salsa: <span class="text-slate-800 font-semibold">{{ pizza.defaultSalsa || 'Salsa de Tomate' }}</span></div>
+                <div>Queso: <span class="text-slate-800 font-semibold">{{ pizza.defaultQueso || 'Mozzarella' }}</span></div>
                 @if (pizza.defaultExtras && pizza.defaultExtras.length > 0) {
-                  <div class="truncate">Extras: <span class="text-slate-300">{{ pizza.defaultExtras.join(', ') }}</span></div>
+                  <div class="truncate">Extras: <span class="text-slate-800 font-semibold">{{ pizza.defaultExtras.join(', ') }}</span></div>
                 }
               </div>
 
-              <!-- Botones de Acción -->
-              <div class="flex items-center gap-2 pt-2 border-t border-slate-100/10">
-                <button (click)="openEditPizzaForm(pizza)" class="flex-1 h-9 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 font-black text-[10px] uppercase tracking-wider transition-colors cursor-pointer">
+              <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+                <button (click)="openEditPizzaForm(pizza)" class="flex-1 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 font-semibold text-[10px] uppercase tracking-wider transition-colors cursor-pointer">
                   Editar
                 </button>
-                <button (click)="deletePizza(pizza.id)" class="flex-1 h-9 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black text-[10px] uppercase tracking-wider transition-colors cursor-pointer">
+                <button (click)="deletePizza(pizza.id)" class="flex-1 h-8 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold text-[10px] uppercase tracking-wider transition-colors cursor-pointer">
                   Eliminar
                 </button>
               </div>
             </div>
           </div>
         } @empty {
-          <div class="col-span-full py-16 text-center text-slate-400 font-black text-xs border border-dashed border-slate-200/50 rounded-3xl">
+          <div class="col-span-full py-16 text-center text-slate-400 font-semibold text-xs border border-dashed border-slate-200 rounded-lg">
             No se encontraron pizzas con los filtros actuales.
           </div>
         }
@@ -194,11 +188,10 @@
 
     <!-- SUB-TAB: INGREDIENTES EXTRAS -->
     @if (activeSubTab() === 'ingredients') {
-      <!-- Barra de Búsqueda de Ingredientes -->
       <div class="mb-6 flex items-center justify-between gap-4">
         <div class="relative w-full max-w-md">
-          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
             </svg>
           </span>
@@ -207,7 +200,7 @@
             placeholder="Buscar ingrediente extra..." 
             [value]="searchQuery()"
             (input)="onSearchChange($event)"
-            class="w-full pl-11 pr-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+            class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 text-xs font-semibold bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:bg-white transition-colors"
           >
         </div>
       </div>
@@ -215,31 +208,31 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm font-medium border-collapse">
           <thead>
-            <tr class="border-b border-slate-100/10 text-[10px] uppercase font-bold tracking-widest text-slate-400">
+            <tr class="border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
               <th class="py-3 px-4">Nombre del Ingrediente</th>
               <th class="py-3 px-4">Categoría</th>
               <th class="py-3 px-4 text-right">Precio Adicional</th>
               <th class="py-3 px-4 text-center">Acciones</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100/5">
+          <tbody class="divide-y divide-slate-100">
             @for (ing of filteredIngredients(); track ing.nombre) {
-              <tr class="hover:bg-slate-50/5 transition-colors">
-                <td class="py-4 px-4 font-black">{{ ing.nombre }}</td>
-                <td class="py-4 px-4">
-                  <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500">Ingrediente Extra</span>
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900">{{ ing.nombre }}</td>
+                <td class="py-3.5 px-4">
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase bg-amber-50 text-amber-700 border border-amber-100">Ingrediente Extra</span>
                 </td>
-                <td class="py-4 px-4 text-right font-black">+${{ ing.precio | number:'1.2-2' }}</td>
-                <td class="py-4 px-4 text-center">
+                <td class="py-3.5 px-4 text-right font-semibold text-slate-900">+${{ ing.precio | number:'1.2-2' }}</td>
+                <td class="py-3.5 px-4 text-center">
                   <div class="flex items-center justify-center gap-2">
-                    <button (click)="openEditIngredientForm(ing)" class="h-8 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 font-bold text-xs transition-colors cursor-pointer">Editar</button>
-                    <button (click)="deleteIngredient(ing.nombre)" class="h-8 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs transition-colors cursor-pointer">Eliminar</button>
+                    <button (click)="openEditIngredientForm(ing)" class="h-7 px-2.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 font-semibold text-xs transition-colors cursor-pointer">Editar</button>
+                    <button (click)="deleteIngredient(ing.nombre)" class="h-7 px-2.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold text-xs transition-colors cursor-pointer">Eliminar</button>
                   </div>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="py-12 text-center text-slate-400 font-black text-xs">Sin ingredientes adicionales coincidentes.</td>
+                <td colspan="4" class="py-12 text-center text-slate-400 font-semibold text-xs">Sin ingredientes adicionales coincidentes.</td>
               </tr>
             }
           </tbody>
@@ -249,11 +242,10 @@
 
     <!-- SUB-TAB: BASES (MASAS, SALSAS Y QUESOS) -->
     @if (activeSubTab() === 'options') {
-      <!-- Barra de Búsqueda de Bases -->
       <div class="mb-6 flex items-center justify-between gap-4">
         <div class="relative w-full max-w-md">
-          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
             </svg>
           </span>
@@ -262,7 +254,7 @@
             placeholder="Buscar masa, salsa o queso..." 
             [value]="searchQuery()"
             (input)="onSearchChange($event)"
-            class="w-full pl-11 pr-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+            class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 text-xs font-semibold bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:bg-white transition-colors"
           >
         </div>
       </div>
@@ -270,24 +262,24 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm font-medium border-collapse">
           <thead>
-            <tr class="border-b border-slate-100/10 text-[10px] uppercase font-bold tracking-widest text-slate-400">
+            <tr class="border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
               <th class="py-3 px-4">Nombre de la Base</th>
               <th class="py-3 px-4">Categoría / Tipo</th>
               <th class="py-3 px-4 text-right">Precio Extra</th>
               <th class="py-3 px-4 text-center">Acciones</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100/5">
+          <tbody class="divide-y divide-slate-100">
             @for (ing of filteredOptions(); track ing.nombre) {
-              <tr class="hover:bg-slate-50/5 transition-colors">
-                <td class="py-4 px-4 font-black">{{ ing.nombre }}</td>
-                <td class="py-4 px-4">
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900">{{ ing.nombre }}</td>
+                <td class="py-3.5 px-4">
                   <span 
-                    class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider"
+                    class="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase border"
                     [ngClass]="{
-                      'bg-purple-500/10 text-purple-500': ing.categoria === 'masa',
-                      'bg-red-500/10 text-red-500': ing.categoria === 'salsa',
-                      'bg-yellow-500/10 text-yellow-500': ing.categoria === 'queso'
+                      'bg-purple-50 text-purple-700 border-purple-100': ing.categoria === 'masa',
+                      'bg-red-50 text-red-700 border-red-100': ing.categoria === 'salsa',
+                      'bg-amber-50 text-amber-700 border-amber-100': ing.categoria === 'queso'
                     }"
                   >
                     @if (ing.categoria === 'masa') { Tipo de Masa }
@@ -295,17 +287,17 @@
                     @else if (ing.categoria === 'queso') { Queso Base }
                   </span>
                 </td>
-                <td class="py-4 px-4 text-right font-black">+${{ ing.precio | number:'1.2-2' }}</td>
-                <td class="py-4 px-4 text-center">
+                <td class="py-3.5 px-4 text-right font-semibold text-slate-900">+${{ ing.precio | number:'1.2-2' }}</td>
+                <td class="py-3.5 px-4 text-center">
                   <div class="flex items-center justify-center gap-2">
-                    <button (click)="openEditIngredientForm(ing)" class="h-8 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 font-bold text-xs transition-colors cursor-pointer">Editar</button>
-                    <button (click)="deleteIngredient(ing.nombre)" class="h-8 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs transition-colors cursor-pointer">Eliminar</button>
+                    <button (click)="openEditIngredientForm(ing)" class="h-7 px-2.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 font-semibold text-xs transition-colors cursor-pointer">Editar</button>
+                    <button (click)="deleteIngredient(ing.nombre)" class="h-7 px-2.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold text-xs transition-colors cursor-pointer">Eliminar</button>
                   </div>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="py-12 text-center text-slate-400 font-black text-xs">Sin bases registradas con los filtros.</td>
+                <td colspan="4" class="py-12 text-center text-slate-400 font-semibold text-xs">Sin bases registradas con los filtros.</td>
               </tr>
             }
           </tbody>
@@ -315,11 +307,10 @@
 
     <!-- SUB-TAB: TAMAÑOS -->
     @if (activeSubTab() === 'sizes') {
-      <!-- Barra de Búsqueda de Tamaños -->
       <div class="mb-6 flex items-center justify-between gap-4">
         <div class="relative w-full max-w-md">
-          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
             </svg>
           </span>
@@ -328,7 +319,7 @@
             placeholder="Buscar tamaño..." 
             [value]="searchQuery()"
             (input)="onSearchChange($event)"
-            class="w-full pl-11 pr-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+            class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 text-xs font-semibold bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:bg-white transition-colors"
           >
         </div>
       </div>
@@ -336,29 +327,97 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm font-medium border-collapse">
           <thead>
-            <tr class="border-b border-slate-100/10 text-[10px] uppercase font-bold tracking-widest text-slate-400">
+            <tr class="border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
               <th class="py-3 px-4">Nombre del Tamaño</th>
               <th class="py-3 px-4">Medidas / Dimensiones</th>
               <th class="py-3 px-4 text-right">Precio Base</th>
               <th class="py-3 px-4 text-center">Acciones</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100/5">
+          <tbody class="divide-y divide-slate-100">
             @for (size of filteredSizes(); track size.nombre) {
-              <tr class="hover:bg-slate-50/5 transition-colors">
-                <td class="py-4 px-4 font-black">{{ size.nombre }}</td>
-                <td class="py-4 px-4 text-xs font-semibold text-slate-500">{{ size.medida }}</td>
-                <td class="py-4 px-4 text-right font-black">${{ size.precio | number:'1.2-2' }}</td>
-                <td class="py-4 px-4 text-center">
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900">{{ size.nombre }}</td>
+                <td class="py-3.5 px-4 text-xs font-semibold text-slate-500">{{ size.medida }}</td>
+                <td class="py-3.5 px-4 text-right font-semibold text-slate-900">${{ size.precio | number:'1.2-2' }}</td>
+                <td class="py-3.5 px-4 text-center">
                   <div class="flex items-center justify-center gap-2">
-                    <button (click)="openEditSizeForm(size)" class="h-8 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 font-bold text-xs transition-colors cursor-pointer">Editar</button>
-                    <button (click)="deleteSize(size.nombre)" class="h-8 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs transition-colors cursor-pointer">Eliminar</button>
+                    <button (click)="openEditSizeForm(size)" class="h-7 px-2.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 font-semibold text-xs transition-colors cursor-pointer">Editar</button>
+                    <button (click)="deleteSize(size.nombre)" class="h-7 px-2.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold text-xs transition-colors cursor-pointer">Eliminar</button>
                   </div>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="py-12 text-center text-slate-400 font-black text-xs">Sin tamaños registrados con estos filtros.</td>
+                <td colspan="4" class="py-12 text-center text-slate-400 font-semibold text-xs">Sin tamaños registrados con estos filtros.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- SUB-TAB: PROMOCIONES -->
+    @if (activeSubTab() === 'promos') {
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div class="relative w-full max-w-md">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+            </svg>
+          </span>
+          <input 
+            type="text" 
+            placeholder="Buscar promoción..." 
+            [value]="searchQuery()"
+            (input)="onSearchChange($event)"
+            class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 text-xs font-semibold bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:bg-white transition-colors"
+          >
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm font-medium border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <th class="py-3 px-4">Nombre / Detalles</th>
+              <th class="py-3 px-4">Precio Combo</th>
+              <th class="py-3 px-4">Pizza Base</th>
+              <th class="py-3 px-4">Badge (Etiqueta)</th>
+              <th class="py-3 px-4 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @for (promo of filteredPromos(); track promo.id) {
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900">
+                  <div class="flex items-center gap-3">
+                    <img [src]="promo.imagen" [alt]="promo.nombre" class="h-10 w-16 object-cover rounded-lg border border-slate-200">
+                    <div>
+                      <div class="text-sm font-semibold text-slate-900">{{ promo.nombre }}</div>
+                      <div class="text-[11px] text-slate-500 max-w-xs truncate font-medium">{{ promo.descripcion }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 font-bold text-red-600">${{ promo.precio | number:'1.2-2' }}</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-700">{{ promo.pizzaBase.nombre || promo.pizzaBaseId || 'Sin asignar' }}</td>
+                <td class="py-3.5 px-4">
+                  @if (promo.badge) {
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-orange-50 text-orange-600 border border-orange-100">{{ promo.badge }}</span>
+                  } @else {
+                    <span class="text-slate-400 italic text-[11px]">-</span>
+                  }
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button (click)="openEditPromoForm(promo)" class="h-7 px-2.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 font-semibold text-xs transition-colors cursor-pointer">Editar</button>
+                    <button (click)="deletePromo(promo.id)" class="h-7 px-2.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold text-xs transition-colors cursor-pointer">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="py-12 text-center text-slate-400 font-semibold text-xs">Sin promociones registradas.</td>
               </tr>
             }
           </tbody>
@@ -372,84 +431,82 @@
   <!-- MODAL: PIZZA FORM -->
   <!-- ======================================================= -->
   @if (isEditingPizza()) {
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="w-full max-w-lg rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" style="background-color: var(--admin-card-bg); border-color: var(--admin-card-border);">
-        <div class="p-6 border-b border-slate-100/10 flex items-center justify-between bg-black/5">
-          <h3 class="text-lg font-black uppercase tracking-tight" style="color: var(--admin-primary);">
+    <div class="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <h3 class="text-base font-bold text-slate-900">
             {{ selectedPizza() ? 'Editar Pizza' : 'Añadir Nueva Pizza' }}
           </h3>
-          <button (click)="isEditingPizza.set(false)" class="h-8 w-8 rounded-full bg-slate-100/10 hover:bg-slate-100/20 flex items-center justify-center text-slate-400 hover:text-slate-100 cursor-pointer">&times;</button>
+          <button (click)="isEditingPizza.set(false)" class="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 cursor-pointer text-lg">&times;</button>
         </div>
-        <form (ngSubmit)="savePizza()" class="flex-1 overflow-y-auto p-6 space-y-4">
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Nombre de la Pizza</label>
-            <input type="text" name="nombre" [(ngModel)]="pizzaNombre" placeholder="Ej. Pepperoni Especial" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
+        <form (ngSubmit)="savePizza()" class="flex-1 overflow-y-auto p-5 space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Nombre de la Pizza</label>
+            <input type="text" name="nombre" [(ngModel)]="pizzaNombre" placeholder="Ej. Pepperoni Especial" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" required>
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Precio Base ($)</label>
-            <input type="number" name="precio" [(ngModel)]="pizzaPrecio" min="0" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Precio Base ($)</label>
+            <input type="number" name="precio" [(ngModel)]="pizzaPrecio" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" required>
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Subir Imagen a Cloudinary</label>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Subir Imagen a Cloudinary</label>
             <div class="flex items-center gap-3">
               <input type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden" #fileInput>
-              <button type="button" (click)="fileInput.click()" [disabled]="isUploadingImage()" class="px-4 py-3 rounded-2xl border border-dashed border-slate-200/40 text-xs font-bold hover:bg-slate-50/10 cursor-pointer flex items-center gap-2 text-slate-300">
+              <button type="button" (click)="fileInput.click()" [disabled]="isUploadingImage()" class="px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-400 transition-colors cursor-pointer flex items-center gap-1.5">
                 @if (isUploadingImage()) {
-                  <svg class="animate-spin h-3.5 w-3.5 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg class="animate-spin h-3.5 w-3.5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   Subiendo...
                 } @else {
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-amber-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-red-600">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                   </svg>
                   Seleccionar Imagen
                 }
               </button>
               @if (pizzaImagen) {
-                <span class="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-                  ✓ Listo
+                <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                  ✓ Subida
                 </span>
               }
             </div>
-            <!-- Vista Previa de la Imagen Subida -->
             @if (pizzaImagen && !isUploadingImage()) {
-              <div class="mt-2.5 h-24 w-40 rounded-2xl overflow-hidden border border-slate-200/20 shadow-sm animate-in fade-in duration-200">
+              <div class="mt-2 h-20 w-32 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
                 <img [src]="pizzaImagen" alt="Vista previa de la pizza" class="h-full w-full object-cover">
               </div>
             }
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">O URL de la Imagen (Manual)</label>
-            <input type="text" name="imagen" [(ngModel)]="pizzaImagen" placeholder="Ej. https://images.unsplash.com/..." class="w-full px-4 py-3 rounded-2xl border text-sm font-semibold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">O URL de la Imagen (Manual)</label>
+            <input type="text" name="imagen" [(ngModel)]="pizzaImagen" placeholder="Ej. https://images.unsplash.com/..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Descripción</label>
-            <textarea name="descripcion" [(ngModel)]="pizzaDescripcion" rows="3" placeholder="Ingredientes y descripción..." class="w-full px-4 py-3 rounded-2xl border text-sm font-semibold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20"></textarea>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Descripción</label>
+            <textarea name="descripcion" [(ngModel)]="pizzaDescripcion" rows="2" placeholder="Ingredientes y descripción..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-colors"></textarea>
           </div>
 
-          <!-- Bases por Defecto (Masa, Salsa, Queso) -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-2xl bg-slate-50/5 border border-slate-100/10">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg bg-slate-50 border border-slate-200">
             <div class="space-y-1">
-              <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Masa por Defecto</label>
-              <select name="defaultMasa" [(ngModel)]="pizzaDefaultMasa" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+              <label class="text-[10px] uppercase font-bold tracking-widest text-slate-500">Masa por Defecto</label>
+              <select name="defaultMasa" [(ngModel)]="pizzaDefaultMasa" class="w-full px-2 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold bg-white text-slate-900 focus:outline-none focus:border-red-500">
                 @for (masa of getIngredientsOfCategory('masa'); track masa.nombre) {
                   <option [value]="masa.nombre">{{ masa.nombre }}</option>
                 }
               </select>
             </div>
             <div class="space-y-1">
-              <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Salsa por Defecto</label>
-              <select name="defaultSalsa" [(ngModel)]="pizzaDefaultSalsa" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+              <label class="text-[10px] uppercase font-bold tracking-widest text-slate-500">Salsa por Defecto</label>
+              <select name="defaultSalsa" [(ngModel)]="pizzaDefaultSalsa" class="w-full px-2 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold bg-white text-slate-900 focus:outline-none focus:border-red-500">
                 @for (salsa of getIngredientsOfCategory('salsa'); track salsa.nombre) {
                   <option [value]="salsa.nombre">{{ salsa.nombre }}</option>
                 }
               </select>
             </div>
             <div class="space-y-1">
-              <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Queso por Defecto</label>
-              <select name="defaultQueso" [(ngModel)]="pizzaDefaultQueso" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+              <label class="text-[10px] uppercase font-bold tracking-widest text-slate-500">Queso por Defecto</label>
+              <select name="defaultQueso" [(ngModel)]="pizzaDefaultQueso" class="w-full px-2 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold bg-white text-slate-900 focus:outline-none focus:border-red-500">
                 @for (queso of getIngredientsOfCategory('queso'); track queso.nombre) {
                   <option [value]="queso.nombre">{{ queso.nombre }}</option>
                 }
@@ -457,21 +514,18 @@
             </div>
           </div>
 
-          <!-- Ingredientes por Defecto -->
-          <div class="p-4 rounded-2xl bg-slate-50/5 border border-slate-100/10 space-y-4">
-            <h4 class="text-xs uppercase font-black tracking-wider text-slate-400 border-b border-slate-100/5 pb-2">Ingredientes Incluidos por Defecto</h4>
-            
-            <!-- Default Extras toppings list -->
+          <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-3">
+            <h4 class="text-xs uppercase font-bold tracking-wider text-slate-500 border-b border-slate-200 pb-1.5">Ingredientes Incluidos por Defecto</h4>
             <div class="space-y-2">
               <div class="flex flex-wrap gap-2">
                 @for (extra of getIngredientsOfCategory('extra'); track extra.nombre) {
                   <button 
                     type="button"
                     (click)="togglePizzaDefaultExtra(extra.nombre)"
-                    class="px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase border transition-all duration-150 active:scale-95 cursor-pointer"
+                    class="px-2.5 py-1.5 rounded-lg text-[10px] font-semibold uppercase border transition-colors cursor-pointer"
                     [class]="isPizzaDefaultExtraSelected(extra.nombre)
-                      ? 'bg-amber-500 border-amber-500 text-white'
-                      : 'bg-transparent border-slate-200 text-slate-400 hover:bg-slate-50/10'"
+                      ? 'bg-red-600 border-red-600 text-white'
+                      : 'bg-white border-slate-300 text-slate-500 hover:bg-slate-100'"
                   >
                     {{ extra.nombre }}
                   </button>
@@ -480,9 +534,9 @@
             </div>
           </div>
 
-          <div class="pt-4 border-t border-slate-100/10 flex gap-3 bg-black/5 -mx-6 -mb-6 p-6">
-            <button type="submit" class="flex-1 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow cursor-pointer" style="background-color: var(--admin-primary);">Guardar Pizza</button>
-            <button type="button" (click)="isEditingPizza.set(false)" class="bg-slate-100/10 hover:bg-slate-100/20 text-slate-500 px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer">Cancelar</button>
+          <div class="pt-4 border-t border-slate-200 flex gap-3 bg-slate-50 -mx-5 -mb-5 p-5">
+            <button type="submit" class="flex-1 text-white bg-red-600 hover:bg-red-700 py-2.5 rounded-lg font-semibold text-sm transition-colors cursor-pointer">Guardar Pizza</button>
+            <button type="button" (click)="isEditingPizza.set(false)" class="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors cursor-pointer">Cancelar</button>
           </div>
 
         </form>
@@ -494,10 +548,10 @@
   <!-- MODAL: INGREDIENT FORM -->
   <!-- ======================================================= -->
   @if (isEditingIngredient()) {
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="w-full max-w-lg rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" style="background-color: var(--admin-card-bg); border-color: var(--admin-card-border);">
-        <div class="p-6 border-b border-slate-100/10 flex items-center justify-between bg-black/5">
-          <h3 class="text-lg font-black uppercase tracking-tight" style="color: var(--admin-primary);">
+    <div class="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <h3 class="text-base font-bold text-slate-900">
             @if (selectedIngredient()) {
               Editar
             } @else {
@@ -508,11 +562,11 @@
             @else if (ingredientCategoria === 'queso') { Queso Base }
             @else { Ingrediente Extra (Topping) }
           </h3>
-          <button (click)="isEditingIngredient.set(false)" class="h-8 w-8 rounded-full bg-slate-100/10 hover:bg-slate-100/20 flex items-center justify-center text-slate-400 hover:text-slate-100 cursor-pointer">&times;</button>
+          <button (click)="isEditingIngredient.set(false)" class="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 cursor-pointer text-lg">&times;</button>
         </div>
-        <form (ngSubmit)="saveIngredient()" class="flex-1 overflow-y-auto p-6 space-y-4">
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">
+        <form (ngSubmit)="saveIngredient()" class="flex-1 overflow-y-auto p-5 space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               @if (ingredientCategoria === 'masa') { Nombre de la Masa }
               @else if (ingredientCategoria === 'salsa') { Nombre de la Salsa }
               @else if (ingredientCategoria === 'queso') { Nombre del Queso }
@@ -528,28 +582,27 @@
                 ingredientCategoria === 'queso' ? 'Ej. Queso Cheddar, Mezcla de 3 Quesos' :
                 'Ej. Pepperoni, Champiñones, Tocino'
               " 
-              class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" 
+              class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" 
               required
             >
           </div>
-          <!-- Categoría / Tipo (Campo de solo lectura para evitar confusiones) -->
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Tipo de Elemento</label>
-            <div class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200/50 text-slate-400 select-none">
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo de Elemento</label>
+            <div class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-500 select-none">
               @if (ingredientCategoria === 'masa') { Masa (Base) }
               @else if (ingredientCategoria === 'salsa') { Salsa (Base) }
               @else if (ingredientCategoria === 'queso') { Queso (Base) }
               @else { Ingrediente Extra (Topping) }
             </div>
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Costo Adicional para el Cliente ($)</label>
-            <input type="number" name="precio" [(ngModel)]="ingredientPrecio" min="0" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
-            <span class="text-[10px] text-slate-400 block mt-1 font-semibold">Ingresa 0 si no tiene costo extra (ej. masas y salsas básicas).</span>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Costo Adicional para el Cliente ($)</label>
+            <input type="number" name="precio" [(ngModel)]="ingredientPrecio" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" required>
+            <span class="text-[10px] text-slate-500 block mt-1 font-medium">Ingresa 0 si no tiene costo extra (ej. masas y salsas básicas).</span>
           </div>
-          <div class="pt-4 border-t border-slate-100/10 flex gap-3 bg-black/5 -mx-6 -mb-6 p-6">
-            <button type="submit" class="flex-1 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow cursor-pointer" style="background-color: var(--admin-primary);">Guardar Elemento</button>
-            <button type="button" (click)="isEditingIngredient.set(false)" class="bg-slate-100/10 hover:bg-slate-100/20 text-slate-500 px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer">Cancelar</button>
+          <div class="pt-4 border-t border-slate-200 flex gap-3 bg-slate-50 -mx-5 -mb-5 p-5">
+            <button type="submit" class="flex-1 text-white bg-red-600 hover:bg-red-700 py-2.5 rounded-lg font-semibold text-sm transition-colors cursor-pointer">Guardar Elemento</button>
+            <button type="button" (click)="isEditingIngredient.set(false)" class="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors cursor-pointer">Cancelar</button>
           </div>
         </form>
       </div>
@@ -560,31 +613,112 @@
   <!-- MODAL: SIZE FORM -->
   <!-- ======================================================= -->
   @if (isEditingSize()) {
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="w-full max-w-lg rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" style="background-color: var(--admin-card-bg); border-color: var(--admin-card-border);">
-        <div class="p-6 border-b border-slate-100/10 flex items-center justify-between bg-black/5">
-          <h3 class="text-lg font-black uppercase tracking-tight" style="color: var(--admin-primary);">
+    <div class="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <h3 class="text-base font-bold text-slate-900">
             {{ selectedSize() ? 'Editar Tamaño' : 'Añadir Nuevo Tamaño' }}
           </h3>
-          <button (click)="isEditingSize.set(false)" class="h-8 w-8 rounded-full bg-slate-100/10 hover:bg-slate-100/20 flex items-center justify-center text-slate-400 hover:text-slate-100 cursor-pointer">&times;</button>
+          <button (click)="isEditingSize.set(false)" class="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 cursor-pointer text-lg">&times;</button>
         </div>
-        <form (ngSubmit)="saveSize()" class="flex-1 overflow-y-auto p-6 space-y-4">
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Nombre del Tamaño</label>
-            <input type="text" name="nombre" [(ngModel)]="sizeNombre" placeholder="Ej. Chica, Mediana, Grande, Familiar, Jumbo" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
+        <form (ngSubmit)="saveSize()" class="flex-1 overflow-y-auto p-5 space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Nombre del Tamaño</label>
+            <input type="text" name="nombre" [(ngModel)]="sizeNombre" placeholder="Ej. Chica, Mediana, Grande..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" required>
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Medida / Porciones y Diámetro</label>
-            <input type="text" name="medida" [(ngModel)]="sizeMedida" placeholder='Ej. 12" - 8 rebanadas' class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
-            <span class="text-[10px] text-slate-400 block mt-1 font-semibold">Especifica el diámetro en pulgadas y la cantidad de rebanadas estimadas.</span>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Medida / Porciones y Diámetro</label>
+            <input type="text" name="medida" [(ngModel)]="sizeMedida" placeholder='Ej. 12" - 8 rebanadas' class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" required>
+            <span class="text-[10px] text-slate-500 block mt-1 font-medium">Especifica el diámetro en pulgadas y la cantidad de rebanadas estimadas.</span>
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Precio Base del Tamaño ($)</label>
-            <input type="number" name="precio" [(ngModel)]="sizePrecio" min="0" class="w-full px-4 py-3 rounded-2xl border text-sm font-bold bg-slate-50/5 text-inherit border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20" required>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Precio Base del Tamaño ($)</label>
+            <input type="number" name="precio" [(ngModel)]="sizePrecio" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" required>
           </div>
-          <div class="pt-4 border-t border-slate-100/10 flex gap-3 bg-black/5 -mx-6 -mb-6 p-6">
-            <button type="submit" class="flex-1 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow cursor-pointer" style="background-color: var(--admin-primary);">Guardar Tamaño</button>
-            <button type="button" (click)="isEditingSize.set(false)" class="bg-slate-100/10 hover:bg-slate-100/20 text-slate-500 px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer">Cancelar</button>
+          <div class="pt-4 border-t border-slate-200 flex gap-3 bg-slate-50 -mx-5 -mb-5 p-5">
+            <button type="submit" class="flex-1 text-white bg-red-600 hover:bg-red-700 py-2.5 rounded-lg font-semibold text-sm transition-colors cursor-pointer">Guardar Tamaño</button>
+            <button type="button" (click)="isEditingSize.set(false)" class="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors cursor-pointer">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ======================================================= -->
+  <!-- MODAL: PROMO FORM -->
+  <!-- ======================================================= -->
+  @if (isEditingPromo()) {
+    <div class="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <h3 class="text-base font-bold text-slate-900">
+            {{ selectedPromo() ? 'Editar Promoción' : 'Añadir Nueva Promoción' }}
+          </h3>
+          <button (click)="isEditingPromo.set(false)" class="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 cursor-pointer text-lg">&times;</button>
+        </div>
+        <form (ngSubmit)="savePromo()" class="flex-1 overflow-y-auto p-5 space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Nombre de la Promoción</label>
+            <input type="text" name="promoNombre" [(ngModel)]="promoNombre" placeholder="Ej. Combo Pareja, Martes 2x1" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" required>
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Precio del Combo ($)</label>
+            <input type="number" name="promoPrecio" [(ngModel)]="promoPrecio" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" required>
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Etiqueta (Badge)</label>
+            <input type="text" name="promoBadge" [(ngModel)]="promoBadge" placeholder="Ej. Sólo Hoy, Para Compartir..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pizza Base Asociada</label>
+            <select name="promoPizzaBaseId" [(ngModel)]="promoPizzaBaseId" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold bg-white text-slate-900 focus:outline-none focus:border-red-500" required>
+              @for (pizza of productService.pizzas(); track pizza.id) {
+                <option [value]="pizza.id">{{ pizza.nombre }}</option>
+              }
+            </select>
+            <span class="text-[10px] text-slate-500 block mt-1 font-medium">El cliente iniciará el flujo de personalización con esta pizza base.</span>
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Subir Imagen a Cloudinary</label>
+            <div class="flex items-center gap-3">
+              <input type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden" #fileInputPromo>
+              <button type="button" (click)="fileInputPromo.click()" [disabled]="isUploadingImage()" class="px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-400 transition-colors cursor-pointer flex items-center gap-1.5">
+                @if (isUploadingImage()) {
+                  <svg class="animate-spin h-3.5 w-3.5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Subiendo...
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-red-600">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                  </svg>
+                  Seleccionar Imagen
+                }
+              </button>
+              @if (promoImagen) {
+                <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                  ✓ Subida
+                </span>
+              }
+            </div>
+            @if (promoImagen && !isUploadingImage()) {
+              <div class="mt-2 h-20 w-32 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+                <img [src]="promoImagen" alt="Vista previa" class="h-full w-full object-cover">
+              </div>
+            }
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">O URL de la Imagen (Manual)</label>
+            <input type="text" name="promoImagen" [(ngModel)]="promoImagen" placeholder="Ej. https://images.unsplash.com/..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Descripción de la Promoción</label>
+            <textarea name="promoDescripcion" [(ngModel)]="promoDescripcion" rows="2" placeholder="Ej. Incluye 1 pizza grande y refresco..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-colors" required></textarea>
+          </div>
+          <div class="pt-4 border-t border-slate-200 flex gap-3 bg-slate-50 -mx-5 -mb-5 p-5">
+            <button type="submit" class="flex-1 text-white bg-red-600 hover:bg-red-700 py-2.5 rounded-lg font-semibold text-sm transition-colors cursor-pointer">Guardar Promoción</button>
+            <button type="button" (click)="isEditingPromo.set(false)" class="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors cursor-pointer">Cancelar</button>
           </div>
         </form>
       </div>

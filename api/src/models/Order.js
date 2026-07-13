@@ -12,6 +12,11 @@ const Order = sequelize.define('Order', {
     allowNull: false,
     unique: true,
   },
+  clienteNombre: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: '',
+  },
   items: {
     type: DataTypes.JSON, // Almacena el array de CartItem de forma serializada en formato JSON
     allowNull: false,
@@ -39,6 +44,14 @@ const Order = sequelize.define('Order', {
   },
   preferenceId: {
     type: DataTypes.STRING(100),
+    allowNull: true,
+  },
+  pickupCode: {
+    type: DataTypes.STRING(10),
+    allowNull: true,
+  },
+  userId: {
+    type: DataTypes.UUID,
     allowNull: true,
   },
   time: {

@@ -43,21 +43,27 @@ export const createPaymentPreference = async (req, res) => {
     const preference = new Preference(client);
 
     const webhookUrl = `${process.env.BACKEND_URL}/api/payments/webhook`;
+    const isLocalhost = webhookUrl.includes('localhost') || webhookUrl.includes('127.0.0.1');
+
+    const bodyData = {
+      items: items,
+      backUrls: {
+        success: `${process.env.FRONTEND_URL}/success?orderId=${orderId}`,
+        failure: `${process.env.FRONTEND_URL}/cart?status=failure`,
+        pending: `${process.env.FRONTEND_URL}/cart?status=pending`,
+      },
+      autoReturn: 'approved',
+      metadata: {
+        order_id: orderId,
+      },
+    };
+
+    if (!isLocalhost) {
+      bodyData.notificationUrl = webhookUrl;
+    }
 
     const response = await preference.create({
-      body: {
-        items: items,
-        back_urls: {
-          success: `${process.env.FRONTEND_URL}/success?orderId=${orderId}`,
-          failure: `${process.env.FRONTEND_URL}/cart?status=failure`,
-          pending: `${process.env.FRONTEND_URL}/cart?status=pending`,
-        },
-        auto_return: 'approved',
-        notification_url: webhookUrl,
-        metadata: {
-          order_id: orderId,
-        },
-      },
+      body: bodyData,
     });
 
     // Guardar el preferenceId en la orden

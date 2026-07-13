@@ -1,40 +1,45 @@
-@if (cartService.activeModal() === 'success') {
-  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto transition-all duration-300">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-8">
-      
-      <!-- Close Button -->
-      <button 
-        (click)="nuevaOrden()"
-        class="absolute top-5 right-5 w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-100 no-print"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+<div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden relative p-8">
+    
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-20 space-y-4">
+        <svg class="animate-spin h-10 w-10 text-pizza-orange" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-      </button>
-
+        <p class="text-sm font-bold text-slate-600">Cargando detalles de tu pedido...</p>
+      </div>
+    } @else if (error(); as errMessage) {
+      <div class="flex flex-col items-center justify-center py-12 text-center space-y-4">
+        <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-500 border border-red-100">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-black text-slate-800">¡Algo salió mal!</h2>
+        <p class="text-xs text-slate-400 font-semibold max-w-xs">{{ errMessage }}</p>
+        <button (click)="volverAlMenu()" class="w-full bg-pizza-red hover:bg-red-700 text-white font-bold py-3.5 px-6 rounded-2xl transition-colors cursor-pointer shadow">
+          Volver al Menú
+        </button>
+      </div>
+    } @else if (order(); as orderData) {
       <!-- Printable Ticket Area -->
       <div id="printable-ticket" class="flex flex-col items-center">
-        <!-- Giant Pizza Slice -->
-        <div class="w-20 h-20 text-amber-500 mb-4 animate-bounce no-print">
-          <!-- Beautiful Vector Pizza Slice SVG -->
-          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-            <path d="M56 12C48 6 36 4 32 4C28 4 16 6 8 12C7 13 8 15 9 15.5C14 18 20 20 32 20C44 20 50 18 55 15.5C56 15 57 13 56 12Z" fill="#E85D04"/>
-            <path d="M53.5 16.5C48 20.5 38 23 32 23C26 23 16 20.5 10.5 16.5C10 16 9.5 17 10 18L30.5 58.5C31 59.5 33 59.5 33.5 58.5L54 18C54.5 17 54 16 53.5 16.5Z" fill="#FFB703"/>
-            <circle cx="24" cy="24" r="3.5" fill="#D00000"/>
-            <circle cx="40" cy="24" r="3.5" fill="#D00000"/>
-            <circle cx="32" cy="36" r="3.5" fill="#D00000"/>
-            <circle cx="28" cy="46" r="2.5" fill="#D00000"/>
+        <!-- Giant Check Circle -->
+        <div class="w-20 h-20 text-emerald-500 mb-4 animate-bounce no-print flex items-center justify-center bg-emerald-50 rounded-full border border-emerald-100">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-10 h-10">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
 
-        <!-- High-Impact Cash Warning Banner -->
-        <div class="w-full bg-amber-500 text-white rounded-2xl p-4.5 mb-6 text-center space-y-1.5 shadow-lg shadow-amber-100 no-print animate-in slide-in-from-top-4 duration-300">
-          <h2 class="text-md font-black uppercase tracking-wider leading-none">¡PAGO EN CAJA PENDIENTE!</h2>
-          <p class="text-[11px] font-bold leading-normal text-amber-50/90">
-            Presenta este código QR en la caja de la sucursal para pagar en efectivo. Tu pizza comenzará a prepararse inmediatamente después de tu pago.
+        <!-- High-Impact Success Instruction Banner -->
+        <div class="w-full bg-emerald-600 text-white rounded-2xl p-4.5 mb-6 text-center space-y-1.5 shadow-lg shadow-emerald-100 no-print animate-in slide-in-from-top-4 duration-300">
+          <h2 class="text-md font-black uppercase tracking-wider leading-none">¡PEDIDO CONFIRMADO Y PAGADO!</h2>
+          <p class="text-[11px] font-bold leading-normal text-emerald-50/90">
+            Tu pizza ya se está preparando. Presenta el código QR de este ticket en la sucursal para que te la entreguen caliente.
           </p>
-          <div class="pt-2 border-t border-amber-400/40 text-[10px] text-amber-100 font-bold uppercase tracking-wider">
-            Copia del ticket enviada al correo registrado
+          <div class="pt-2 border-t border-emerald-500/30 text-[10px] text-emerald-200 font-bold uppercase tracking-wider">
+            Se ha enviado una copia de tu ticket al correo registrado
           </div>
         </div>
 
@@ -44,15 +49,15 @@
           <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1 block">Kiosco de Autoservicio</span>
         </div>
 
-        <h2 class="text-lg font-black text-slate-800 mb-0.5 text-center mt-2">¡Orden Confirmada!</h2>
+        <h2 class="text-lg font-black text-slate-800 mb-0.5 text-center mt-2">¡Pago Aprobado!</h2>
         <div class="text-sm font-black text-pizza-orange text-center mb-1 uppercase tracking-wide">
-          A nombre de: {{ cartService.lastConfirmedOrderName() }}
+          A nombre de: {{ orderData.clienteNombre }}
         </div>
         
         <div class="flex flex-col items-center my-1 w-full">
           <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Número de Orden</span>
           <span class="text-lg font-black text-slate-700 tracking-tight mt-0.5">
-            {{ cartService.lastConfirmedOrderNumber() }}
+            {{ orderData.orderNumber }}
           </span>
           
           <!-- Barcode & QR Code Area (Domino's pick-up code) -->
@@ -62,7 +67,7 @@
             <!-- Real Dynamic QR Code -->
             <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/60 transition-transform duration-200 hover:scale-105">
               <img 
-                [src]="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PLANET-PIZZA-ORDER-' + (cartService.lastConfirmedOrderPickupCode() || '')" 
+                [src]="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PLANET-PIZZA-ORDER-' + (orderData.pickupCode || '')" 
                 alt="Código QR de Retiro"
                 class="w-32 h-32 object-contain"
               />
@@ -70,7 +75,7 @@
 
             <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Código de Retiro</span>
             <span class="text-3xl font-black text-pizza-red tracking-widest font-mono leading-none">
-              {{ cartService.lastConfirmedOrderPickupCode() || 'PP-XXXX' }}
+              {{ orderData.pickupCode || 'PP-XXXX' }}
             </span>
             
             <!-- Barcode Graphic -->
@@ -103,12 +108,12 @@
               </g>
             </svg>
             <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider text-center leading-normal px-2">
-              Paga en caja presentando este código QR o de barras para iniciar la preparación de tu orden.
+              Presenta este código QR o de barras en la sucursal de Planet Pizza para recibir tu pedido.
             </span>
           </div>
 
           <span class="text-[10px] text-slate-400 font-semibold">
-            Registrado a las {{ cartService.lastConfirmedOrderTime() }}
+            Registrado a las {{ orderData.time }}
           </span>
         </div>
 
@@ -119,18 +124,17 @@
         <div class="w-full text-left">
           <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">Detalle de la Orden</h3>
           <div class="space-y-4">
-            @for (item of cartService.lastConfirmedOrder(); track item.id; let idx = $index) {
+            @for (item of orderData.items; track item.id; let idx = $index) {
               <div>
                 <div class="flex justify-between items-start text-sm font-bold text-slate-800">
                   <span>{{ idx + 1 }}. {{ item.cantidad }}x {{ item.pizza.nombre }} ({{ item.size.nombre }})</span>
                   <span>${{ item.totalItem }}</span>
                 </div>
-                <!-- Customization details -->
                 <ul class="mt-1 ml-4 list-disc text-slate-400 text-xs space-y-0.5">
                   <li>Masa: <span class="font-medium text-slate-600">{{ item.masa.nombre }}</span></li>
                   <li>Salsa: <span class="font-medium text-slate-600">{{ item.salsa.nombre }}</span></li>
                   <li>Queso: <span class="font-medium text-slate-600">{{ item.queso.nombre }}</span></li>
-                  @if (item.extras.length > 0) {
+                  @if (item.extras && item.extras.length > 0) {
                     <li>
                       Extras: 
                       <span class="font-medium text-slate-600">
@@ -147,24 +151,21 @@
           <div class="flex justify-between items-center text-lg font-black text-slate-800 pt-4 border-t border-slate-100 mt-6">
             <span>Total:</span>
             <span class="text-2xl text-pizza-orange font-black">
-              ${{ cartService.lastConfirmedOrderTotal() }}
+              ${{ orderData.total }}
             </span>
           </div>
 
           <!-- Payment Info Line -->
           <div class="flex justify-between items-center text-xs font-bold text-slate-500 pt-2.5">
             <span>Método de Pago:</span>
-            <span class="uppercase tracking-wider text-slate-700">Efectivo (Pendiente)</span>
+            <span class="uppercase tracking-wider text-slate-700">Tarjeta / Mercado Pago</span>
           </div>
         </div>
 
-        <!-- Ticket Footer note (Show in print too) -->
-        <!-- Ticket Footer note (Show in print too) -->
+        <!-- Ticket Footer note -->
         <div class="w-full border-t border-slate-100 pt-4 mt-6 flex flex-col items-center gap-3">
-          
-          <!-- Nota de Pago (Solo Impresión en Blanco y Negro, sin emojis) -->
           <div class="print-only text-[10px] text-center font-bold uppercase tracking-wide leading-normal border-t border-black pt-3.5 w-full">
-            PAGO EN EFECTIVO: Presenta este ticket o número en caja para pagar y comenzar la preparación.
+            ORDEN PAGADA DIGITALMENTE. Tu pedido ya está en preparación en cocina.
           </div>
 
           <div class="text-xs text-slate-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 text-center">
@@ -173,17 +174,14 @@
             </svg>
             Tiempo estimado: 15-20 min
           </div>
-
-
         </div>
       </div>
 
-      <!-- Action Buttons (Hidden during printing) -->
+      <!-- Action Buttons -->
       <div class="flex gap-4 w-full mt-8 no-print">
-        <!-- Download PDF Button -->
         <button 
-          (click)="imprimirTicket()"
-          class="flex-1 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-lg shadow-slate-200"
+          (click)="generarTicketPDF(orderData)"
+          class="flex-1 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-lg"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 shrink-0">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -191,15 +189,13 @@
           Descargar Ticket PDF
         </button>
         
-        <!-- New Order Button -->
         <button 
-          (click)="nuevaOrden()"
-          class="flex-1 bg-pizza-red hover:bg-red-700 active:scale-95 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-lg shadow-red-100 hover:shadow-red-200"
+          (click)="volverAlMenu()"
+          class="flex-1 bg-pizza-red hover:bg-red-700 active:scale-95 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-lg"
         >
           Nueva Orden
         </button>
       </div>
-
-    </div>
+    }
   </div>
-}
+</div>

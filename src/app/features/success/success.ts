@@ -1,17 +1,66 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CartService } from '../../../services/cart.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { OrderService, Order } from '../../services/order.service';
 import { jsPDF } from 'jspdf';
 
 @Component({
-  selector: 'app-confirmacion-orden',
+  selector: 'app-success',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './confirmacion-orden.html',
-  styleUrl: './confirmacion-orden.scss'
+  templateUrl: './success.html',
+  styleUrl: './success.scss'
 })
-export class ConfirmacionOrden {
-  public readonly cartService = inject(CartService);
+export class SuccessComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private orderService = inject(OrderService);
+
+  public readonly order = signal<Order | null>(null);
+  public readonly loading = signal<boolean>(true);
+  public readonly error = signal<string | null>(null);
+
+  public ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const orderId = params['orderId'];
+      if (!orderId) {
+        this.error.set('No se proporcionó el ID de la orden.');
+        this.loading.set(false);
+        return;
+      }
+
+      // Automatically confirm the online payment on success screen load
+      this.orderService.confirmOrderPayment(orderId).subscribe({
+        next: (data) => {
+          this.order.set(data);
+          this.loading.set(false);
+          this.autoTriggerDownload(data);
+        },
+        error: (err) => {
+          console.error('Error al confirmar y cargar la orden exitosa', err);
+          // Fallback to just loading the order details if payment confirmation is already recorded
+          this.orderService.getOrderById(orderId).subscribe({
+            next: (data) => {
+              this.order.set(data);
+              this.loading.set(false);
+              this.autoTriggerDownload(data);
+            },
+            error: (getErr) => {
+              this.error.set('No se pudo encontrar la información del pedido.');
+              this.loading.set(false);
+            }
+          });
+        }
+      });
+    });
+  }
+
+  private autoTriggerDownload(orderData: Order): void {
+    // Wait a brief moment to ensure UI elements render, then auto download PDF
+    setTimeout(() => {
+      this.generarTicketPDF(orderData);
+    }, 1200);
+  }
 
   private getQRCodeBase64(pickupCode: string): Promise<string> {
     return new Promise((resolve) => {
@@ -36,17 +85,8 @@ export class ConfirmacionOrden {
     });
   }
 
-  public imprimirTicket(): void {
-    // Map current confirmed order details from CartService signals
-    const orderData = {
-      orderNumber: this.cartService.lastConfirmedOrderNumber(),
-      clienteNombre: this.cartService.lastConfirmedOrderName(),
-      time: this.cartService.lastConfirmedOrderTime(),
-      pickupCode: this.cartService.lastConfirmedOrderPickupCode(),
-      total: this.cartService.lastConfirmedOrderTotal(),
-      items: this.cartService.lastConfirmedOrder(),
-      paymentStatus: 'pending' // Cash orders start as pending payment
-    };
+  public generarTicketPDF(orderData: Order | null): void {
+    if (!orderData) return;
 
     this.getQRCodeBase64(orderData.pickupCode || 'PP-XXXX').then((qrBase64) => {
       const doc = new jsPDF({
@@ -160,7 +200,10 @@ export class ConfirmacionOrden {
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(8);
       doc.setTextColor(120, 120, 120);
-      const noteText = 'PAGO PENDIENTE EN CAJA. Presenta este QR en caja para pagar y preparar.';
+      const isPaid = orderData.paymentStatus === 'approved';
+      const noteText = isPaid 
+        ? 'ORDEN PAGADA DIGITALMENTE. Tu pedido ya esta en preparacion.' 
+        : 'PAGO PENDIENTE EN CAJA. Presenta este QR en caja para pagar y preparar.';
       doc.text(noteText, 74, y, { align: 'center', maxWidth: 120 });
 
       // Save PDF
@@ -168,7 +211,7 @@ export class ConfirmacionOrden {
     });
   }
 
-  public nuevaOrden(): void {
-    this.cartService.closeModal();
+  public volverAlMenu(): void {
+    this.router.navigate(['/kiosk']);
   }
 }

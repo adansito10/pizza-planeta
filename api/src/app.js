@@ -8,6 +8,8 @@ import catalogRoutes from './routes/catalogRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import promoRoutes from './routes/promoRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -30,6 +32,8 @@ app.use('/api/catalog', catalogRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/promos', promoRoutes);
+app.use('/api/auth', authRoutes);
 
 // Middleware para rutas no encontradas (404)
 app.use((req, res, next) => {

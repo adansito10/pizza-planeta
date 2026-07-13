@@ -49,7 +49,8 @@ export class SeleccionIngredientes {
 
   // Real-time calculated price
   public readonly currentUnitPrice = computed(() => {
-    const sizePrice = this.cartService.selectedSize()?.precio || 0;
+    const promo = this.cartService.customizingPromo();
+    const sizePrice = promo ? promo.precio : (this.cartService.selectedSize()?.precio || 0);
     const masaPrice = this.selectedMasa().precio;
     const salsaPrice = this.selectedSalsa().precio;
     const quesoPrice = this.selectedQueso().precio;
@@ -94,11 +95,17 @@ export class SeleccionIngredientes {
   public agregarAlCarrito(): void {
     const pizza = this.cartService.customizingPizza();
     const size = this.cartService.selectedSize();
+    const promo = this.cartService.customizingPromo();
     
     if (!pizza || !size) return;
 
+    const cartPizza = promo ? {
+      ...pizza,
+      nombre: promo.nombre
+    } : pizza;
+
     this.cartService.addToCart({
-      pizza,
+      pizza: cartPizza,
       size,
       masa: this.selectedMasa(),
       salsa: this.selectedSalsa(),

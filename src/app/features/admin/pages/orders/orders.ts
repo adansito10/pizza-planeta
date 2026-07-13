@@ -1,35 +1,57 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { OrderService, Order, OrderStatus } from '../../../../services/order.service';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './orders.html',
   styleUrl: './orders.scss'
 })
 export class OrdersComponent {
   public readonly orderService = inject(OrderService);
 
+  // Search filter query
+  public readonly searchQuery = signal<string>('');
+
   // Modal / Detail state signals
   public readonly selectedOrder = signal<Order | null>(null);
 
+  // View mode signal: 'cajero' (shows all) or 'cocina' (hides pending & finances)
+  public readonly viewMode = signal<'cajero' | 'cocina'>('cajero');
+
+  public setViewMode(mode: 'cajero' | 'cocina'): void {
+    this.viewMode.set(mode);
+  }
+
+  // Helper method to filter orders based on the search query
+  private filterQuery(orders: Order[]): Order[] {
+    const query = this.searchQuery().trim().toLowerCase();
+    if (!query) return orders;
+    return orders.filter(o => 
+      (o.orderNumber && o.orderNumber.toLowerCase().includes(query)) ||
+      (o.clienteNombre && o.clienteNombre.toLowerCase().includes(query)) ||
+      (o.pickupCode && o.pickupCode.toLowerCase().includes(query))
+    );
+  }
+
   // Filter columns
   public getPendingOrders(): Order[] {
-    return this.orderService.orders().filter(o => o.status === 'Pendiente');
+    return this.filterQuery(this.orderService.orders().filter(o => o.status === 'Pendiente'));
   }
 
   public getPreparingOrders(): Order[] {
-    return this.orderService.orders().filter(o => o.status === 'Preparando');
+    return this.filterQuery(this.orderService.orders().filter(o => o.status === 'Preparando'));
   }
 
   public getReadyOrders(): Order[] {
-    return this.orderService.orders().filter(o => o.status === 'Listo');
+    return this.filterQuery(this.orderService.orders().filter(o => o.status === 'Listo'));
   }
 
   public getDeliveredOrders(): Order[] {
-    return this.orderService.orders().filter(o => o.status === 'Entregado');
+    return this.filterQuery(this.orderService.orders().filter(o => o.status === 'Entregado'));
   }
 
   public selectOrder(order: Order): void {
@@ -41,9 +63,22 @@ export class OrdersComponent {
   }
 
   public advanceStatus(order: Order): void {
+    if (order.status === 'Pendiente') {
+      this.orderService.confirmOrderPayment(order.id).subscribe({
+        next: (updatedOrder) => {
+          // Update selected order details if open
+          const currentSelected = this.selectedOrder();
+          if (currentSelected && currentSelected.id === order.id) {
+            this.selectedOrder.set(updatedOrder);
+          }
+        },
+        error: (err) => console.error('Error al confirmar pago en caja', err)
+      });
+      return;
+    }
+
     let nextStatus: OrderStatus = order.status;
-    if (order.status === 'Pendiente') nextStatus = 'Preparando';
-    else if (order.status === 'Preparando') nextStatus = 'Listo';
+    if (order.status === 'Preparando') nextStatus = 'Listo';
     else if (order.status === 'Listo') nextStatus = 'Entregado';
 
     this.orderService.updateOrderStatus(order.id, nextStatus);

@@ -189,21 +189,20 @@ body {
 .admin-theme-red {
   --admin-primary: #d00000;
   --admin-primary-hover: #b00000;
-  --admin-bg-gradient-start: #fef2f2;
-  --admin-bg-gradient-end: #fee2e2;
+  --admin-bg: #f8fafc;
   --admin-card-bg: #ffffff;
-  --admin-card-border: #fee2e2;
-  --admin-text-main: #1e293b;
+  --admin-card-border: #e2e8f0;
+  --admin-text-main: #0f172a;
   --admin-text-muted: #64748b;
   --admin-sidebar-bg: #0f172a;
-  --admin-sidebar-text: #f8fafc;
+  --admin-sidebar-text: #94a3b8;
   --admin-sidebar-active: #d00000;
   --admin-badge-pending: #fee2e2;
   --admin-badge-pending-text: #ef4444;
-  --admin-header-bg: #d00000;
-  --admin-header-text: #ffffff;
-  --admin-header-border: #b00000;
-  --admin-header-subtitle: rgba(255, 255, 255, 0.7);
+  --admin-header-bg: #ffffff;
+  --admin-header-text: #0f172a;
+  --admin-header-border: #e2e8f0;
+  --admin-header-subtitle: #64748b;
 }
 
 .admin-theme-blue {

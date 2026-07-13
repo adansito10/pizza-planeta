@@ -5,7 +5,11 @@
       <!-- Sticky Header -->
       <div class="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-white z-10">
         <h2 class="text-2xl font-bold text-slate-800">
-          Arma tu {{ pizza.nombre }} <span class="text-pizza-orange text-lg font-medium">({{ cartService.selectedSize()?.nombre }})</span>
+          @if (cartService.customizingPromo(); as promo) {
+            Arma tu {{ promo.nombre }} <span class="text-pizza-orange text-lg font-medium">({{ cartService.selectedSize()?.nombre }})</span>
+          } @else {
+            Arma tu {{ pizza.nombre }} <span class="text-pizza-orange text-lg font-medium">({{ cartService.selectedSize()?.nombre }})</span>
+          }
         </h2>
         
         <!-- Close Button -->

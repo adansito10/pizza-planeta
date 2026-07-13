@@ -9,7 +9,10 @@ import { Promociones } from '../../components/promociones/promociones';
 import { Carrito } from '../../components/carrito/carrito';
 import { SeleccionTamano } from '../../components/modales/seleccion-tamano/seleccion-tamano';
 import { SeleccionIngredientes } from '../../components/modales/seleccion-ingredientes/seleccion-ingredientes';
+import { SeleccionNombre } from '../../components/modales/seleccion-nombre/seleccion-nombre';
+import { MetodoPago } from '../../components/modales/metodo-pago/metodo-pago';
 import { ConfirmacionOrden } from '../../components/modales/confirmacion-orden/confirmacion-orden';
+import { CustomerAuthComponent } from '../customer-auth/customer-auth';
 
 @Component({
   selector: 'app-kiosk-layout',
@@ -22,25 +25,29 @@ import { ConfirmacionOrden } from '../../components/modales/confirmacion-orden/c
     Carrito,
     SeleccionTamano,
     SeleccionIngredientes,
-    ConfirmacionOrden
+    SeleccionNombre,
+    MetodoPago,
+    ConfirmacionOrden,
+    CustomerAuthComponent
   ],
   templateUrl: './kiosk-layout.html',
   styleUrl: './kiosk-layout.scss'
 })
 export class KioskLayout {
   public readonly cartService = inject(CartService);
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
+  public readonly authService = inject(AuthService);
+  public readonly router = inject(Router);
+
+  public irALogin(): void {
+    this.cartService.activeModal.set('customerAuth');
+  }
+
+  public cerrarSesionCliente(): void {
+    this.authService.customerLogout();
+  }
   
   // Tab control
   public readonly activeTab = signal<'menu' | 'promos'>('menu');
-
-  // Login Modal Control States
-  public readonly showLoginModal = signal<boolean>(false);
-  public username = '';
-  public password = '';
-  public readonly loginError = signal<string | null>(null);
-  public readonly loginLoading = signal<boolean>(false);
 
   // Privacy Modal Control State
   public readonly showPrivacyModal = signal<boolean>(false);
@@ -57,63 +64,9 @@ export class KioskLayout {
     this.activeTab.set(tab);
   }
 
-  // Clicks counter for secret admin access
-  private logoClicks = 0;
-  private logoClicksTimeout: any = null;
-
   public onLogoClick(): void {
-    this.logoClicks++;
-    if (this.logoClicksTimeout) {
-      clearTimeout(this.logoClicksTimeout);
-    }
-
-    if (this.logoClicks >= 5) {
-      this.logoClicks = 0;
-      this.openLogin();
-    } else {
-      this.logoClicksTimeout = setTimeout(() => {
-        this.logoClicks = 0;
-      }, 2000); // Resetea el contador si pasan más de 2 segundos sin clics
-    }
-  }
-
-  public openLogin(): void {
-    this.username = '';
-    this.password = '';
-    this.loginError.set(null);
-    this.loginLoading.set(false);
-    this.showLoginModal.set(true);
-  }
-
-  public closeLogin(): void {
-    this.showLoginModal.set(false);
-    this.username = '';
-    this.password = '';
-    this.loginError.set(null);
-  }
-
-  public onLoginSubmit(): void {
-    this.loginError.set(null);
-
-    if (!this.username.trim() || !this.password) {
-      this.loginError.set('Por favor completa todos los campos.');
-      return;
-    }
-
-    this.loginLoading.set(true);
-
-    // Simulated short premium visual feedback
-    setTimeout(() => {
-      const success = this.authService.login(this.username, this.password);
-      this.loginLoading.set(false);
-
-      if (success) {
-        this.closeLogin();
-        this.router.navigate(['/admin']);
-      } else {
-        this.loginError.set('Usuario o contraseña incorrectos.');
-      }
-    }, 850);
+    // Return to menu
+    this.router.navigate(['/kiosk']);
   }
 }
 

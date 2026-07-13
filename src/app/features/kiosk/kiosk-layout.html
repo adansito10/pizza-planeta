@@ -1,13 +1,14 @@
-<!-- Digital Kiosk Layout Container -->
-<div class="h-screen flex flex-col overflow-hidden no-print">
+<!-- Premium Web Store Layout Container (Scrollable) -->
+<div class="min-h-screen flex flex-col bg-slate-100 no-print pb-16">
 
-  <!-- Top Header Banner -->
-  <header class="bg-pizza-red h-20 text-white flex items-center justify-between px-8 shadow-md shrink-0 border-b border-red-700">
-    <!-- Brand Logo and Subtitle -->
-    <div class="flex items-center gap-3.5">
+  <!-- Responsive Navigation Header (Domino's Style) -->
+  <header class="bg-pizza-red text-white sticky top-0 z-50 shadow-md flex items-center justify-between border-b border-red-700 px-6 sm:px-10 h-20">
+    
+    <!-- Left: Brand Logo & Title -->
+    <div class="flex items-center gap-4">
       <div 
         (click)="onLogoClick()"
-        class="h-12 w-12 rounded-full overflow-hidden bg-white flex items-center justify-center p-0.5 border border-white/20 shadow-inner cursor-pointer"
+        class="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center cursor-pointer hover:rotate-6 transition-all duration-300"
       >
         <img 
           src="assets/images/logo_pizza.JPG" 
@@ -16,79 +17,141 @@
         />
       </div>
       <div>
-        <h1 class="text-2xl font-black tracking-tight leading-none">Planet Pizza</h1>
-        <span class="text-[10px] text-white/80 font-bold uppercase tracking-widest mt-1 block leading-none">Ordena fácil y rápido</span>
+        <h1 class="text-xl font-black tracking-tight leading-none text-white">PLANET PIZZA</h1>
+        <span class="text-[8px] text-pizza-yellow font-black uppercase tracking-widest block leading-none mt-1">ORDENA ONLINE</span>
       </div>
     </div>
 
-    <!-- Right Side Actions (Admin Link & Wait Time) -->
-    <div class="flex items-center gap-4">
-
-      <!-- Cart Button with app-style notification badge -->
+    <!-- Center: Desktop Navigation Links -->
+    <div class="hidden lg:flex items-center gap-6">
       <button 
-        (click)="cartService.showCart.update(v => !v)"
-        class="relative bg-white/10 hover:bg-white/20 text-white p-3 rounded-2xl border border-white/20 font-bold transition-all duration-150 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
+        (click)="setTab('menu')"
+        class="font-black text-xs uppercase tracking-wider transition-colors hover:text-pizza-yellow bg-transparent border-none cursor-pointer"
+        [class.text-pizza-yellow]="activeTab() === 'menu'"
+        [class.text-white]="activeTab() !== 'menu'"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-white">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-        </svg>
-
-        <!-- Notification Badge -->
-        @if (cartService.totalItemsCount() > 0) {
-          <span class="absolute -top-1.5 -right-1.5 bg-pizza-yellow text-red-700 text-[10px] font-black w-5.5 h-5.5 rounded-full flex items-center justify-center shadow-md border-2 border-pizza-red animate-in zoom-in-50 duration-200">
-            {{ cartService.totalItemsCount() }}
-          </span>
-        }
+        MENÚ
       </button>
+      <button 
+        (click)="setTab('promos')"
+        class="font-black text-xs uppercase tracking-wider transition-colors hover:text-pizza-yellow bg-transparent border-none cursor-pointer"
+        [class.text-pizza-yellow]="activeTab() === 'promos'"
+        [class.text-white]="activeTab() !== 'promos'"
+      >
+        PROMOS
+      </button>
+    </div>
 
-      <!-- Wait Time estimation -->
-      <div class="bg-red-700/40 backdrop-blur-sm border border-red-500/20 px-4 py-2 rounded-2xl flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-pizza-yellow animate-pulse">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <!-- Right: Auth actions, Cart -->
+    <div class="flex items-center h-full">
+      
+      <!-- Customer Login Section (Slightly Darker Red Block) -->
+      <div 
+        (click)="!authService.isCustomerLoggedIn() ? irALogin() : null"
+        class="flex items-center gap-3 px-6 h-full cursor-pointer hover:bg-black/10 transition-colors"
+        style="background-color: rgba(0, 0, 0, 0.15);"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6 text-white">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
         </svg>
-        <div class="text-right">
-          <span class="text-[9px] text-white/70 font-bold uppercase tracking-wider block leading-none">Tiempo de espera</span>
-          <span class="text-sm font-black text-pizza-yellow leading-none">15-20 min</span>
+        <div class="flex flex-col text-left">
+          @if (authService.isCustomerLoggedIn()) {
+            <span class="text-[8px] text-white/70 font-bold uppercase tracking-wider leading-none">HOLA!</span>
+            <span class="text-xs font-black text-white leading-none mt-0.5">{{ authService.customerUser()?.nombre }}</span>
+            <button 
+              (click)="$event.stopPropagation(); cerrarSesionCliente()"
+              class="text-[8px] text-pizza-yellow font-black uppercase tracking-wider mt-1 hover:underline cursor-pointer bg-transparent border-none p-0 text-left"
+            >
+              CERRAR SESIÓN
+            </button>
+          } @else {
+            <span class="text-xs font-black text-white uppercase tracking-wider leading-none">INICIAR SESIÓN</span>
+          }
         </div>
       </div>
+
+      <!-- Cart Button (Matches Domino's Layout) -->
+      <button 
+        (click)="cartService.showCart.update(v => !v)"
+        class="h-full px-6 flex flex-col items-center justify-center relative bg-transparent border-none text-white cursor-pointer hover:bg-black/5 transition-colors shrink-0"
+      >
+        <div class="relative">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7 text-white">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+          </svg>
+          
+          <!-- Notification Badge inside the Cart Icon -->
+          <span class="absolute -top-1 -right-1 bg-pizza-yellow text-red-800 text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow">
+            {{ cartService.totalItemsCount() }}
+          </span>
+        </div>
+        <span class="text-[9px] font-black uppercase tracking-widest mt-1 block">CARRITO</span>
+      </button>
+
     </div>
   </header>
 
-  <!-- Kiosk Body (Main area is full-width catalog grid) -->
-  <main class="flex-1 flex relative overflow-hidden bg-slate-50/50">
-    
-    <!-- Left Area: Catalog / Grid Area (Takes up 100% width) -->
-    <section class="w-full h-full overflow-y-auto p-8 space-y-6 flex flex-col">
-      <!-- Tabs (Menú vs Promos Capsules) -->
-      <div class="flex gap-4 pb-2">
-        <button 
-          (click)="setTab('menu')"
-          class="px-8 py-3.5 rounded-full font-black text-sm transition-all duration-150 active:scale-95 cursor-pointer shadow-sm border"
-          [class]="activeTab() === 'menu' 
-            ? 'bg-pizza-red text-white shadow-red-100 hover:bg-red-700 border-pizza-red' 
-            : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100'"
-        >
-          Menú
-        </button>
-        <button 
-          (click)="setTab('promos')"
-          class="px-8 py-3.5 rounded-full font-black text-sm transition-all duration-150 active:scale-95 cursor-pointer shadow-sm border"
-          [class]="activeTab() === 'promos' 
-            ? 'bg-pizza-red text-white shadow-red-100 hover:bg-red-700 border-pizza-red' 
-            : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100'"
-        >
-          Promos
-        </button>
-      </div>
+  <!-- Mobile Tab Switcher (Visible only on mobile devices) -->
+  <div class="md:hidden flex bg-white border-b border-slate-200/80 p-2 gap-2 sticky top-[73px] z-40">
+    <button 
+      (click)="setTab('menu')"
+      class="flex-1 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all"
+      [class]="activeTab() === 'menu' 
+        ? 'bg-pizza-red text-white shadow-md shadow-red-500/10' 
+        : 'text-slate-500 bg-slate-50 hover:bg-slate-100'"
+    >
+      Menú
+    </button>
+    <button 
+      (click)="setTab('promos')"
+      class="flex-1 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all"
+      [class]="activeTab() === 'promos' 
+        ? 'bg-pizza-red text-white shadow-md shadow-red-500/10' 
+        : 'text-slate-500 bg-slate-50 hover:bg-slate-100'"
+    >
+      Promos
+    </button>
+  </div>
 
-      <!-- Tab Content Switcher -->
-      <div class="flex-1">
-        @if (activeTab() === 'menu') {
-          <app-catalogo class="block animate-in fade-in duration-200"></app-catalogo>
-        } @else {
-          <app-promociones class="block animate-in fade-in duration-200"></app-promociones>
-        }
+  <!-- Full-Width Hero Banner with background image containing multiple pizzas -->
+  <div class="w-full relative min-h-[360px] md:min-h-[420px] flex items-center bg-slate-950 overflow-hidden shadow-lg border-b border-slate-900">
+    <!-- Background Image -->
+    <img 
+      src="assets/images/pizzas_collage.png" 
+      alt="Varios tipos de pizzas calientes" 
+      class="absolute inset-0 w-full h-full object-cover pointer-events-none"
+    />
+    <!-- Dark Gradient Overlay for optimal readability -->
+    <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent z-10"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/30 to-transparent z-10"></div>
+
+    <!-- Banner Content (Aligned with max-7xl layout margin) -->
+    <div class="max-w-7xl w-full mx-auto px-6 sm:px-10 lg:px-12 py-12 relative z-20 text-white">
+      <div class="max-w-xl space-y-5 text-left">
+        <span class="inline-block text-white text-[10px] font-black uppercase tracking-widest">
+          ¡Ordena Online!
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight uppercase">
+          Arma tu Pizza <br/>
+          <span class="text-pizza-yellow">y Recógela en Sucursal</span>
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 font-semibold leading-relaxed">
+          Personaliza tu masa, salsa y agrega todos tus ingredientes favoritos. Paga de forma segura con Mercado Pago y recibe tu código de retiro instantáneo para disfrutar de tu pizza calientita.
+        </p>
       </div>
+    </div>
+  </div>
+
+  <!-- Customer Portal Body -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+
+    <!-- Active Tab Menu / Catalog Grid -->
+    <section class="space-y-6">
+      @if (activeTab() === 'menu') {
+        <app-catalogo class="block animate-in fade-in duration-200"></app-catalogo>
+      } @else {
+        <app-promociones class="block animate-in fade-in duration-200"></app-promociones>
+      }
     </section>
 
     <!-- Cart Drawer Backdrop Overlay -->
@@ -121,13 +184,13 @@
 
   </main>
 
-  <!-- Kiosk Footer for Legal & Info Links -->
-  <footer class="bg-slate-100/30 border-t border-slate-200/40 px-8 py-3 flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-wider shrink-0 select-none">
+  <!-- Web Footer (Fixed at the bottom of the screen) -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-md border-t border-slate-900 px-8 py-3 flex flex-row items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-wider z-30 shadow-2xl">
     <span>Planet Pizza &copy; 2026</span>
     <div class="flex items-center gap-6">
       <button 
         (click)="openPrivacyModal()" 
-        class="hover:text-pizza-red transition-colors cursor-pointer underline decoration-dotted decoration-1 underline-offset-2"
+        class="hover:text-pizza-red transition-colors cursor-pointer underline decoration-dotted decoration-1 underline-offset-2 bg-transparent border-none text-slate-400 text-[10px] font-black"
       >
         Aviso de Privacidad
       </button>
@@ -138,109 +201,16 @@
 <!-- Modal Overlays (Controlled reactively via CartService) -->
 <app-seleccion-tamano></app-seleccion-tamano>
 <app-seleccion-ingredientes></app-seleccion-ingredientes>
+<app-seleccion-nombre></app-seleccion-nombre>
+<app-metodo-pago></app-metodo-pago>
 <app-confirmacion-orden></app-confirmacion-orden>
 
+@if (cartService.activeModal() === 'customerAuth') {
+  <app-customer-auth></app-customer-auth>
+}
+
 <!-- Admin Login Modal Overlay -->
-@if (showLoginModal()) {
-  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-3xl p-8 flex flex-col space-y-6 animate-in fade-in zoom-in-95 duration-200">
-      
-      <!-- Modal Header -->
-      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-        <div class="flex items-center gap-2.5">
-          <div class="h-8 w-8 rounded-lg overflow-hidden bg-white flex items-center justify-center p-0.5 border border-slate-200 shadow-inner flex-shrink-0">
-            <img 
-              src="assets/images/logo_pizza.JPG" 
-              alt="Planet Pizza Logo" 
-              class="h-full w-full object-cover rounded-lg"
-            />
-          </div>
-
-          <div>
-            <h3 class="text-md font-black uppercase tracking-wider text-slate-800 leading-none">Acceso Admin</h3>
-            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none block mt-1">Ingresar al panel de control</span>
-          </div>
-        </div>
-        <button 
-          (click)="closeLogin()"
-          class="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          &times;
-        </button>
-      </div>
-
-      <!-- Login Form inside modal -->
-      <form (ngSubmit)="onLoginSubmit()" class="space-y-4">
-        
-        <!-- Login error message -->
-        @if (loginError(); as msg) {
-          <div class="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-[11px] font-black text-red-500 uppercase tracking-wide flex items-center gap-2 animate-in shake duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 shrink-0">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            {{ msg }}
-          </div>
-        }
-
-        <!-- Username field -->
-        <div class="space-y-1">
-          <label class="text-[9px] uppercase font-bold tracking-widest text-slate-400">Usuario</label>
-          <input 
-            type="text" 
-            name="username"
-            [(ngModel)]="username"
-            placeholder="Usuario"
-            class="w-full px-4 py-3 rounded-2xl border text-xs font-black bg-slate-50 border-slate-200 focus:outline-none focus:ring-2 focus:ring-pizza-red/20 focus:border-pizza-red transition-all"
-            required
-            [disabled]="loginLoading()"
-          >
-        </div>
-
-        <!-- Password field -->
-        <div class="space-y-1">
-          <label class="text-[9px] uppercase font-bold tracking-widest text-slate-400">Contraseña</label>
-          <input 
-            type="password" 
-            name="password"
-            [(ngModel)]="password"
-            placeholder="Contraseña"
-            class="w-full px-4 py-3 rounded-2xl border text-xs font-black bg-slate-50 border-slate-200 focus:outline-none focus:ring-2 focus:ring-pizza-red/20 focus:border-pizza-red transition-all"
-            required
-            [disabled]="loginLoading()"
-          >
-        </div>
-
-        <!-- Submit actions -->
-        <div class="pt-4 border-t border-slate-100 flex gap-3">
-          <button 
-            type="submit"
-            class="flex-1 bg-pizza-red hover:bg-red-700 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow transition-all duration-150 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
-            [disabled]="loginLoading()"
-          >
-            @if (loginLoading()) {
-              <svg class="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Comprobando...
-            } @else {
-              Iniciar Sesión
-            }
-          </button>
-          <button 
-            type="button"
-            (click)="closeLogin()"
-            class="bg-slate-100 hover:bg-slate-200 text-slate-500 px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-colors cursor-pointer"
-            [disabled]="loginLoading()"
-          >
-            Cancelar
-          </button>
-        </div>
-
-      </form>
-    </div>
-  </div>
-}<!-- Privacy Notice Modal Overlay -->
+<!-- Privacy Notice Modal Overlay -->
 @if (showPrivacyModal()) {
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="w-full max-w-2xl bg-white border border-slate-200 shadow-2xl rounded-3xl p-8 flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200 relative overflow-hidden">
@@ -248,11 +218,11 @@
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <div class="flex items-center gap-2.5">
-          <div class="h-8 w-8 rounded-lg overflow-hidden bg-white flex items-center justify-center p-0.5 border border-slate-200 shadow-inner flex-shrink-0">
+          <div class="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
             <img 
               src="assets/images/logo_pizza.JPG" 
               alt="Planet Pizza Logo" 
-              class="h-full w-full object-cover rounded-lg"
+              class="h-full w-full object-cover rounded-full"
             />
           </div>
           <div>
@@ -274,11 +244,11 @@
         <!-- I. IDENTIDAD DEL RESPONSABLE -->
         <div class="space-y-1.5">
           <h4 class="font-black text-slate-800 text-sm">I. Identidad y Domicilio del Responsable</h4>
-          <p><strong>Planeta Pizza</strong> (en adelante "el Responsable") es titular de la aplicación web de catálogo interactivo del mismo nombre, desarrollada por el equipo de estudiantes de la carrera <strong>Ingeniería en Desarrollo y Gestión de Software — IDGS 9° A</strong>, con propósito académico y de apoyo operativo al local de pizzería.</p>
+          <p><strong>Planeta Pizza</strong> (en adelante "el Responsable") es titular de la aplicación web integrada de catálogo, pedidos y pagos del mismo nombre, desarrollada por el equipo de estudiantes de la carrera <strong>Ingeniería en Desarrollo y Gestión de Software — IDGS 9° A</strong>, con propósito académico y de apoyo operativo al local de pizzería.</p>
           <div class="p-3 bg-slate-50 border border-slate-100 rounded-2xl space-y-1 text-[11px] text-slate-500">
-            <div><strong>Nombre del sistema:</strong> Planeta Pizza — Catálogo Web</div>
-            <div><strong>Tipo de aplicación:</strong> Aplicación web de catálogo interactivo (vitrina digital)</div>
-            <div><strong>Modalidad de servicio:</strong> Exclusivamente presencial en el punto de venta</div>
+            <div><strong>Nombre del sistema:</strong> Planeta Pizza — Portal de Pedidos y Administración</div>
+            <div><strong>Tipo de aplicación:</strong> Aplicación web integrada con sistema de pagos online y panel de cocina</div>
+            <div><strong>Modalidad de servicio:</strong> Orden en línea para retiro presencial en sucursal</div>
             <div><strong>Equipo responsable:</strong> César Mundo González · Eleonor G. Radilla Partida · Adán de J. Morales Capistran · Fátima García Peralta · Alex Tadeo Carrera Rojas</div>
           </div>
           <p>El presente aviso de privacidad se emite en cumplimiento de las disposiciones aplicables en materia de protección de datos personales y tiene como propósito informar a los usuarios sobre el tratamiento que se da a su información.</p>
@@ -287,102 +257,95 @@
         <!-- II. NATURALEZA DE LA APLICACIÓN -->
         <div class="space-y-1.5">
           <h4 class="font-black text-slate-800 text-sm">II. Naturaleza y Alcance de la Aplicación</h4>
-          <p>La aplicación web de <strong>Planeta Pizza</strong> es una <strong>vitrina digital de catálogo interactivo</strong>. Su única finalidad es presentar visualmente el menú completo de la pizzería —incluyendo productos por categoría, opciones de personalización, combos familiares y promociones vigentes— para facilitar la consulta del cliente en el punto de venta.</p>
-          <p>La aplicación <strong>no procesa pedidos en línea, no gestiona envíos a domicilio, no realiza transacciones económicas de ningún tipo</strong> y no incluye pasarela de pago ni formulario de cobro. Todo pedido y pago se efectúa directamente en la caja del local, de forma presencial, en efectivo o con tarjeta.</p>
+          <p>La aplicación web de <strong>Planeta Pizza</strong> es un portal interactivo que permite a los usuarios consultar el catálogo de productos (pizzas, bases, ingredientes y combos), registrarse con una cuenta personal de cliente, realizar pedidos en línea y efectuar pagos seguros de manera electrónica a través de la pasarela de pagos integrada de <strong>Mercado Pago</strong>.</p>
+          <p>Los pedidos realizados se registran en una base de datos centralizada y se gestionan en tiempo real a través de un panel de control interno (cola de producción) en el establecimiento, facilitando el retiro en el local mediante un código único generado automáticamente.</p>
           <div class="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-[11px] text-emerald-800 font-medium">
-            <strong>🔒 La aplicación Planeta Pizza NO recopila, almacena ni procesa datos personales de los clientes.</strong> No existe registro de usuario, inicio de sesión, historial de pedidos, ni ningún mecanismo que identifique o rastree a las personas que consultan el catálogo.
+            <strong>🔒 Compromiso de Privacidad:</strong> La recopilación de información personal se limita estrictamente a los datos requeridos para gestionar el registro de usuarios, procesar sus compras, validar pagos mediante plataformas oficiales de terceros y permitir el retiro seguro de sus productos.
           </div>
         </div>
 
         <!-- III. DATOS PERSONALES -->
         <div class="space-y-1.5">
           <h4 class="font-black text-slate-800 text-sm">III. Datos Personales Tratados</h4>
-          <p>La aplicación funciona como catálogo de consulta de uso presencial. No cuenta con registro de usuario, formularios de contacto, proceso de compra en línea ni ningún mecanismo que requiera que el cliente proporcione información personal. Por ello, <strong>Planeta Pizza — Catálogo Web no recopila, almacena ni trata datos personales</strong> de quienes la consultan.</p>
-          <p>La selección de productos que el usuario puede armar dentro de la aplicación es una <strong>lista temporal en pantalla</strong>, pensada únicamente para organizar el pedido antes de acercarse a caja. Esta información existe solo durante la sesión activa y desaparece al cerrar o recargar la aplicación; no se guarda en ningún servidor ni base de datos.</p>
+          <p>Para cumplir con las funcionalidades del portal, el sistema recopila y almacena los siguientes datos personales y de transacciones:</p>
+          <ul class="list-disc pl-5 space-y-1 text-slate-500 font-normal">
+            <li><strong>Datos de Registro de Clientes:</strong> Nombre completo, correo electrónico y contraseña de acceso (encriptada mediante métodos seguros en la base de datos).</li>
+            <li><strong>Datos de Compra y Pedidos:</strong> Detalles del pedido (pizzas elegidas, tamaños, ingredientes), total acumulado, fecha, hora, estado actual del pedido y código de retiro.</li>
+            <li><strong>Datos de Transacción Electrónica:</strong> Estado del pago (aprobado, pendiente, rechazado) y códigos de referencia oficiales devueltos por la pasarela de pagos (ID de pago e ID de preferencia de Mercado Pago). <em>Nota: El sistema no almacena información de tarjetas de crédito o débito; dicha información es procesada de manera directa y cifrada por Mercado Pago.</em></li>
+          </ul>
         </div>
 
         <!-- IV. FINALIDADES -->
         <div class="space-y-1.5">
           <h4 class="font-black text-slate-800 text-sm">IV. Finalidades del Tratamiento</h4>
-          <p>Al no recopilarse datos personales de clientes, no existe tratamiento de información personal con fines comerciales, estadísticos, de marketing ni de ninguna otra naturaleza.</p>
-          <p>Las <strong>únicas finalidades de la aplicación</strong> son de carácter informativo y de apoyo al cliente en el punto de venta:</p>
+          <p>Los datos personales recolectados serán tratados para las siguientes finalidades primarias:</p>
           <ul class="list-disc pl-5 space-y-1 text-slate-500">
-            <li>Presentar el catálogo visual de pizzas clasificado por tamaño (grande, mediana, chica) y por sabor.</li>
-            <li>Mostrar opciones de personalización de productos (tipo de masa, tamaño, ingredientes opcionales).</li>
-            <li>Exhibir combos familiares, precios y promociones o descuentos vigentes.</li>
-            <li>Permitir al cliente organizar visualmente su selección antes de acercarse a caja.</li>
-            <li>Informar sobre los métodos de pago aceptados en el local (efectivo y tarjeta).</li>
+            <li>Crear y autenticar la cuenta del cliente para acceder a sus funciones y al flujo de compra.</li>
+            <li>Registrar y procesar los pedidos de alimentos del cliente, calculando los importes correspondientes.</li>
+            <li>Interconectar la aplicación con la API de Mercado Pago para procesar y validar el cobro de la orden de forma segura.</li>
+            <li>Generar códigos de retiro y monitorear el avance de la orden en la cola de cocina en el establecimiento.</li>
+            <li>Permitir al administrador del establecimiento verificar transacciones en el panel de control y generar estadísticas de venta.</li>
           </ul>
         </div>
 
         <!-- V. ADMINISTRADOR DEL SISTEMA -->
         <div class="space-y-1.5">
-          <h4 class="font-black text-slate-800 text-sm">V. Rol del Administrador del Sistema</h4>
-          <p>La aplicación contempla un <strong>perfil de administrador</strong> con acceso restringido, cuya función es gestionar el contenido del catálogo: actualizar precios, sabores, imágenes, combos y promociones activas. Este acceso es exclusivo del responsable del local o la persona autorizada por él.</p>
-          <p>En el ejercicio de estas funciones, el administrador <strong>no tiene acceso a datos personales de clientes</strong>, ya que la aplicación no los recopila. Su actividad se limita al mantenimiento del contenido público del catálogo digital.</p>
-          <div class="p-3 bg-red-500/5 border border-red-500/10 rounded-2xl text-[11px] text-red-900/80 leading-normal">
-            <strong>Nota técnica:</strong> El repositorio del proyecto se gestiona bajo GitHub Flow con acceso controlado por el equipo de desarrollo (IDGS 9° A). El código fuente, historial de cambios y ramas de trabajo son recursos internos del equipo y no contienen información personal de clientes finales.
-          </div>
+          <h4 class="font-black text-slate-800 text-sm">V. Acceso y Rol del Administrador</h4>
+          <p>La aplicación contempla un perfil de administrador con acceso restringido para la gestión del catálogo y control de producción de cocina. El administrador tiene acceso visual a los nombres de los clientes, detalles de los pedidos y estado de pago de las órdenes vigentes con la única finalidad de preparar y entregar las pizzas correctamente.</p>
+          <p>El administrador <strong>no puede visualizar las contraseñas de los usuarios</strong>, las cuales están cifradas en la base de datos, garantizando la confidencialidad de las credenciales de acceso del cliente.</p>
         </div>
 
         <!-- VI. TRANSFERENCIA DE DATOS -->
         <div class="space-y-1.5">
           <h4 class="font-black text-slate-800 text-sm">VI. Transferencia de Datos a Terceros</h4>
-          <p>Dado que <strong>Planeta Pizza — Catálogo Web no recopila datos personales de sus usuarios</strong>, no existe transferencia, cesión, venta ni compartición de información personal con terceros de ningún tipo, ya sean empresas de publicidad, plataformas de análisis, redes sociales u otros proveedores de servicios.</p>
-          <p>La aplicación no integra herramientas de analítica de usuario (como Google Analytics), píxeles de seguimiento, cookies de terceros ni SDKs publicitarios.</p>
+          <p>Los datos de transacción e importes del pedido se transfieren única y exclusivamente a la plataforma de pagos <strong>Mercado Pago (MercadoLibre, S. de R.L. de C.V.)</strong> para llevar a cabo el cobro solicitado por el cliente. No se realiza transferencia, cesión o venta de datos de contacto o registros de clientes a empresas publicitarias ni a otros terceros ajenos a la operación de este servicio.</p>
         </div>
 
         <!-- VII. DERECHOS ARCO -->
         <div class="space-y-1.5">
-          <h4 class="font-black text-slate-800 text-sm">VII. Derechos del Usuario</h4>
-          <p>Al no existir recopilación de datos personales, el ejercicio formal de los derechos de <strong>Acceso, Rectificación, Cancelación y Oposición (ARCO)</strong> no resulta aplicable en el contexto de esta aplicación, ya que no existe información personal de usuarios almacenada en el sistema.</p>
-          <p>No obstante, cualquier usuario que tenga dudas, inquietudes o comentarios relacionados con el tratamiento de su información podrá dirigirse directamente al personal del local <strong>Planeta Pizza</strong> durante el horario de atención.</p>
+          <h4 class="font-black text-slate-800 text-sm">VII. Derechos del Usuario (ARCO)</h4>
+          <p>Los usuarios registrados tienen derecho a ejercer el Acceso, Rectificación, Cancelación u Oposición (ARCO) sobre sus datos personales. Para solicitar la eliminación de su cuenta o la revocación del consentimiento para el tratamiento de su correo y datos de perfil, los usuarios pueden enviar una solicitud directamente al establecimiento o al equipo responsable mediante los canales de contacto provistos en el local.</p>
         </div>
 
         <!-- VIII. SEGURIDAD -->
         <div class="space-y-1.5">
           <h4 class="font-black text-slate-800 text-sm">VIII. Medidas de Seguridad</h4>
-          <p>El equipo de desarrollo ha adoptado las siguientes medidas técnicas y organizativas para garantizar la integridad, disponibilidad y confidencialidad del sistema:</p>
+          <p>Para proteger la información personal y de pedidos, se han implementado medidas técnicas de seguridad:</p>
           <ul class="list-disc pl-5 space-y-1 text-slate-500">
-            <li><strong>Control de versiones con GitHub Flow:</strong> todo cambio al código pasa por revisión y aprobación mediante Pull Request antes de integrarse a la rama principal, evitando modificaciones no autorizadas.</li>
-            <li><strong>Ramas de desarrollo protegidas:</strong> ningún integrante del equipo puede hacer cambios directos a la rama <code>main</code> sin revisión previa del encargado del repositorio.</li>
-            <li><strong>Ausencia de bases de datos de usuarios:</strong> al no existir registro de clientes, no hay base de datos de información personal que deba protegerse contra accesos no autorizados.</li>
-            <li><strong>Sin almacenamiento local de sesión:</strong> la vista de selección es temporal en memoria del navegador y no persiste entre sesiones.</li>
-            <li><strong>Mantenimiento controlado:</strong> las actualizaciones de catálogo, precios y promociones son realizadas únicamente por el administrador autorizado del local.</li>
+            <li><strong>Cifrado de Credenciales:</strong> Uso de algoritmos de hashing para la protección de las contraseñas de clientes en la base de datos relacional PostgreSQL.</li>
+            <li><strong>Protocolo Seguro:</strong> Canales de comunicación con el backend resguardados mediante APIs y variables de entorno seguras para las llaves de Mercado Pago y base de datos.</li>
+            <li><strong>Control de Código:</strong> Repositorio Git estructurado y ramas de desarrollo protegidas que garantizan la integridad del software de Planet Pizza.</li>
           </ul>
         </div>
 
         <!-- IX. COOKIES Y TECNOLOGÍAS DE RASTREO -->
         <div class="space-y-1.5">
           <h4 class="font-black text-slate-800 text-sm">IX. Cookies y Tecnologías de Rastreo</h4>
-          <p>La aplicación web de Planeta Pizza <strong>no utiliza cookies de rastreo, cookies de sesión persistente, web beacons, píxeles de seguimiento ni ninguna otra tecnología de monitoreo del comportamiento del usuario</strong>.</p>
-          <p>El navegador puede generar datos de caché propios para mejorar el rendimiento de carga de la aplicación (imágenes, estilos); estos son gestionados exclusivamente por el dispositivo del usuario y no son accesibles por el Responsable.</p>
+          <p>La aplicación utiliza almacenamiento local seguro en el navegador (Local Storage) y cookies estrictamente técnicas con el único fin de mantener activa la sesión iniciada del cliente o del administrador y conservar los elementos del carrito de compra de manera temporal mientras se completa el pedido.</p>
         </div>
 
         <!-- X. CAMBIOS AL AVISO -->
         <div class="space-y-1.5">
           <h4 class="font-black text-slate-800 text-sm">X. Modificaciones al Aviso de Privacidad</h4>
-          <p>El Responsable se reserva el derecho de actualizar el presente aviso de privacidad en caso de que el sistema sea modificado para incorporar nuevas funcionalidades que impliquen el tratamiento de datos personales (por ejemplo: registro de usuarios, pedidos en línea, entregas a domicilio u otras que estén actualmente fuera del alcance definido en el Documento de Requerimientos, versión 1.0).</p>
-          <p>Cualquier modificación relevante será notificada mediante la publicación del aviso actualizado dentro de la propia aplicación, con indicación de la nueva fecha de vigencia.</p>
-          <p>La versión vigente del aviso de privacidad será siempre la disponible en la aplicación al momento de su consulta.</p>
+          <p>El Responsable se reserva el derecho de actualizar el presente aviso de privacidad ante cambios legislativos, modificaciones técnicas o ampliación de las funcionalidades del sistema. La versión vigente siempre estará accesible para su consulta directa a través del footer de esta plataforma.</p>
         </div>
 
         <!-- XI. CONTACTO -->
         <div class="space-y-1.5">
           <h4 class="font-black text-slate-800 text-sm">XI. Contacto y Atención</h4>
-          <p>Para cualquier duda, aclaración o comentario relacionado con el presente aviso de privacidad o con el funcionamiento de la aplicación, el usuario podrá comunicarse directamente en el punto de venta:</p>
+          <p>Para cualquier duda, aclaración o solicitud relacionada con este aviso de privacidad o el tratamiento de sus datos personales, el usuario puede acudir directamente a sucursal:</p>
           <div class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-[11px] text-slate-500">
             <div><strong>Establecimiento:</strong> Planeta Pizza</div>
-            <div><strong>Atención:</strong> Personal del local durante horario de servicio</div>
-            <div><strong>Modalidad:</strong> Presencial en caja del local</div>
+            <div><strong>Atención:</strong> Personal del local durante el horario de servicio</div>
+            <div><strong>Modalidad:</strong> Presencial en caja o mediante el contacto directo de los responsables del proyecto</div>
           </div>
         </div>
 
         <div class="text-center text-slate-300 text-lg tracking-widest pt-2">· · ·</div>
 
         <p class="text-[11px] text-slate-400 text-center leading-normal">
-          Este aviso de privacidad fue elaborado conforme a la naturaleza y alcance del sistema descrito en el <em>Documento de Requerimientos del Sistema — Planeta Pizza v1.0</em> y el <em>Documento de Gestión y Control del Repositorio — IDGS 9° A, mayo 2025</em>.<br>
-          <strong class="text-slate-500">Fecha de emisión: Mayo 2025 · Vigente hasta nueva publicación.</strong>
+          Este aviso de privacidad fue elaborado conforme a la arquitectura técnica del sistema y en cumplimiento con la normativa aplicable de protección de datos personales de los usuarios de comercio electrónico.<br>
+          <strong class="text-slate-500">Última actualización: Julio 2026 · Vigente hasta nueva publicación.</strong>
         </p>
 
       </div>

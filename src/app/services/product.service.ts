@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Pizza, SizeOption, IngredientOption } from './cart.service';
+import { Pizza, SizeOption, IngredientOption, Promo } from './cart.service';
 
 @Injectable({
   providedIn: 'root'
@@ -120,6 +120,7 @@ export class ProductService {
   public readonly pizzas = signal<Pizza[]>([]);
   public readonly sizes = signal<SizeOption[]>([]);
   public readonly ingredients = signal<IngredientOption[]>([]);
+  public readonly promos = signal<Promo[]>([]);
 
   constructor() {
     this.loadCatalog();
@@ -221,9 +222,38 @@ export class ProductService {
     }
   }
 
+  // --- PROMOS CRUD ---
+  public addPromo(promo: any): void {
+    this.http.post<Promo>(`${this.apiUrl}/promos`, promo).subscribe({
+      next: (data) => {
+        this.promos.update(items => [...items, data]);
+      },
+      error: (err) => console.error('Error al agregar promoción', err)
+    });
+  }
+
+  public updatePromo(updated: any): void {
+    this.http.put<Promo>(`${this.apiUrl}/promos/${updated.id}`, updated).subscribe({
+      next: (data) => {
+        this.promos.update(items => items.map(p => p.id === updated.id ? { ...p, ...data } : p));
+      },
+      error: (err) => console.error('Error al actualizar promoción', err)
+    });
+  }
+
+  public deletePromo(id: string): void {
+    this.http.delete(`${this.apiUrl}/promos/${id}`).subscribe({
+      next: () => {
+        this.promos.update(items => items.filter(p => p.id !== id));
+      },
+      error: (err) => console.error('Error al eliminar promoción', err)
+    });
+  }
+
   // --- GLOBAL RESET ---
   public resetCatalog(): void {
     // Eliminar todo
+    this.promos().forEach(pr => this.deletePromo(pr.id));
     this.pizzas().forEach(p => this.deletePizza(p.id));
     this.sizes().forEach(s => { if (s.nombre) this.deleteSize(s.nombre); });
     this.ingredients().forEach(i => { if (i.nombre) this.deleteIngredient(i.nombre); });
@@ -256,6 +286,11 @@ export class ProductService {
     this.http.get<IngredientOption[]>(`${this.apiUrl}/catalog/ingredients`).subscribe({
       next: (data) => this.ingredients.set(data),
       error: (err) => console.error('Error al cargar ingredientes', err)
+    });
+
+    this.http.get<Promo[]>(`${this.apiUrl}/promos`).subscribe({
+      next: (data) => this.promos.set(data),
+      error: (err) => console.error('Error al cargar promociones', err)
     });
   }
 }
