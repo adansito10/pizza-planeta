@@ -7,7 +7,7 @@ import { Observable, tap } from 'rxjs';
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/auth';
+  private readonly apiUrl = 'https://api-pizzeria-production.up.railway.app/api/auth';
 
   private readonly AUTH_KEY = 'planet_pizza_admin_session';
   private readonly CUSTOMER_TOKEN_KEY = 'planet_pizza_customer_token';
@@ -17,7 +17,8 @@ export class AuthService {
   public readonly isLoggedIn = computed(() => 
     this.localAdmin() || 
     this.customerUser()?.rol === 'admin' || 
-    this.customerUser()?.email === 'adandejesus200420@gmail.com'
+    this.customerUser()?.email === 'adandejesus200420@gmail.com' ||
+    this.customerUser()?.email === 'admin@planetpizza.com'
   );
 
   // Customer login states
@@ -108,7 +109,8 @@ export class AuthService {
       contrasena: password,
       password 
     };
-    return this.http.put<any>(`${this.apiUrl}/update`, payload).pipe(
+    // Swagger: PUT /api/users/{id}
+    return this.http.put<any>(`https://api-pizzeria-production.up.railway.app/api/users/${userId}`, payload).pipe(
       tap(res => {
         if (res.user) {
           if (res.user.correo && !res.user.email) {
@@ -126,7 +128,8 @@ export class AuthService {
   }
 
   public getAllUsers(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/users`);
+    // Swagger: GET /api/users
+    return this.http.get<any[]>(`https://api-pizzeria-production.up.railway.app/api/users`);
   }
 
   private checkSession(): void {

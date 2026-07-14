@@ -332,7 +332,7 @@ export class CartService {
           this.isProcessingPayment.set(false);
         } else {
           // Mercado Pago payment option selected
-          this.http.post<{ initPoint: string }>('http://localhost:3000/api/payments/create-preference', { orderId: newOrder.id }).subscribe({
+          this.http.post<{ initPoint: string }>('https://api-pizzeria-production.up.railway.app/api/payments/create-preference', { orderId: newOrder.id }).subscribe({
             next: (paymentRes) => {
               this.cart.set([]); // Clear cart
               this.closeModal();

@@ -129,7 +129,7 @@ export class CustomerAuthComponent implements OnInit, AfterViewInit {
       next: (res) => {
         this.loading.set(false);
         this.cartService.activeModal.set('none'); // Close modal
-        if (res.user && (res.user.rol === 'admin' || res.user.email === 'adandejesus200420@gmail.com')) {
+        if (res.user && (res.user.rol === 'admin' || res.user.email === 'adandejesus200420@gmail.com' || res.user.email === 'admin@planetpizza.com')) {
           this.router.navigate(['/admin/dashboard']);
         } else {
           this.router.navigate(['/kiosk']);
@@ -255,7 +255,7 @@ export class CustomerAuthComponent implements OnInit, AfterViewInit {
         next: (res) => {
           this.loading.set(false);
           this.cartService.activeModal.set('none'); // Close modal
-          if (res.user && (res.user.rol === 'admin' || res.user.email === 'adandejesus200420@gmail.com')) {
+          if (res.user && (res.user.rol === 'admin' || res.user.email === 'adandejesus200420@gmail.com' || res.user.email === 'admin@planetpizza.com')) {
             this.router.navigate(['/admin/dashboard']);
           } else {
             this.router.navigate(['/kiosk']);

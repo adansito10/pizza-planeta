@@ -26,7 +26,7 @@ export interface Order {
 })
 export class OrderService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/orders';
+  private readonly apiUrl = 'https://api-pizzeria-production.up.railway.app/api/orders';
 
   // State signals
   public readonly orders = signal<Order[]>([]);
@@ -80,7 +80,8 @@ export class OrderService {
   });
 
   public confirmOrderPayment(orderId: string): Observable<Order> {
-    return this.http.put<Order>(`${this.apiUrl}/${orderId}/confirm-payment`, {}).pipe(
+    // Swagger: PUT /api/orders/{id}
+    return this.http.put<Order>(`${this.apiUrl}/${orderId}`, { paymentStatus: 'approved' }).pipe(
       tap((updatedOrder) => {
         this.orders.update(current => current.map(order => 
           order.id === orderId ? updatedOrder : order
