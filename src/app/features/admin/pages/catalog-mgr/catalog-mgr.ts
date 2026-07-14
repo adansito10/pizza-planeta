@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../../../services/product.service';
 import { Pizza, SizeOption, IngredientOption, Promo } from '../../../../services/cart.service';
+import { ToastService } from '../../../../services/toast.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 
 @Component({
   selector: 'app-catalog-mgr',
@@ -14,6 +16,8 @@ import { Pizza, SizeOption, IngredientOption, Promo } from '../../../../services
 })
 export class CatalogMgrComponent {
   public readonly productService = inject(ProductService);
+  public readonly toastService = inject(ToastService);
+  public readonly confirmService = inject(ConfirmService);
   private http = inject(HttpClient);
 
   // Sub-navigation tab: pizzas, ingredients (extras), options (masas, salsas, quesos), sizes, promos
@@ -97,7 +101,7 @@ export class CatalogMgrComponent {
         },
         error: (err) => {
           console.error('Error al subir la imagen', err);
-          alert('Hubo un error al subir la imagen. Asegúrate de tener la API backend encendida y configurada.');
+          this.toastService.show('Error', 'Hubo un error al subir la imagen.', 'error');
           this.isUploadingImage.set(false);
         }
       });
@@ -186,7 +190,7 @@ export class CatalogMgrComponent {
 
   public savePizza(): void {
     if (!this.pizzaNombre.trim()) {
-      alert('Por favor introduce el nombre de la pizza.');
+      this.toastService.show('Error', 'Por favor introduce el nombre de la pizza.', 'error');
       return;
     }
 
@@ -211,9 +215,15 @@ export class CatalogMgrComponent {
   }
 
   public deletePizza(id: string): void {
-    if (confirm('¿Estás seguro de que deseas eliminar esta pizza?')) {
-      this.productService.deletePizza(id);
-    }
+    const pizza = this.productService.pizzas().find(p => p.id === id);
+    this.confirmService.ask({
+      title: 'Eliminar Pizza',
+      message: `¿Estás seguro de que deseas eliminar la pizza "${pizza?.nombre || ''}" del catálogo?`,
+      confirmText: 'Eliminar',
+      onConfirm: () => {
+        this.productService.deletePizza(id);
+      }
+    });
   }
 
   public togglePizzaDefaultExtra(extraName: string): void {
@@ -249,7 +259,7 @@ export class CatalogMgrComponent {
 
   public saveIngredient(): void {
     if (!this.ingredientNombre.trim()) {
-      alert('Por favor introduce el nombre del ingrediente.');
+      this.toastService.show('Error', 'Por favor introduce el nombre del ingrediente.', 'error');
       return;
     }
 
@@ -269,9 +279,14 @@ export class CatalogMgrComponent {
   }
 
   public deleteIngredient(name: string): void {
-    if (confirm(`¿Deseas eliminar el ingrediente "${name}"?`)) {
-      this.productService.deleteIngredient(name);
-    }
+    this.confirmService.ask({
+      title: 'Eliminar Ingrediente',
+      message: `¿Estás seguro de que deseas eliminar el ingrediente "${name}" del catálogo?`,
+      confirmText: 'Eliminar',
+      onConfirm: () => {
+        this.productService.deleteIngredient(name);
+      }
+    });
   }
 
   public getIngredientsOfCategory(cat: 'masa' | 'salsa' | 'queso' | 'extra'): IngredientOption[] {
@@ -299,7 +314,7 @@ export class CatalogMgrComponent {
 
   public saveSize(): void {
     if (!this.sizeNombre.trim() || !this.sizeMedida.trim()) {
-      alert('Por favor completa todos los campos del tamaño.');
+      this.toastService.show('Error', 'Por favor completa todos los campos del tamaño.', 'error');
       return;
     }
 
@@ -319,9 +334,14 @@ export class CatalogMgrComponent {
   }
 
   public deleteSize(name: string): void {
-    if (confirm(`¿Deseas eliminar el tamaño "${name}"?`)) {
-      this.productService.deleteSize(name);
-    }
+    this.confirmService.ask({
+      title: 'Eliminar Tamaño',
+      message: `¿Estás seguro de que deseas eliminar el tamaño "${name}" del catálogo?`,
+      confirmText: 'Eliminar',
+      onConfirm: () => {
+        this.productService.deleteSize(name);
+      }
+    });
   }
 
   // --- PROMOS EDIT METHODS ---
@@ -351,11 +371,11 @@ export class CatalogMgrComponent {
 
   public savePromo(): void {
     if (!this.promoNombre.trim()) {
-      alert('Por favor introduce el nombre de la promoción.');
+      this.toastService.show('Error', 'Por favor introduce el nombre de la promoción.', 'error');
       return;
     }
     if (!this.promoPizzaBaseId) {
-      alert('Por favor selecciona una pizza base para esta promoción.');
+      this.toastService.show('Error', 'Por favor selecciona una pizza base para esta promoción.', 'error');
       return;
     }
 
@@ -378,15 +398,26 @@ export class CatalogMgrComponent {
   }
 
   public deletePromo(id: string): void {
-    if (confirm('¿Estás seguro de que deseas eliminar esta promoción?')) {
-      this.productService.deletePromo(id);
-    }
+    const promo = this.productService.promos().find(p => p.id === id);
+    this.confirmService.ask({
+      title: 'Eliminar Promoción',
+      message: `¿Estás seguro de que deseas eliminar la promoción "${promo?.nombre || ''}" del catálogo?`,
+      confirmText: 'Eliminar',
+      onConfirm: () => {
+        this.productService.deletePromo(id);
+      }
+    });
   }
 
   // --- CATALOG RESET ---
   public resetCatalog(): void {
-    if (confirm('¿Restablecer todo el catálogo (pizzas, ingredientes y tamaños) a sus valores predeterminados?')) {
-      this.productService.resetCatalog();
-    }
+    this.confirmService.ask({
+      title: 'Restablecer Catálogo',
+      message: '¿Restablecer todo el catálogo (pizzas, ingredientes y tamaños) a sus valores predeterminados? Esta acción es irreversible.',
+      confirmText: 'Restablecer',
+      onConfirm: () => {
+        this.productService.resetCatalog();
+      }
+    });
   }
 }

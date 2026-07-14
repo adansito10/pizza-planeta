@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CartItem } from './cart.service';
+import { ToastService } from './toast.service';
 
 export type OrderStatus = 'Pendiente' | 'Preparando' | 'Listo' | 'Entregado';
 
@@ -26,6 +27,7 @@ export interface Order {
 })
 export class OrderService {
   private http = inject(HttpClient);
+  private toastService = inject(ToastService);
   private readonly apiUrl = 'https://api-pizzeria-production.up.railway.app/api/orders';
 
   // State signals
@@ -82,10 +84,17 @@ export class OrderService {
   public confirmOrderPayment(orderId: string): Observable<Order> {
     // Swagger: PUT /api/orders/{id}
     return this.http.put<Order>(`${this.apiUrl}/${orderId}`, { paymentStatus: 'approved' }).pipe(
-      tap((updatedOrder) => {
-        this.orders.update(current => current.map(order => 
-          order.id === orderId ? updatedOrder : order
-        ));
+      tap({
+        next: (updatedOrder) => {
+          this.orders.update(current => current.map(order => 
+            order.id === orderId ? updatedOrder : order
+          ));
+          this.toastService.show('Pago Confirmado', `Pago de la orden ${updatedOrder.orderNumber} aprobado.`, 'success');
+        },
+        error: (err) => {
+          console.error('Error al confirmar pago', err);
+          this.toastService.show('Error', 'No se pudo confirmar el pago de la orden.', 'error');
+        }
       })
     );
   }
@@ -113,9 +122,11 @@ export class OrderService {
         this.orders.update(current => current.map(order => 
           order.id === orderId ? { ...order, status: updatedOrder.status } : order
         ));
+        this.toastService.show('Pedido Actualizado', `La orden ${updatedOrder.orderNumber} ahora está en: ${status}.`, 'success');
       },
       error: (err) => {
         console.error('Error al actualizar el estado del pedido', err);
+        this.toastService.show('Error', 'No se pudo actualizar el estado de la orden.', 'error');
         // Rollback on error
         this.orders.set(previousOrders);
       }
@@ -123,11 +134,16 @@ export class OrderService {
   }
 
   public deleteOrder(orderId: string): void {
+    const deletedOrder = this.orders().find(o => o.id === orderId);
     this.http.delete(`${this.apiUrl}/${orderId}`).subscribe({
       next: () => {
         this.orders.update(current => current.filter(o => o.id !== orderId));
+        this.toastService.show('Pedido Cancelado', `La orden ${deletedOrder?.orderNumber || ''} fue cancelada.`, 'success');
       },
-      error: (err) => console.error('Error al eliminar el pedido', err)
+      error: (err) => {
+        console.error('Error al eliminar el pedido', err);
+        this.toastService.show('Error', 'No se pudo cancelar el pedido.', 'error');
+      }
     });
   }
 
@@ -136,8 +152,12 @@ export class OrderService {
       next: () => {
         this.orders.set([]);
         this.orderCounter.set(1);
+        this.toastService.show('Pedidos Limpiados', 'Se eliminaron todos los pedidos del historial.', 'success');
       },
-      error: (err) => console.error('Error al limpiar los pedidos', err)
+      error: (err) => {
+        console.error('Error al limpiar los pedidos', err);
+        this.toastService.show('Error', 'No se pudo limpiar los pedidos.', 'error');
+      }
     });
   }
 

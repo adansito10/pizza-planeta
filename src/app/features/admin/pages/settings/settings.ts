@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { OrderService } from '../../../../services/order.service';
 import { ProductService } from '../../../../services/product.service';
+import { ToastService } from '../../../../services/toast.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 
 @Component({
   selector: 'app-settings',
@@ -15,12 +17,14 @@ export class SettingsComponent {
   public readonly themeService = inject(ThemeService);
   public readonly orderService = inject(OrderService);
   public readonly productService = inject(ProductService);
+  public readonly toastService = inject(ToastService);
+  public readonly confirmService = inject(ConfirmService);
 
 
   public generateTestOrder(): void {
     const pizzas = this.productService.pizzas();
     if (pizzas.length === 0) {
-      alert('No hay pizzas en el catálogo para generar un pedido de prueba.');
+      this.toastService.show('Error', 'No hay pizzas en el catálogo para generar un pedido de prueba.', 'error');
       return;
     }
 
@@ -49,15 +53,25 @@ export class SettingsComponent {
       total += itemPrice;
     }
 
-    this.orderService.addOrder(items, total);
-    alert('¡Pedido de prueba generado con éxito! Puedes revisarlo en la sección de Pedidos.');
+    this.orderService.addOrder(items, total).subscribe({
+      next: (newOrder) => {
+        this.toastService.show('Pedido Generado', `Se generó la orden de prueba ${newOrder.orderNumber}.`, 'success');
+      },
+      error: (err) => {
+        this.toastService.show('Error', 'No se pudo generar la orden de prueba.', 'error');
+      }
+    });
   }
 
   public resetEverything(): void {
-    if (confirm('¿Estás seguro de que deseas restablecer todos los datos (pedidos y catálogo)?')) {
-      this.orderService.clearAllOrders();
-      this.productService.resetCatalog();
-      alert('Se han restablecido todos los datos predeterminados.');
-    }
+    this.confirmService.ask({
+      title: 'Restablecer Todo',
+      message: '¿Estás seguro de que deseas restablecer todos los datos (pedidos y catálogo)? Esta acción no se puede deshacer.',
+      confirmText: 'Restablecer',
+      onConfirm: () => {
+        this.orderService.clearAllOrders();
+        this.productService.resetCatalog();
+      }
+    });
   }
 }

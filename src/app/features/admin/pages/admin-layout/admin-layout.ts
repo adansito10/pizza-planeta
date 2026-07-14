@@ -4,6 +4,8 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../../../services/auth.service';
 import { OrderService } from '../../../../services/order.service';
+import { ToastService } from '../../../../services/toast.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -15,6 +17,8 @@ import { OrderService } from '../../../../services/order.service';
 export class AdminLayout {
   public readonly themeService = inject(ThemeService);
   public readonly orderService = inject(OrderService);
+  public readonly toastService = inject(ToastService);
+  public readonly confirmService = inject(ConfirmService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 

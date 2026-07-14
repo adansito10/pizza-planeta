@@ -1,12 +1,14 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Pizza, SizeOption, IngredientOption, Promo } from './cart.service';
+import { ToastService } from './toast.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
   private http = inject(HttpClient);
+  private toastService = inject(ToastService);
   private readonly apiUrl = 'https://api-pizzeria-production.up.railway.app/api';
 
   // Valores predeterminados en memoria (para resetear si el usuario lo desea)
@@ -131,8 +133,12 @@ export class ProductService {
     this.http.post<Pizza>(`${this.apiUrl}/pizzas`, pizza).subscribe({
       next: (data) => {
         this.pizzas.update(items => [...items, data]);
+        this.toastService.show('Pizza Agregada', `La pizza "${data.nombre}" se agregó al catálogo.`, 'success');
       },
-      error: (err) => console.error('Error al agregar pizza', err)
+      error: (err) => {
+        console.error('Error al agregar pizza', err);
+        this.toastService.show('Error', 'No se pudo agregar la pizza.', 'error');
+      }
     });
   }
 
@@ -140,17 +146,26 @@ export class ProductService {
     this.http.put<Pizza>(`${this.apiUrl}/pizzas/${updated.id}`, updated).subscribe({
       next: (data) => {
         this.pizzas.update(items => items.map(p => p.id === updated.id ? { ...p, ...data } : p));
+        this.toastService.show('Pizza Actualizada', `La pizza "${data.nombre}" se actualizó correctamente.`, 'success');
       },
-      error: (err) => console.error('Error al actualizar pizza', err)
+      error: (err) => {
+        console.error('Error al actualizar pizza', err);
+        this.toastService.show('Error', 'No se pudo actualizar la pizza.', 'error');
+      }
     });
   }
 
   public deletePizza(id: string): void {
     this.http.delete(`${this.apiUrl}/pizzas/${id}`).subscribe({
       next: () => {
+        const deleted = this.pizzas().find(p => p.id === id);
         this.pizzas.update(items => items.filter(p => p.id !== id));
+        this.toastService.show('Pizza Eliminada', `La pizza "${deleted?.nombre || ''}" se eliminó del catálogo.`, 'success');
       },
-      error: (err) => console.error('Error al eliminar pizza', err)
+      error: (err) => {
+        console.error('Error al eliminar pizza', err);
+        this.toastService.show('Error', 'No se pudo eliminar la pizza.', 'error');
+      }
     });
   }
 
@@ -159,8 +174,12 @@ export class ProductService {
     this.http.post<SizeOption>(`${this.apiUrl}/catalog/sizes`, size).subscribe({
       next: (data) => {
         this.sizes.update(items => [...items, data]);
+        this.toastService.show('Tamaño Agregado', `El tamaño "${data.nombre}" se agregó correctamente.`, 'success');
       },
-      error: (err) => console.error('Error al agregar tamaño', err)
+      error: (err) => {
+        console.error('Error al agregar tamaño', err);
+        this.toastService.show('Error', 'No se pudo agregar el tamaño.', 'error');
+      }
     });
   }
 
@@ -170,8 +189,12 @@ export class ProductService {
       this.http.put<SizeOption>(`${this.apiUrl}/catalog/sizes/${size.id}`, updated).subscribe({
         next: (data) => {
           this.sizes.update(items => items.map(s => s.id === size.id ? { ...s, ...data } : s));
+          this.toastService.show('Tamaño Actualizado', `El tamaño "${data.nombre}" se actualizó correctamente.`, 'success');
         },
-        error: (err) => console.error('Error al actualizar tamaño', err)
+        error: (err) => {
+          console.error('Error al actualizar tamaño', err);
+          this.toastService.show('Error', 'No se pudo actualizar el tamaño.', 'error');
+        }
       });
     }
   }
@@ -182,8 +205,12 @@ export class ProductService {
       this.http.delete(`${this.apiUrl}/catalog/sizes/${size.id}`).subscribe({
         next: () => {
           this.sizes.update(items => items.filter(s => s.id !== size.id));
+          this.toastService.show('Tamaño Eliminado', `El tamaño "${name}" se eliminó del catálogo.`, 'success');
         },
-        error: (err) => console.error('Error al eliminar tamaño', err)
+        error: (err) => {
+          console.error('Error al eliminar tamaño', err);
+          this.toastService.show('Error', 'No se pudo eliminar el tamaño.', 'error');
+        }
       });
     }
   }
@@ -193,8 +220,12 @@ export class ProductService {
     this.http.post<IngredientOption>(`${this.apiUrl}/catalog/ingredients`, ing).subscribe({
       next: (data) => {
         this.ingredients.update(items => [...items, data]);
+        this.toastService.show('Ingrediente Agregado', `El ingrediente "${data.nombre}" se agregó al catálogo.`, 'success');
       },
-      error: (err) => console.error('Error al agregar ingrediente', err)
+      error: (err) => {
+        console.error('Error al agregar ingrediente', err);
+        this.toastService.show('Error', 'No se pudo agregar el ingrediente.', 'error');
+      }
     });
   }
 
@@ -204,8 +235,12 @@ export class ProductService {
       this.http.put<IngredientOption>(`${this.apiUrl}/catalog/ingredients/${ing.id}`, updated).subscribe({
         next: (data) => {
           this.ingredients.update(items => items.map(i => i.id === ing.id ? { ...i, ...data } : i));
+          this.toastService.show('Ingrediente Actualizado', `El ingrediente "${data.nombre}" se actualizó correctamente.`, 'success');
         },
-        error: (err) => console.error('Error al actualizar ingrediente', err)
+        error: (err) => {
+          console.error('Error al actualizar ingrediente', err);
+          this.toastService.show('Error', 'No se pudo actualizar el ingrediente.', 'error');
+        }
       });
     }
   }
@@ -216,8 +251,12 @@ export class ProductService {
       this.http.delete(`${this.apiUrl}/catalog/ingredients/${ing.id}`).subscribe({
         next: () => {
           this.ingredients.update(items => items.filter(i => i.id !== ing.id));
+          this.toastService.show('Ingrediente Eliminado', `El ingrediente "${name}" se eliminó del catálogo.`, 'success');
         },
-        error: (err) => console.error('Error al eliminar ingrediente', err)
+        error: (err) => {
+          console.error('Error al eliminar ingrediente', err);
+          this.toastService.show('Error', 'No se pudo eliminar el ingrediente.', 'error');
+        }
       });
     }
   }
@@ -227,8 +266,12 @@ export class ProductService {
     this.http.post<Promo>(`${this.apiUrl}/promos`, promo).subscribe({
       next: (data) => {
         this.promos.update(items => [...items, data]);
+        this.toastService.show('Promoción Agregada', `La promoción "${data.nombre}" se agregó al catálogo.`, 'success');
       },
-      error: (err) => console.error('Error al agregar promoción', err)
+      error: (err) => {
+        console.error('Error al agregar promoción', err);
+        this.toastService.show('Error', 'No se pudo agregar la promoción.', 'error');
+      }
     });
   }
 
@@ -236,22 +279,32 @@ export class ProductService {
     this.http.put<Promo>(`${this.apiUrl}/promos/${updated.id}`, updated).subscribe({
       next: (data) => {
         this.promos.update(items => items.map(p => p.id === updated.id ? { ...p, ...data } : p));
+        this.toastService.show('Promoción Actualizada', `La promoción "${data.nombre}" se actualizó correctamente.`, 'success');
       },
-      error: (err) => console.error('Error al actualizar promoción', err)
+      error: (err) => {
+        console.error('Error al actualizar promoción', err);
+        this.toastService.show('Error', 'No se pudo actualizar la promoción.', 'error');
+      }
     });
   }
 
   public deletePromo(id: string): void {
     this.http.delete(`${this.apiUrl}/promos/${id}`).subscribe({
       next: () => {
+        const deleted = this.promos().find(p => p.id === id);
         this.promos.update(items => items.filter(p => p.id !== id));
+        this.toastService.show('Promoción Eliminada', `La promoción "${deleted?.nombre || ''}" se eliminó del catálogo.`, 'success');
       },
-      error: (err) => console.error('Error al eliminar promoción', err)
+      error: (err) => {
+        console.error('Error al eliminar promoción', err);
+        this.toastService.show('Error', 'No se pudo eliminar la promoción.', 'error');
+      }
     });
   }
 
   // --- GLOBAL RESET ---
   public resetCatalog(): void {
+    this.toastService.show('Restableciendo...', 'Iniciando el restablecimiento del catálogo.', 'info');
     // Eliminar todo
     this.promos().forEach(pr => this.deletePromo(pr.id));
     this.pizzas().forEach(p => this.deletePizza(p.id));
@@ -268,6 +321,7 @@ export class ProductService {
           const { id, ...pizzaData } = p;
           this.addPizza(pizzaData);
         });
+        this.toastService.show('Catálogo Restablecido', 'El catálogo se restableció a los valores por defecto.', 'success');
       }, 1000);
     }, 1000);
   }

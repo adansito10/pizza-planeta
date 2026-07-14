@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderService, Order, OrderStatus } from '../../../../services/order.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 
 @Component({
   selector: 'app-orders',
@@ -12,6 +13,7 @@ import { OrderService, Order, OrderStatus } from '../../../../services/order.ser
 })
 export class OrdersComponent {
   public readonly orderService = inject(OrderService);
+  public readonly confirmService = inject(ConfirmService);
 
   // Search filter query
   public readonly searchQuery = signal<string>('');
@@ -104,10 +106,15 @@ export class OrdersComponent {
   }
 
   public cancelOrder(orderId: string): void {
-    if (confirm('¿Estás seguro de que deseas cancelar este pedido?')) {
-      this.orderService.deleteOrder(orderId);
-      this.closeDetails();
-    }
+    this.confirmService.ask({
+      title: 'Cancelar Pedido',
+      message: '¿Estás seguro de que deseas cancelar este pedido? Esta acción es irreversible.',
+      confirmText: 'Cancelar',
+      onConfirm: () => {
+        this.orderService.deleteOrder(orderId);
+        this.closeDetails();
+      }
+    });
   }
 
   public printTicket(order: Order): void {
