@@ -26,6 +26,23 @@ export class AuthService {
   public readonly customerToken = signal<string | null>(null);
   public readonly isCustomerLoggedIn = computed(() => this.customerUser() !== null);
 
+  private decodeToken(token: string): any {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        window.atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error('Error decoding token', e);
+      return null;
+    }
+  }
+
   constructor() {
     this.checkSession();
   }
@@ -69,16 +86,31 @@ export class AuthService {
   public customerLogin(email: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, { correo: email, contrasena: password }).pipe(
       tap(res => {
-        if (res.user) {
-          if (res.user.correo && !res.user.email) {
-            res.user.email = res.user.correo;
+        let user = res.user;
+        if (!user && res.token) {
+          const decoded = this.decodeToken(res.token);
+          if (decoded) {
+            user = {
+              id: decoded.id,
+              nombre: decoded.nombre,
+              apellido: decoded.apellido || '',
+              email: decoded.email || decoded.correo,
+              correo: decoded.correo || decoded.email,
+              telefono: decoded.telefono || '',
+              rol: decoded.rol
+            };
+          }
+        }
+        if (user) {
+          if (user.correo && !user.email) {
+            user.email = user.correo;
           }
         }
         this.customerToken.set(res.token);
-        this.customerUser.set(res.user);
+        this.customerUser.set(user);
         try {
           localStorage.setItem(this.CUSTOMER_TOKEN_KEY, res.token);
-          localStorage.setItem(this.CUSTOMER_USER_KEY, JSON.stringify(res.user));
+          localStorage.setItem(this.CUSTOMER_USER_KEY, JSON.stringify(user));
         } catch (e) {
           console.error('Error saving customer session to localStorage', e);
         }
@@ -112,14 +144,24 @@ export class AuthService {
     // Swagger: PUT /api/users/{id}
     return this.http.put<any>(`https://api-pizzeria-production.up.railway.app/api/users/${userId}`, payload).pipe(
       tap(res => {
-        if (res.user) {
-          if (res.user.correo && !res.user.email) {
-            res.user.email = res.user.correo;
-          }
+        let updatedUser = res.user || res;
+        if (!updatedUser || !updatedUser.nombre) {
+          updatedUser = {
+            ...this.customerUser(),
+            nombre: nombre,
+            apellido: apellido,
+            email: email,
+            correo: email,
+            telefono: telefono,
+            recibePromos: recibePromos
+          };
         }
-        this.customerUser.set(res.user);
+        if (updatedUser.correo && !updatedUser.email) {
+          updatedUser.email = updatedUser.correo;
+        }
+        this.customerUser.set(updatedUser);
         try {
-          localStorage.setItem(this.CUSTOMER_USER_KEY, JSON.stringify(res.user));
+          localStorage.setItem(this.CUSTOMER_USER_KEY, JSON.stringify(updatedUser));
         } catch (e) {
           console.error('Error saving updated customer session to localStorage', e);
         }
@@ -143,13 +185,36 @@ export class AuthService {
       // Check customer session
       const cToken = localStorage.getItem(this.CUSTOMER_TOKEN_KEY);
       const cUserStr = localStorage.getItem(this.CUSTOMER_USER_KEY);
-      if (cToken && cUserStr) {
-        const user = JSON.parse(cUserStr);
-        if (user && user.correo && !user.email) {
-          user.email = user.correo;
+      if (cToken) {
+        let user = null;
+        if (cUserStr && cUserStr !== 'undefined') {
+          try {
+            user = JSON.parse(cUserStr);
+          } catch (e) {}
         }
-        this.customerToken.set(cToken);
-        this.customerUser.set(user);
+        
+        if (!user || !user.nombre) {
+          const decoded = this.decodeToken(cToken);
+          if (decoded) {
+            user = {
+              id: decoded.id,
+              nombre: decoded.nombre,
+              apellido: decoded.apellido || '',
+              email: decoded.email || decoded.correo,
+              correo: decoded.correo || decoded.email,
+              telefono: decoded.telefono || '',
+              rol: decoded.rol
+            };
+          }
+        }
+
+        if (user) {
+          if (user.correo && !user.email) {
+            user.email = user.correo;
+          }
+          this.customerToken.set(cToken);
+          this.customerUser.set(user);
+        }
       }
     } catch (e) {
       console.error('Error checking active session', e);
