@@ -16,7 +16,7 @@ export class AuthService {
   public readonly isLoggedIn = signal<boolean>(false); // Admin login state
   
   // Customer login states
-  public readonly customerUser = signal<{ id: string, nombre: string, email: string } | null>(null);
+  public readonly customerUser = signal<{ id: string, nombre: string, apellido?: string, email: string, telefono?: string, recibePromos?: boolean } | null>(null);
   public readonly customerToken = signal<string | null>(null);
   public readonly isCustomerLoggedIn = computed(() => this.customerUser() !== null);
 
@@ -48,8 +48,8 @@ export class AuthService {
   }
 
   // --- Customer Login ---
-  public customerRegister(nombre: string, email: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, { nombre, email, password });
+  public customerRegister(nombre: string, apellido: string, email: string, password: string, telefono: string, recibePromos: boolean): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/register`, { nombre, apellido, email, password, telefono, recibePromos });
   }
 
   public customerLogin(email: string, password: string): Observable<any> {
@@ -76,6 +76,24 @@ export class AuthService {
     } catch (e) {
       console.error('Error removing customer session from localStorage', e);
     }
+  }
+
+  public customerUpdateProfile(userId: string, nombre: string, apellido: string, email: string, telefono: string, recibePromos: boolean, password?: string): Observable<any> {
+    const payload = { userId, nombre, apellido, email, telefono, recibePromos, password };
+    return this.http.put<any>(`${this.apiUrl}/update`, payload).pipe(
+      tap(res => {
+        this.customerUser.set(res.user);
+        try {
+          localStorage.setItem(this.CUSTOMER_USER_KEY, JSON.stringify(res.user));
+        } catch (e) {
+          console.error('Error saving updated customer session to localStorage', e);
+        }
+      })
+    );
+  }
+
+  public getAllUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/users`);
   }
 
   private checkSession(): void {

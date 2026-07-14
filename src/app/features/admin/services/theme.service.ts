@@ -17,7 +17,7 @@ export class ThemeService {
   public readonly THEMES: ThemeOption[] = [
     {
       id: 'pizza-red',
-      name: 'Rojo Planet Pizza',
+      name: 'Rojo Planeta Pizza',
       primaryColor: '#d00000',
       bgColor: 'bg-red-50/30',
       class: 'admin-theme-red'

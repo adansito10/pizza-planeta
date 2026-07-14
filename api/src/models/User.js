@@ -11,6 +11,11 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(100),
     allowNull: false,
   },
+  apellido: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: '',
+  },
   email: {
     type: DataTypes.STRING(100),
     allowNull: false,
@@ -18,6 +23,16 @@ const User = sequelize.define('User', {
     validate: {
       isEmail: true,
     },
+  },
+  telefono: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    defaultValue: '',
+  },
+  recibePromos: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
   password: {
     type: DataTypes.STRING(255),

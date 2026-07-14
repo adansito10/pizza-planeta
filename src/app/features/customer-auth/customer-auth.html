@@ -4,9 +4,9 @@
   <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-pizza-red/10 blur-3xl"></div>
   <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl"></div>
 
-  <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden relative p-8 animate-in fade-in zoom-in-95 duration-200">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full border border-slate-100 overflow-hidden relative p-8 animate-in fade-in zoom-in-95 duration-200">
     
-    <!-- Close / Back Button (Go directly to menu) -->
+    <!-- Close / Back Button -->
     <button 
       (click)="volverAlMenu()"
       class="absolute top-5 right-5 w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-100"
@@ -19,14 +19,18 @@
     <!-- Header -->
     <div class="text-center mb-8">
       <h2 class="text-2xl font-black text-slate-800 tracking-tight leading-none uppercase">
-        Iniciar Sesión
+        @if (mode === 'login') { Iniciar Sesión }
+        @else if (mode === 'register') { Introduce tus datos para crear tu perfil }
+        @else { Configuración del Perfil }
       </h2>
       <p class="text-xs text-slate-400 font-bold tracking-wider uppercase mt-2">
-        Bienvenido a Planet Pizza
+        @if (mode === 'login') { Bienvenido a Planeta Pizza }
+        @else if (mode === 'register') { Regístrate para poder ordenar y recibir alertas }
+        @else { Administra y edita la configuración de tu cuenta }
       </p>
     </div>
 
-    <!-- Error message alert -->
+    <!-- Message Alerts -->
     @if (errorMessage(); as errorMsg) {
       <div class="bg-red-50 text-red-600 border border-red-100 rounded-2xl p-4 mb-6 flex items-start gap-3 animate-in fade-in duration-200">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 shrink-0 mt-0.5">
@@ -36,29 +40,37 @@
       </div>
     }
 
-    <!-- Google Login Button -->
-    <div class="w-full flex justify-center mb-4 min-h-[44px]">
-      <div id="google-btn" class="w-full"></div>
-    </div>
+    @if (successMessage(); as successMsg) {
+      <div class="bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-2xl p-4 mb-6 flex items-start gap-3 animate-in fade-in duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 shrink-0 mt-0.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+        <span class="text-xs font-bold">{{ successMsg }}</span>
+      </div>
+    }
 
-    <!-- Or Divider -->
-    <div class="flex items-center gap-3 my-5">
-      <div class="flex-1 h-px bg-slate-200"></div>
-      <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">O entra con tu correo</span>
-      <div class="flex-1 h-px bg-slate-200"></div>
-    </div>
+    <!-- MODE: LOGIN -->
+    @if (mode === 'login') {
+      <!-- Google Login Button -->
+      <div class="w-full flex justify-center mb-4 min-h-[44px]">
+        <div id="google-btn" class="w-full"></div>
+      </div>
 
-    <!-- Form -->
-    <form (submit)="onSubmit(); $event.preventDefault()" class="space-y-5">
-      
-      <!-- Email Field -->
-      <div class="space-y-1.5">
-        <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">
-          Correo Electrónico
-        </label>
-        <div class="relative">
+      <!-- Or Divider -->
+      <div class="flex items-center gap-3 my-5">
+        <div class="flex-1 h-px bg-slate-200"></div>
+        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">O entra con tu correo</span>
+        <div class="flex-1 h-px bg-slate-200"></div>
+      </div>
+
+      <!-- Login Form -->
+      <form (submit)="onSubmit(); $event.preventDefault()" class="space-y-5">
+        
+        <!-- Email Field -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Correo Electrónico</label>
           <input 
-            type="text" 
+            type="email" 
             name="email"
             [(ngModel)]="email"
             placeholder="correo@ejemplo.com"
@@ -66,12 +78,10 @@
             required
           />
         </div>
-      </div>
 
-      <!-- Password Field -->
-      <div class="space-y-1.5">
-        <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Contraseña</label>
-        <div class="relative">
+        <!-- Password Field -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Contraseña</label>
           <input 
             type="password" 
             name="password"
@@ -81,26 +91,137 @@
             required
           />
         </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          [disabled]="loading()"
+          class="w-full text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-lg disabled:opacity-50 disabled:pointer-events-none mt-6 bg-pizza-red hover:bg-red-700 shadow-red-100 hover:shadow-red-200"
+        >
+          @if (loading()) {
+            <span class="animate-pulse">Procesando...</span>
+          } @else {
+            Iniciar Sesión
+          }
+        </button>
+      </form>
+
+      <!-- Switch to Register Link -->
+      <div class="mt-6 text-center">
+        <span class="text-xs text-slate-500 font-semibold">¿No tienes una cuenta? </span>
+        <button 
+          (click)="setMode('register')" 
+          class="text-xs font-bold text-pizza-red hover:underline cursor-pointer bg-transparent border-none p-0"
+        >
+          Regístrate aquí
+        </button>
       </div>
+    }
 
-      <!-- Submit button -->
-      <button 
-        type="submit" 
-        [disabled]="loading()"
-        class="w-full text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-lg disabled:opacity-50 disabled:pointer-events-none mt-6 bg-pizza-red hover:bg-red-700 shadow-red-100 hover:shadow-red-200"
-      >
-        @if (loading()) {
-          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Procesando...
-        } @else {
-          Iniciar Sesión
-        }
-      </button>
+    <!-- MODE: REGISTER -->
+    @if (mode === 'register') {
+      <form (submit)="onSubmit(); $event.preventDefault()" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+        
+        <!-- Name Field -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">* Nombre(s)</label>
+          <input 
+            type="text" 
+            name="nombre"
+            [(ngModel)]="nombre"
+            placeholder="Juan"
+            class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+            required
+          />
+        </div>
 
-    </form>
+        <!-- Surname Field -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">* Apellido(s)</label>
+          <input 
+            type="text" 
+            name="apellido"
+            [(ngModel)]="apellido"
+            placeholder="Pérez"
+            class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+            required
+          />
+        </div>
+
+        <!-- Email Field -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">* Correo Electrónico</label>
+          <input 
+            type="email" 
+            name="email"
+            [(ngModel)]="email"
+            placeholder="correo@ejemplo.com"
+            class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+            required
+          />
+        </div>
+
+        <!-- Confirm Email Field -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">* Confirmar Correo Electrónico</label>
+          <input 
+            type="email" 
+            name="confirmEmail"
+            [(ngModel)]="confirmEmail"
+            placeholder="correo@ejemplo.com"
+            class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+            required
+          />
+        </div>
+
+        <!-- Password Field -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">* Contraseña</label>
+          <input 
+            type="password" 
+            name="password"
+            [(ngModel)]="password"
+            placeholder="••••••••"
+            class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+            required
+          />
+        </div>
+
+        <!-- Promos Opt-in Checkbox -->
+        <div class="flex items-center gap-2.5 pt-2">
+          <input 
+            type="checkbox" 
+            id="recibePromosReg" 
+            name="recibePromos" 
+            [(ngModel)]="recibePromos"
+            class="h-4 w-4 rounded text-pizza-red focus:ring-pizza-red cursor-pointer border-slate-300"
+          />
+          <label for="recibePromosReg" class="text-xs font-bold text-slate-600 cursor-pointer">
+            Me gustaría recibir promociones por correo.
+          </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4 pt-4 border-t border-slate-100">
+          <button 
+            type="submit" 
+            [disabled]="loading()"
+            class="flex-1 bg-pizza-red hover:bg-red-700 disabled:opacity-50 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-red-150 transition-all"
+          >
+            @if (loading()) { Procesando... } @else { Registrarme }
+          </button>
+          
+          <button 
+            type="button" 
+            (click)="setMode('login')"
+            class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3.5 px-6 rounded-2xl cursor-pointer transition-all text-xs uppercase tracking-wider"
+          >
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+    }
 
   </div>
 </div>

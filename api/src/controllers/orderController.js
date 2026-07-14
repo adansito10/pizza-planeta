@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import Order from '../models/Order.js';
+import User from '../models/User.js';
 
 // @desc    Obtener todas las órdenes
 // @route   GET /api/orders
@@ -36,7 +37,7 @@ export const getOrderById = async (req, res) => {
 // @access  Public
 export const createOrder = async (req, res) => {
   try {
-    const { items, total, clienteNombre, userId } = req.body;
+    const { items, total, clienteNombre, clienteTelefono, userId, paymentStatus } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'La orden debe contener al menos un producto' });
@@ -79,14 +80,34 @@ export const createOrder = async (req, res) => {
       attempts++;
     }
 
+    // Fetch customer telephone and email if userId is provided
+    let finalClienteTelefono = clienteTelefono || '';
+    let clienteEmail = '';
+    let finalClienteNombre = clienteNombre || '';
+
+    if (userId) {
+      const user = await User.findByPk(userId);
+      if (user) {
+        if (!finalClienteTelefono) {
+          finalClienteTelefono = user.telefono || '';
+        }
+        clienteEmail = user.email || '';
+        if (!finalClienteNombre) {
+          finalClienteNombre = `${user.nombre} ${user.apellido}`.trim();
+        }
+      }
+    }
+
     const order = await Order.create({
       orderNumber,
-      clienteNombre: clienteNombre || '',
+      clienteNombre: finalClienteNombre,
+      clienteTelefono: finalClienteTelefono,
+      clienteEmail,
       items,
       total,
       time,
       status: 'Pendiente',
-      paymentStatus: 'pending',
+      paymentStatus: paymentStatus || 'pending',
       pickupCode,
       userId: userId || null
     });
@@ -158,7 +179,6 @@ export const confirmOrderPayment = async (req, res) => {
   try {
     const order = await Order.findByPk(req.params.id);
     if (order) {
-      order.status = 'Preparando';
       order.paymentStatus = 'approved';
       const updated = await order.save();
       res.json(updated);

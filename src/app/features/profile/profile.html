@@ -1,0 +1,288 @@
+<!-- Premium Profile Page Layout Container -->
+<div class="min-h-screen flex flex-col bg-slate-100 no-print pb-16">
+
+  <!-- Responsive Navigation Header (Domino's Style) -->
+  <header class="bg-pizza-red text-white sticky top-0 z-50 shadow-md flex items-center justify-between border-b border-red-700 px-6 sm:px-10 h-20">
+    
+    <!-- Left: Brand Logo & Title -->
+    <div class="flex items-center gap-4">
+      <div 
+        (click)="volverAlKiosk()"
+        class="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center cursor-pointer hover:rotate-6 transition-all duration-300"
+      >
+        <img 
+          src="assets/images/logo_pizza.JPG" 
+          alt="Planeta Pizza Logo" 
+          class="h-full w-full object-cover rounded-full"
+        />
+      </div>
+      <div>
+        <h1 class="text-xl font-black tracking-tight leading-none text-white">PLANETA PIZZA</h1>
+        <span class="text-[8px] text-pizza-yellow font-black uppercase tracking-widest block leading-none mt-1">ORDENA ONLINE</span>
+      </div>
+    </div>
+
+    <!-- Center: Navigation Links -->
+    <div class="hidden lg:flex items-center gap-6">
+      <button 
+        (click)="volverAlKiosk()"
+        class="font-black text-xs uppercase tracking-wider text-white transition-colors hover:text-pizza-yellow bg-transparent border-none cursor-pointer"
+      >
+        MENÚ
+      </button>
+      <button 
+        (click)="volverAlKiosk()"
+        class="font-black text-xs uppercase tracking-wider text-white transition-colors hover:text-pizza-yellow bg-transparent border-none cursor-pointer"
+      >
+        PROMOS
+      </button>
+    </div>
+
+    <!-- Right: Account Profile and Logout -->
+    <div class="flex items-center h-full">
+      <div 
+        class="flex items-center gap-3 px-6 h-full cursor-pointer hover:bg-black/10 transition-colors"
+        style="background-color: rgba(0, 0, 0, 0.15);"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6 text-white">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+        </svg>
+        <div class="flex flex-col text-left">
+          <span class="text-[8px] text-white/70 font-bold uppercase tracking-wider leading-none">HOLA!</span>
+          <span class="text-xs font-black text-white leading-none mt-0.5">{{ authService.customerUser()?.nombre }}</span>
+          <button 
+            (click)="cerrarSesion()"
+            class="text-[8px] text-pizza-yellow font-black uppercase tracking-wider mt-1 hover:underline cursor-pointer bg-transparent border-none p-0 text-left"
+          >
+            CERRAR SESIÓN
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Profile Content Container -->
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    
+    <!-- Tab Switcher Navigation -->
+    <div class="flex justify-center bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm max-w-md mx-auto">
+      <button 
+        (click)="setTab('resumen')"
+        class="flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
+        [class]="activeTab === 'resumen' 
+          ? 'bg-pizza-red text-white shadow-md' 
+          : 'text-slate-500 hover:text-slate-800 bg-transparent'"
+      >
+        Resumen del Perfil
+      </button>
+      <button 
+        (click)="setTab('configuracion')"
+        class="flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
+        [class]="activeTab === 'configuracion' 
+          ? 'bg-pizza-red text-white shadow-md' 
+          : 'text-slate-500 hover:text-slate-800 bg-transparent'"
+      >
+        Configuración del Perfil
+      </button>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (errorMessage(); as errorMsg) {
+      <div class="bg-red-50 text-red-600 border border-red-100 rounded-2xl p-4 flex items-start gap-3 animate-in fade-in duration-200 max-w-xl mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 shrink-0 mt-0.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+        <span class="text-xs font-bold">{{ errorMsg }}</span>
+      </div>
+    }
+
+    @if (successMessage(); as successMsg) {
+      <div class="bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-2xl p-4 flex items-start gap-3 animate-in fade-in duration-200 max-w-xl mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 shrink-0 mt-0.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+        <span class="text-xs font-bold">{{ successMsg }}</span>
+      </div>
+    }
+
+    <!-- TAB: RESUMEN DEL PERFIL (MI DOMINO'S STYLE) -->
+    @if (activeTab === 'resumen') {
+      <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-8 animate-in fade-in duration-200">
+        
+        <div class="border-b border-slate-100 pb-5 text-center sm:text-left">
+          <h2 class="text-xl font-black text-slate-800 tracking-tight leading-none uppercase">Mi Perfil</h2>
+          <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1.5">Administra y edita la configuración de tu perfil</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6">
+          
+          <!-- Column 1: Tu Información -->
+          <div class="space-y-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+            <h3 class="text-xs uppercase font-black tracking-widest text-slate-400 border-b border-slate-200/50 pb-2">Tu Información</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs pt-2">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Nombre Completo</span>
+                <span class="font-bold text-slate-700 text-sm leading-tight block mt-0.5">{{ authService.customerUser()?.nombre }} {{ authService.customerUser()?.apellido }}</span>
+              </div>
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Correo Electrónico</span>
+                <span class="font-bold text-slate-700 text-sm leading-tight block mt-0.5 truncate">{{ authService.customerUser()?.email }}</span>
+              </div>
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Número de Teléfono</span>
+                <span class="font-bold text-slate-700 text-sm leading-tight block mt-0.5">{{ authService.customerUser()?.telefono || 'No registrado' }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Section: Ofertas de Email -->
+        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <h4 class="text-sm font-bold text-slate-800">Ofertas de Email</h4>
+            <p class="text-xs text-slate-500 font-medium">Recibe cupones de descuento y promociones exclusivas en tu correo.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span 
+              class="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border"
+              [class]="authService.customerUser()?.recibePromos
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                : 'bg-slate-100 text-slate-500 border-slate-200'"
+            >
+              {{ authService.customerUser()?.recibePromos ? 'Suscrito' : 'No Suscrito' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Big CTA Button -->
+        <div class="pt-4 text-center">
+          <button 
+            (click)="volverAlKiosk()"
+            class="bg-pizza-red hover:bg-red-700 active:scale-95 text-white font-black py-4 px-8 rounded-2xl text-xs uppercase tracking-widest transition-all shadow-lg shadow-red-100 hover:shadow-red-200 cursor-pointer inline-flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+            </svg>
+            Ordenar Ahora
+          </button>
+        </div>
+
+      </div>
+    }
+
+    <!-- TAB: CONFIGURACIÓN DEL PERFIL -->
+    @if (activeTab === 'configuracion') {
+      <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6 animate-in fade-in duration-200">
+        
+        <div class="border-b border-slate-100 pb-5 text-center sm:text-left">
+          <h2 class="text-xl font-black text-slate-800 tracking-tight leading-none uppercase">Configuración del Perfil</h2>
+          <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1.5">Edita y actualiza la información de tu cuenta</p>
+        </div>
+
+        <form (submit)="onSubmit(); $event.preventDefault()" class="space-y-5 max-w-xl mx-auto">
+          
+          <!-- Name Field -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">* Nombre(s)</label>
+              <input 
+                type="text" 
+                name="nombre"
+                [(ngModel)]="nombre"
+                class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+                required
+              />
+            </div>
+            
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">* Apellido(s)</label>
+              <input 
+                type="text" 
+                name="apellido"
+                [(ngModel)]="apellido"
+                class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">* Correo Electrónico</label>
+            <input 
+              type="email" 
+              name="email"
+              [(ngModel)]="email"
+              class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+              required
+            />
+          </div>
+
+          <!-- Phone Field -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">* Número de Teléfono</label>
+            <input 
+              type="tel" 
+              name="telefono"
+              [(ngModel)]="telefono"
+              class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+              required
+            />
+            <span class="text-[9px] text-slate-400 font-semibold block leading-none pl-1">
+              Necesario para avisarte vía llamada o mensaje en cuanto tu pizza esté lista en el horno.
+            </span>
+          </div>
+
+          <!-- Password Field -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Nueva Contraseña (dejar vacío para no cambiar)</label>
+            <input 
+              type="password" 
+              name="password"
+              [(ngModel)]="password"
+              placeholder="••••••••"
+              class="w-full bg-slate-50 border border-slate-200/80 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pizza-red focus:bg-white transition-all"
+            />
+          </div>
+
+          <!-- Promos Checkbox -->
+          <div class="flex items-center gap-2.5 pt-2">
+            <input 
+              type="checkbox" 
+              id="recibePromosPage" 
+              name="recibePromos" 
+              [(ngModel)]="recibePromos"
+              class="h-4 w-4 rounded text-pizza-red focus:ring-pizza-red cursor-pointer border-slate-300"
+            />
+            <label for="recibePromosPage" class="text-xs font-bold text-slate-600 cursor-pointer">
+              Me gustaría recibir ofertas y cupones de Planeta Pizza en mi correo.
+            </label>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="pt-6 border-t border-slate-100 flex gap-4">
+            <button 
+              type="submit" 
+              [disabled]="loading()"
+              class="flex-grow bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-100 transition-all"
+            >
+              @if (loading()) { Procesando... } @else { Guardar Cambios }
+            </button>
+            
+            <button 
+              type="button" 
+              (click)="setTab('resumen')"
+              class="bg-slate-100 hover:bg-slate-200 text-slate-500 px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    }
+
+  </main>
+</div>

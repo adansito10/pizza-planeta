@@ -39,7 +39,11 @@ export class OrdersComponent {
 
   // Filter columns
   public getPendingOrders(): Order[] {
-    return this.filterQuery(this.orderService.orders().filter(o => o.status === 'Pendiente'));
+    return this.filterQuery(this.orderService.orders().filter(o => o.status === 'Pendiente' && o.paymentStatus !== 'approved' && !o.preferenceId));
+  }
+
+  public getPaidOrders(): Order[] {
+    return this.filterQuery(this.orderService.orders().filter(o => o.status === 'Pendiente' && o.paymentStatus === 'approved'));
   }
 
   public getPreparingOrders(): Order[] {
@@ -64,16 +68,25 @@ export class OrdersComponent {
 
   public advanceStatus(order: Order): void {
     if (order.status === 'Pendiente') {
-      this.orderService.confirmOrderPayment(order.id).subscribe({
-        next: (updatedOrder) => {
-          // Update selected order details if open
-          const currentSelected = this.selectedOrder();
-          if (currentSelected && currentSelected.id === order.id) {
-            this.selectedOrder.set(updatedOrder);
-          }
-        },
-        error: (err) => console.error('Error al confirmar pago en caja', err)
-      });
+      if (order.paymentStatus !== 'approved') {
+        this.orderService.confirmOrderPayment(order.id).subscribe({
+          next: (updatedOrder) => {
+            // Update selected order details if open
+            const currentSelected = this.selectedOrder();
+            if (currentSelected && currentSelected.id === order.id) {
+              this.selectedOrder.set(updatedOrder);
+            }
+          },
+          error: (err) => console.error('Error al confirmar pago en caja', err)
+        });
+      } else {
+        this.orderService.updateOrderStatus(order.id, 'Preparando');
+        // Update active selected order if open
+        const currentSelected = this.selectedOrder();
+        if (currentSelected && currentSelected.id === order.id) {
+          this.selectedOrder.set({ ...currentSelected, status: 'Preparando' });
+        }
+      }
       return;
     }
 

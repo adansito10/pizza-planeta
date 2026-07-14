@@ -18,7 +18,7 @@ export class Promociones {
   }
 
   public ordenarPromo(promo: Promo): void {
-    // Open the customizer flow using the promo modal setup (locks size, sets base promo price)
-    this.cartService.openPromoModal(promo);
+    // Directly add promo to cart using its default configuration and set promo price
+    this.cartService.addPromoToCartDirectly(promo);
   }
 }

@@ -63,8 +63,8 @@ export class ConfirmacionOrden {
       // Brand Title
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(22);
-      doc.setTextColor(201, 44, 61); // Planet Pizza Red
-      doc.text('PLANET PIZZA', 74, 20, { align: 'center' });
+      doc.setTextColor(201, 44, 61); // Planeta Pizza Red
+      doc.text('PLANETA PIZZA', 74, 20, { align: 'center' });
 
       // Subtitle
       doc.setFont('Helvetica', 'normal');

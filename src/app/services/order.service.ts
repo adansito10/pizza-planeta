@@ -18,6 +18,7 @@ export interface Order {
   pickupCode?: string;
   userId?: string | null;
   paymentStatus?: string;
+  preferenceId?: string | null;
 }
 
 @Injectable({
@@ -33,6 +34,10 @@ export class OrderService {
 
   constructor() {
     this.loadFromBackend();
+    // Refresh orders from the backend API every second
+    setInterval(() => {
+      this.loadFromBackend();
+    }, 1000);
   }
 
   // Computed signals for Dashboard KPIs
@@ -83,8 +88,8 @@ export class OrderService {
       })
     );
   }
-  public addOrder(items: CartItem[], total: number, clienteNombre: string = '', userId: string | null = null): Observable<Order> {
-    const payload = { items, total, clienteNombre, userId };
+  public addOrder(items: CartItem[], total: number, clienteNombre: string = '', clienteTelefono: string = '', userId: string | null = null, paymentStatus: string = 'pending'): Observable<Order> {
+    const payload = { items, total, clienteNombre, clienteTelefono, userId, paymentStatus };
     return this.http.post<Order>(this.apiUrl, payload).pipe(
       tap((newOrder) => {
         this.orders.update(current => [newOrder, ...current]);

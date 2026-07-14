@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +13,7 @@ import { SeleccionNombre } from '../../components/modales/seleccion-nombre/selec
 import { MetodoPago } from '../../components/modales/metodo-pago/metodo-pago';
 import { ConfirmacionOrden } from '../../components/modales/confirmacion-orden/confirmacion-orden';
 import { CustomerAuthComponent } from '../customer-auth/customer-auth';
+import { Sucursal } from '../../components/sucursal/sucursal';
 
 @Component({
   selector: 'app-kiosk-layout',
@@ -28,18 +29,38 @@ import { CustomerAuthComponent } from '../customer-auth/customer-auth';
     SeleccionNombre,
     MetodoPago,
     ConfirmacionOrden,
-    CustomerAuthComponent
+    CustomerAuthComponent,
+    Sucursal
   ],
   templateUrl: './kiosk-layout.html',
   styleUrl: './kiosk-layout.scss'
 })
-export class KioskLayout {
+export class KioskLayout implements OnInit, OnDestroy {
   public readonly cartService = inject(CartService);
   public readonly authService = inject(AuthService);
   public readonly router = inject(Router);
 
+  private titleInterval: any;
+  public readonly alternateTitle = signal<boolean>(false);
+
+  public ngOnInit(): void {
+    this.titleInterval = setInterval(() => {
+      this.alternateTitle.update(val => !val);
+    }, 5000); // Changes every 5 seconds
+  }
+
+  public ngOnDestroy(): void {
+    if (this.titleInterval) {
+      clearInterval(this.titleInterval);
+    }
+  }
+
   public irALogin(): void {
-    this.cartService.activeModal.set('customerAuth');
+    if (this.authService.isCustomerLoggedIn()) {
+      this.router.navigate(['/profile']);
+    } else {
+      this.cartService.activeModal.set('customerAuth');
+    }
   }
 
   public cerrarSesionCliente(): void {
@@ -47,7 +68,7 @@ export class KioskLayout {
   }
   
   // Tab control
-  public readonly activeTab = signal<'menu' | 'promos'>('menu');
+  public readonly activeTab = signal<'menu' | 'promos' | 'sucursal'>('menu');
 
   // Privacy Modal Control State
   public readonly showPrivacyModal = signal<boolean>(false);
@@ -60,7 +81,7 @@ export class KioskLayout {
     this.showPrivacyModal.set(false);
   }
 
-  public setTab(tab: 'menu' | 'promos'): void {
+  public setTab(tab: 'menu' | 'promos' | 'sucursal'): void {
     this.activeTab.set(tab);
   }
 

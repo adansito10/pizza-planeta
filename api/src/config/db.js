@@ -76,7 +76,15 @@ export const connectDB = async () => {
     await sequelize.query(`ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "userId" UUID REFERENCES "Users"("id") ON DELETE SET NULL;`);
     await sequelize.query(`ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "time" VARCHAR(50);`);
     await sequelize.query(`ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "timestamp" BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000;`);
-    console.log('Tablas de PostgreSQL y columnas de Orders actualizadas correctamente.');
+    await sequelize.query(`ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "clienteTelefono" VARCHAR(20) DEFAULT '';`);
+    await sequelize.query(`ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "clienteEmail" VARCHAR(100) DEFAULT '';`);
+    
+    // 3. Columnas en Users
+    await sequelize.query(`ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "apellido" VARCHAR(100) DEFAULT '';`);
+    await sequelize.query(`ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "telefono" VARCHAR(20) DEFAULT '';`);
+    await sequelize.query(`ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "recibePromos" BOOLEAN DEFAULT FALSE;`);
+    
+    console.log('Tablas de PostgreSQL y columnas de Orders/Users actualizadas correctamente.');
   } catch (error) {
     console.error(`Error de conexión o sincronización a PostgreSQL: ${error.message}`);
     process.exit(1);

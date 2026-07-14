@@ -17,6 +17,16 @@ const Order = sequelize.define('Order', {
     allowNull: true,
     defaultValue: '',
   },
+  clienteTelefono: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    defaultValue: '',
+  },
+  clienteEmail: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: '',
+  },
   items: {
     type: DataTypes.JSON, // Almacena el array de CartItem de forma serializada en formato JSON
     allowNull: false,

@@ -53,6 +53,7 @@ export interface CartItem {
   cantidad: number;
   precioUnitario: number;
   totalItem: number;
+  promo?: Promo;
 }
 
 @Injectable({
@@ -86,6 +87,8 @@ export class CartService {
 
   // Payment states
   public readonly tempCustomerName = signal<string>('');
+  public readonly tempCustomerPhone = signal<string>('');
+  public readonly tempPaymentMethod = signal<'Efectivo' | 'MercadoPago'>('Efectivo');
   public readonly isProcessingPayment = signal<boolean>(false);
 
   // Getters reading from ProductService dynamically
@@ -150,6 +153,58 @@ export class CartService {
     this.activeModal.set('ingredients');
   }
 
+  public addPromoToCartDirectly(promo: Promo): void {
+    const pizza = promo.pizzaBase;
+    
+    // Auto-detect the size from the promo title/description
+    let sizeName = 'Mediana'; // default fallback
+    const lowerNombre = promo.nombre.toLowerCase();
+    const lowerDesc = promo.descripcion.toLowerCase();
+    if (lowerNombre.includes('familiar') || lowerNombre.includes('grande') || lowerDesc.includes('familiar') || lowerDesc.includes('grande')) {
+      sizeName = 'Familiar';
+    } else if (lowerNombre.includes('personal') || lowerNombre.includes('chica') || lowerDesc.includes('personal') || lowerDesc.includes('chica')) {
+      sizeName = 'Personal';
+    } else if (lowerNombre.includes('mediana') || lowerDesc.includes('mediana')) {
+      sizeName = 'Mediana';
+    }
+
+    const matchedSize = this.SIZES.find(s => s.nombre.toLowerCase() === sizeName.toLowerCase()) || this.SIZES[0];
+    
+    const defaultMasa = this.MASAS.find(m => m.nombre === pizza.defaultMasa) || this.MASAS[0];
+    const defaultSalsa = this.SALSAS.find(s => s.nombre === pizza.defaultSalsa) || this.SALSAS[0];
+    const defaultQueso = this.QUESOS.find(q => q.nombre === pizza.defaultQueso) || this.QUESOS[0];
+    
+    const defaultExtras: IngredientOption[] = [];
+    if (pizza.defaultExtras) {
+      let extrasArray: string[] = [];
+      if (typeof pizza.defaultExtras === 'string') {
+        try {
+          extrasArray = JSON.parse(pizza.defaultExtras);
+        } catch (e) {
+          extrasArray = [];
+        }
+      } else if (Array.isArray(pizza.defaultExtras)) {
+        extrasArray = pizza.defaultExtras;
+      }
+      
+      extrasArray.forEach((name: string) => {
+        const matched = this.EXTRAS.find(e => e.nombre === name);
+        if (matched) defaultExtras.push(matched);
+      });
+    }
+
+    this.addToCart({
+      pizza,
+      size: matchedSize,
+      masa: defaultMasa,
+      salsa: defaultSalsa,
+      queso: defaultQueso,
+      extras: defaultExtras,
+      precioUnitario: promo.precio,
+      promo
+    });
+  }
+
   public selectSize(size: SizeOption): void {
     this.selectedSize.set(size);
     this.activeModal.set('ingredients');
@@ -178,7 +233,11 @@ export class CartService {
       const matchExtras = item.extras.length === itemDetails.extras.length &&
         item.extras.every(extra => itemDetails.extras.some(e => e.nombre === extra.nombre));
         
-      return matchPizza && matchSize && matchMasa && matchSalsa && matchQueso && matchExtras;
+      // Compare promo associations
+      const matchPromo = (!item.promo && !itemDetails.promo) || 
+                         (item.promo && itemDetails.promo && item.promo.id === itemDetails.promo.id);
+        
+      return matchPizza && matchSize && matchMasa && matchSalsa && matchQueso && matchExtras && matchPromo;
     });
 
     if (existingIndex > -1) {
@@ -235,9 +294,12 @@ export class CartService {
     
     const customer = this.authService.customerUser();
     const userId = customer ? customer.id : null;
+    const clienteTelefono = this.tempCustomerPhone();
+    
+    const paymentStatus = metodoPago === 'MercadoPago' ? 'approved' : 'pending';
     
     // Register the order via OrderService
-    this.orderService.addOrder(this.cart(), this.totalCart(), clienteNombre, userId).subscribe({
+    this.orderService.addOrder(this.cart(), this.totalCart(), clienteNombre, clienteTelefono, userId, paymentStatus).subscribe({
       next: (newOrder) => {
         if (metodoPago === 'Efectivo') {
           const now = new Date();

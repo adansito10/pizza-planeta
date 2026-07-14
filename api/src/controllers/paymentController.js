@@ -111,10 +111,6 @@ export const handlePaymentWebhook = async (req, res) => {
           order.paymentId = paymentId.toString();
           order.paymentStatus = status;
 
-          if (status === 'approved') {
-            order.status = 'Preparando';
-          }
-
           await order.save();
           console.log(`Orden ${orderId} actualizada correctamente con pago estado: ${status}`);
         } else {

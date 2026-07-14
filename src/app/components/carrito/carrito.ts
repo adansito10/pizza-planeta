@@ -38,10 +38,8 @@ export class Carrito {
       return;
     }
 
-    // Customer is logged in. Close cart drawer and open payment selector
+    // Customer is logged in. Close cart drawer and open payment selector modal
     this.cartService.showCart.set(false);
-    const customer = this.authService.customerUser();
-    this.cartService.tempCustomerName.set(customer?.nombre || 'Cliente');
     this.cartService.activeModal.set('payment');
   }
 }
