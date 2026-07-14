@@ -7,7 +7,7 @@ import { Observable, tap } from 'rxjs';
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/auth';
+  private readonly apiUrl = 'https://api-pizzeria-production.up.railway.app/api/auth';
 
   private readonly AUTH_KEY = 'planet_pizza_admin_session';
   private readonly CUSTOMER_TOKEN_KEY = 'planet_pizza_customer_token';

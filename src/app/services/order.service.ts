@@ -26,7 +26,7 @@ export interface Order {
 })
 export class OrderService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/orders';
+  private readonly apiUrl = 'https://api-pizzeria-production.up.railway.app/api/orders';
 
   // State signals
   public readonly orders = signal<Order[]>([]);
