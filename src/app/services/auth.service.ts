@@ -7,16 +7,21 @@ import { Observable, tap } from 'rxjs';
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'https://api-pizzeria-production.up.railway.app/api/auth';
+  private readonly apiUrl = 'http://localhost:3000/api/auth';
 
   private readonly AUTH_KEY = 'planet_pizza_admin_session';
   private readonly CUSTOMER_TOKEN_KEY = 'planet_pizza_customer_token';
   private readonly CUSTOMER_USER_KEY = 'planet_pizza_customer_user';
 
-  public readonly isLoggedIn = signal<boolean>(false); // Admin login state
-  
+  private readonly localAdmin = signal<boolean>(false);
+  public readonly isLoggedIn = computed(() => 
+    this.localAdmin() || 
+    this.customerUser()?.rol === 'admin' || 
+    this.customerUser()?.email === 'adandejesus200420@gmail.com'
+  );
+
   // Customer login states
-  public readonly customerUser = signal<{ id: string, nombre: string, apellido?: string, email: string, telefono?: string, recibePromos?: boolean } | null>(null);
+  public readonly customerUser = signal<{ id: string, nombre: string, apellido?: string, email: string, telefono?: string, recibePromos?: boolean, rol?: string } | null>(null);
   public readonly customerToken = signal<string | null>(null);
   public readonly isCustomerLoggedIn = computed(() => this.customerUser() !== null);
 
@@ -27,7 +32,7 @@ export class AuthService {
   // --- Admin Login ---
   public login(usuario: string, contrasenia: string): boolean {
     if (usuario.trim() === 'admin' && contrasenia === 'admin123') {
-      this.isLoggedIn.set(true);
+      this.localAdmin.set(true);
       try {
         localStorage.setItem(this.AUTH_KEY, 'true');
       } catch (e) {
@@ -39,7 +44,8 @@ export class AuthService {
   }
 
   public logout(): void {
-    this.isLoggedIn.set(false);
+    this.localAdmin.set(false);
+    this.customerLogout();
     try {
       localStorage.removeItem(this.AUTH_KEY);
     } catch (e) {
@@ -49,12 +55,24 @@ export class AuthService {
 
   // --- Customer Login ---
   public customerRegister(nombre: string, apellido: string, email: string, password: string, telefono: string, recibePromos: boolean): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, { nombre, apellido, email, password, telefono, recibePromos });
+    return this.http.post<any>(`${this.apiUrl}/register`, { 
+      nombre, 
+      apellido, 
+      correo: email, 
+      contrasena: password, 
+      telefono, 
+      recibePromos 
+    });
   }
 
   public customerLogin(email: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email, password }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/login`, { correo: email, contrasena: password }).pipe(
       tap(res => {
+        if (res.user) {
+          if (res.user.correo && !res.user.email) {
+            res.user.email = res.user.correo;
+          }
+        }
         this.customerToken.set(res.token);
         this.customerUser.set(res.user);
         try {
@@ -79,9 +97,24 @@ export class AuthService {
   }
 
   public customerUpdateProfile(userId: string, nombre: string, apellido: string, email: string, telefono: string, recibePromos: boolean, password?: string): Observable<any> {
-    const payload = { userId, nombre, apellido, email, telefono, recibePromos, password };
+    const payload = { 
+      userId, 
+      nombre, 
+      apellido, 
+      correo: email, 
+      email,
+      telefono, 
+      recibePromos, 
+      contrasena: password,
+      password 
+    };
     return this.http.put<any>(`${this.apiUrl}/update`, payload).pipe(
       tap(res => {
+        if (res.user) {
+          if (res.user.correo && !res.user.email) {
+            res.user.email = res.user.correo;
+          }
+        }
         this.customerUser.set(res.user);
         try {
           localStorage.setItem(this.CUSTOMER_USER_KEY, JSON.stringify(res.user));
@@ -101,15 +134,19 @@ export class AuthService {
       // Check admin session
       const active = localStorage.getItem(this.AUTH_KEY);
       if (active === 'true') {
-        this.isLoggedIn.set(true);
+        this.localAdmin.set(true);
       }
 
       // Check customer session
       const cToken = localStorage.getItem(this.CUSTOMER_TOKEN_KEY);
       const cUserStr = localStorage.getItem(this.CUSTOMER_USER_KEY);
       if (cToken && cUserStr) {
+        const user = JSON.parse(cUserStr);
+        if (user && user.correo && !user.email) {
+          user.email = user.correo;
+        }
         this.customerToken.set(cToken);
-        this.customerUser.set(JSON.parse(cUserStr));
+        this.customerUser.set(user);
       }
     } catch (e) {
       console.error('Error checking active session', e);

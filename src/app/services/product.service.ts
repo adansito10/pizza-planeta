@@ -7,7 +7,7 @@ import { Pizza, SizeOption, IngredientOption, Promo } from './cart.service';
 })
 export class ProductService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'https://api-pizzeria-production.up.railway.app/api';
+  private readonly apiUrl = 'http://localhost:3000/api';
 
   // Valores predeterminados en memoria (para resetear si el usuario lo desea)
   public readonly defaultPizzas: Pizza[] = [

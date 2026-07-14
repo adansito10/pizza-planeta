@@ -86,7 +86,7 @@ export class CatalogMgrComponent {
 
       this.isUploadingImage.set(true);
 
-      this.http.post<{ imageUrl: string }>('https://api-pizzeria-production.up.railway.app/api/upload', formData).subscribe({
+      this.http.post<{ imageUrl: string }>('http://localhost:3000/api/upload', formData).subscribe({
         next: (res) => {
           if (this.activeSubTab() === 'promos') {
             this.promoImagen = res.imageUrl;

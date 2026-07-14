@@ -1,1 +1,10 @@
 // Custom styles for customer authentication
+#google-btn {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  
+  & > div {
+    margin: 0 auto !important;
+  }
+}

@@ -73,11 +73,15 @@ export class CustomerAuthComponent implements OnInit, AfterViewInit {
             client_id: '879718315293-mujlou621pv9vcmki392to2lvkhauda1.apps.googleusercontent.com',
             callback: this.handleCredentialResponse.bind(this)
           });
+          const widthVal = btnEl.clientWidth || 320;
+          const finalWidth = Math.min(Math.max(widthVal, 200), 400);
           google.accounts.id.renderButton(btnEl, {
             theme: 'outline',
             size: 'large',
-            width: btnEl.clientWidth || 380,
-            text: 'signin_with'
+            width: finalWidth,
+            text: 'signin_with',
+            shape: 'rectangular',
+            logo_alignment: 'left'
           });
         } catch (err) {
           console.error('Error initializing Google Sign-In:', err);
