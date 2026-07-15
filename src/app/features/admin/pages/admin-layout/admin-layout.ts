@@ -23,8 +23,15 @@ export class AdminLayout {
   private readonly router = inject(Router);
 
   public onLogout(): void {
-    this.authService.logout();
-    this.router.navigate(['/kiosk']);
+    this.confirmService.ask({
+      title: 'Cerrar Sesión',
+      message: '¿Estás seguro de que deseas cerrar la sesión del panel administrativo?',
+      confirmText: 'Cerrar Sesión',
+      onConfirm: () => {
+        this.authService.logout();
+        this.router.navigate(['/kiosk']);
+      }
+    });
   }
 
 

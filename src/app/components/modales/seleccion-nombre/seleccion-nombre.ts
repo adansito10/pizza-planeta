@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../../services/cart.service';
@@ -17,6 +17,19 @@ export class SeleccionNombre implements OnInit {
   
   public nombre = '';
   public telefono = '';
+
+  constructor() {
+    effect(() => {
+      const activeModal = this.cartService.activeModal();
+      if (activeModal === 'name') {
+        const customer = this.authService.customerUser();
+        if (customer) {
+          this.nombre = `${customer.nombre || ''} ${customer.apellido || ''}`.trim();
+          this.telefono = customer.telefono || '';
+        }
+      }
+    });
+  }
 
   public ngOnInit(): void {
     const customer = this.authService.customerUser();
@@ -44,24 +57,33 @@ export class SeleccionNombre implements OnInit {
     this.cartService.tempCustomerName.set(finalNombre);
     this.cartService.tempCustomerPhone.set(finalTelefono);
 
-    // If logged in and phone was empty in profile, save it to their profile database record
+    // If logged in, check if name or phone changed and update database profile
     const customer = this.authService.customerUser();
-    if (customer && !customer.telefono && finalTelefono) {
-      this.authService.customerUpdateProfile(
-        customer.id,
-        customer.nombre,
-        customer.apellido || '',
-        customer.email,
-        finalTelefono,
-        customer.recibePromos || false
-      ).subscribe({
-        next: () => {
-          console.log('Phone number successfully updated in customer profile.');
-        },
-        error: (err) => {
-          console.error('Error auto-updating customer phone number:', err);
-        }
-      });
+    if (customer) {
+      const nameParts = finalNombre.split(' ');
+      const newNombre = nameParts[0] || '';
+      const newApellido = nameParts.slice(1).join(' ');
+      
+      const hasNameChanged = (newNombre !== customer.nombre) || (newApellido !== (customer.apellido || ''));
+      const hasPhoneChanged = finalTelefono !== customer.telefono;
+
+      if (hasNameChanged || hasPhoneChanged) {
+        this.authService.customerUpdateProfile(
+          customer.id,
+          newNombre,
+          newApellido,
+          customer.email,
+          finalTelefono,
+          customer.recibePromos || false
+        ).subscribe({
+          next: () => {
+            console.log('Customer profile auto-updated successfully.');
+          },
+          error: (err) => {
+            console.error('Error auto-updating customer profile:', err);
+          }
+        });
+      }
     }
 
     // Execute order placement using MercadoPago

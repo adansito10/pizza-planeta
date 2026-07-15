@@ -1,5 +1,6 @@
 import { Component, input, inject } from '@angular/core';
 import { Pizza, CartService } from '../../services/cart.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-pizza-card',
@@ -11,8 +12,13 @@ import { Pizza, CartService } from '../../services/cart.service';
 export class PizzaCard {
   public readonly pizza = input.required<Pizza>();
   private readonly cartService = inject(CartService);
+  private readonly authService = inject(AuthService);
 
   public ordenar(): void {
-    this.cartService.openSizeModal(this.pizza());
+    if (!this.authService.isCustomerLoggedIn()) {
+      this.cartService.activeModal.set('customerAuth');
+    } else {
+      this.cartService.openSizeModal(this.pizza());
+    }
   }
 }
